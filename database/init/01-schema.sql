@@ -533,8 +533,6 @@ VALUES
 (4, 3, 1, 2.9000, 1.4000, 2.13, 'Regular', '2026-11-04 11:00:00'),
 (5, 3, 1, 3.2500, 1.6000, 2.39, 'Boa', '2026-11-04 12:00:00');
 
--- Cada ocorrencia e gerada por um dispositivo. O ambiente e identificado
--- pelo relacionamento do dispositivo com o ambiente. O responsavel e opcional.
 INSERT INTO ocorrencia
 (id_ocorrencia, id_dispositivo, id_usuario_abertura, id_usuario_responsavel, titulo, descricao, origem, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
 VALUES
