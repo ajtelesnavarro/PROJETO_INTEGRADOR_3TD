@@ -375,11 +375,9 @@ CREATE TABLE ocorrencia (
     data_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resolvida_em DATETIME NULL,
 
-
     CONSTRAINT fk_ocorrencia_dispositivo
         FOREIGN KEY (id_dispositivo)
         REFERENCES dispositivo(id_dispositivo),
-
 
     CONSTRAINT fk_ocorrencia_responsavel
         FOREIGN KEY (id_usuario)
@@ -393,14 +391,12 @@ CREATE TABLE historico_ocorrencia (
     id_usuario INT NULL,
     data_historico_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     observacao TEXT NULL,
-    status_anterior VARCHAR(50) NULL,
-    status_posterior VARCHAR(50) NOT NULL,
-
+    status_anterior VARCHAR(30) NULL,
+    status_posterior VARCHAR(30) NOT NULL,
 
     CONSTRAINT fk_hist_ocorrencia_ocorrencia
         FOREIGN KEY (id_ocorrencia)
         REFERENCES ocorrencia(id_ocorrencia),
-
 
     CONSTRAINT fk_hist_ocorrencia_usuario
         FOREIGN KEY (id_usuario)
