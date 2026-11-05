@@ -319,7 +319,6 @@ CREATE TABLE ocorrencia (
     id_usuario_responsavel INT NULL,
     titulo VARCHAR(150) NOT NULL,
     descricao TEXT NOT NULL,
-    origem ENUM('dispositivo') NOT NULL DEFAULT 'dispositivo',
     status_ocorrencia VARCHAR(50) NOT NULL DEFAULT 'Aberta',
     prioridade VARCHAR(30) NOT NULL DEFAULT 'Media',
     data_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
