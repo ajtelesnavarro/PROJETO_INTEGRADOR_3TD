@@ -89,7 +89,6 @@ CREATE TABLE dispositivo (
     tipo_dispositivo VARCHAR(80) NOT NULL,
     fabricante VARCHAR(100) NULL,
     modelo VARCHAR(100) NULL,
-    versao VARCHAR(50) NULL,
     unidade_medida VARCHAR(30) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
