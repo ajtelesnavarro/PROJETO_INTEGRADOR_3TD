@@ -1,4 +1,5 @@
 import "./globals.css";
+import Sidebar from "@/componets/Sidebar";
 
 export const metadata = {
   title: "Projeto Base",
@@ -8,6 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
+      <Sidebar></Sidebar>
       <body>{children}</body>
     </html>
   );
