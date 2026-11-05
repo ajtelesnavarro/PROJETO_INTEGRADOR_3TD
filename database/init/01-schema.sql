@@ -1,3 +1,440 @@
+CREATE DATABASE IF NOT EXISTS lumora_smartbuilding
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE lumora_smartbuilding;
+
+CREATE TABLE predio (
+    id_predio INT NOT NULL DEFAULT 1 PRIMARY KEY,
+    nome_predio VARCHAR(100) NOT NULL,
+    endereco VARCHAR(255) NULL,
+    rua VARCHAR(100) NOT NULL,
+    bairro VARCHAR(100) NULL,
+    numero VARCHAR(20) NULL,
+    complemento VARCHAR(100) NULL,
+    estado VARCHAR(50) NOT NULL,
+    cep VARCHAR(9) NULL,
+    cidade VARCHAR(100) NOT NULL,
+
+    CONSTRAINT chk_predio_unico CHECK (id_predio = 1)
+) ENGINE=InnoDB;
+
+CREATE TABLE andar (
+    id_andar INT AUTO_INCREMENT PRIMARY KEY,
+    id_predio INT NOT NULL,
+    numero_andar INT NOT NULL,
+    descricao VARCHAR(255) NULL,
+    data_cadastro DATE NULL,
+
+    CONSTRAINT fk_andar_predio
+        FOREIGN KEY (id_predio) REFERENCES predio(id_predio),
+
+    CONSTRAINT uk_andar_predio_numero
+        UNIQUE (id_predio, numero_andar)
+) ENGINE=InnoDB;
+
+CREATE TABLE ambiente (
+    id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
+    id_andar INT NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    localizacao VARCHAR(255) NULL,
+    capacidade_maxima INT NULL,
+    horario_abertura TIME NULL,
+    horario_fechamento TIME NULL,
+    requer_reserva BOOLEAN NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT fk_ambiente_andar
+        FOREIGN KEY (id_andar) REFERENCES andar(id_andar),
+
+    CONSTRAINT chk_capacidade
+        CHECK (capacidade_maxima IS NULL OR capacidade_maxima > 0),
+
+    CONSTRAINT chk_horario_ambiente
+        CHECK (
+            horario_abertura IS NULL
+            OR horario_fechamento IS NULL
+            OR horario_fechamento > horario_abertura
+        )
+) ENGINE=InnoDB;
+
+CREATE TABLE usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    senha_hash VARCHAR(255) NOT NULL,
+    telefone VARCHAR(20) NULL,
+    unidade VARCHAR(100) NULL,
+    perfil ENUM(
+        'administrador',
+        'manutencao',
+        'consulta',
+        'seguranca',
+        'visitante'
+    ) NOT NULL DEFAULT 'visitante',
+    cpf CHAR(11) NOT NULL,
+    rg VARCHAR(20) NULL,
+    foto VARCHAR(255) NULL,
+    data_nascimento DATE NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT uk_usuario_email UNIQUE (email),
+    CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
+) ENGINE=InnoDB;
+
+CREATE TABLE dispositivo (
+    id_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
+    id_ambiente INT NOT NULL,
+    id_usuario INT NULL,
+    nome VARCHAR(100) NOT NULL,
+    tipo_dispositivo VARCHAR(80) NOT NULL,
+    fabricante VARCHAR(100) NULL,
+    modelo VARCHAR(100) NULL,
+    versao VARCHAR(50) NULL,
+    unidade_medida VARCHAR(30) NULL,
+    potencia_nominal_kw DECIMAL(10,4) NULL,
+    data_dispositivo DATE NULL,
+    identificador VARCHAR(100) NOT NULL,
+    status_dispositivo ENUM('ativo', 'instavel', 'manutencao', 'inativo', 'offline') NOT NULL DEFAULT 'ativo',
+
+    CONSTRAINT uk_dispositivo_identificador UNIQUE (identificador),
+
+    CONSTRAINT fk_dispositivo_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT fk_dispositivo_responsavel
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+
+    CONSTRAINT chk_potencia_dispositivo
+        CHECK (potencia_nominal_kw IS NULL OR potencia_nominal_kw >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE temperatura (
+    id_temperatura INT AUTO_INCREMENT PRIMARY KEY,
+    id_ambiente INT NOT NULL,
+    temperatura_minima DECIMAL(5,2) NOT NULL,
+    temperatura_maxima DECIMAL(5,2) NOT NULL,
+
+    CONSTRAINT uk_temperatura_ambiente UNIQUE (id_ambiente),
+
+    CONSTRAINT fk_temperatura_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT chk_limite_temperatura
+        CHECK (temperatura_minima <= temperatura_maxima)
+) ENGINE=InnoDB;
+
+CREATE TABLE iluminacao (
+    id_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_ambiente INT NOT NULL,
+    iluminacao_minima DECIMAL(10,2) NOT NULL,
+    iluminacao_maxima DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT uk_iluminacao_ambiente UNIQUE (id_ambiente),
+
+    CONSTRAINT fk_iluminacao_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT chk_limite_iluminacao
+        CHECK (
+            iluminacao_minima >= 0
+            AND iluminacao_minima <= iluminacao_maxima
+        )
+) ENGINE=InnoDB;
+
+CREATE TABLE energia (
+    id_energia INT AUTO_INCREMENT PRIMARY KEY,
+    id_ambiente INT NOT NULL,
+    consumo_minimo DECIMAL(12,4) NOT NULL,
+    consumo_maximo DECIMAL(12,4) NOT NULL,
+    potencia_maxima DECIMAL(10,4) NOT NULL,
+
+    CONSTRAINT uk_energia_ambiente UNIQUE (id_ambiente),
+
+    CONSTRAINT fk_energia_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT chk_limite_consumo
+        CHECK (
+            consumo_minimo >= 0
+            AND consumo_minimo <= consumo_maximo
+        ),
+
+    CONSTRAINT chk_potencia_maxima CHECK (potencia_maxima >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE tarifa_energia (
+    id_tarifa INT AUTO_INCREMENT PRIMARY KEY,
+    valor_kwh DECIMAL(10,4) NOT NULL,
+    data_inicio_vigencia DATE NOT NULL,
+    data_fim_vigencia DATE NULL,
+
+    CONSTRAINT chk_valor_tarifa CHECK (valor_kwh >= 0),
+
+    CONSTRAINT chk_vigencia_tarifa
+        CHECK (
+            data_fim_vigencia IS NULL
+            OR data_fim_vigencia >= data_inicio_vigencia
+        )
+) ENGINE=InnoDB;
+
+CREATE TABLE historico_temperatura (
+    id_historico_temperatura INT AUTO_INCREMENT PRIMARY KEY,
+    id_dispositivo INT NOT NULL,
+    temperatura_medida DECIMAL(5,2) NOT NULL,
+    umidade DECIMAL(5,2) NULL,
+    data_temperatura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hist_temperatura_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT chk_umidade
+        CHECK (umidade IS NULL OR (umidade >= 0 AND umidade <= 100))
+) ENGINE=InnoDB;
+
+CREATE TABLE historico_iluminacao (
+    id_historico_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_dispositivo INT NOT NULL,
+    iluminacao_medida DECIMAL(10,2) NOT NULL,
+    data_iluminacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hist_iluminacao_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT chk_iluminacao_medida CHECK (iluminacao_medida >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE historico_energia (
+    id_historico_energia INT AUTO_INCREMENT PRIMARY KEY,
+    id_dispositivo INT NOT NULL,
+    id_tarifa INT NULL,
+    consumo_kwh DECIMAL(12,4) NOT NULL,
+    potencia_kw DECIMAL(10,4) NOT NULL,
+    custo_estimado DECIMAL(12,2) NULL,
+    qualidade_medicao VARCHAR(50) NULL,
+    data_historico_energia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hist_energia_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT fk_hist_energia_tarifa
+        FOREIGN KEY (id_tarifa) REFERENCES tarifa_energia(id_tarifa),
+
+    CONSTRAINT chk_consumo_energia CHECK (consumo_kwh >= 0),
+    CONSTRAINT chk_potencia_energia CHECK (potencia_kw >= 0),
+    CONSTRAINT chk_custo_energia
+        CHECK (custo_estimado IS NULL OR custo_estimado >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE credenciais_acesso (
+    id_credencial INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'Ativa',
+    data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    token_acesso VARCHAR(255) NOT NULL,
+    tipo_credencial VARCHAR(50) NOT NULL,
+    bloqueado_ate DATETIME NULL,
+
+    CONSTRAINT uk_credencial_token UNIQUE (token_acesso),
+
+    CONSTRAINT fk_credencial_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB;
+
+CREATE TABLE permissao_acesso (
+    id_permissao INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_ambiente INT NOT NULL,
+    horario_inicio TIME NULL,
+    horario_fim TIME NULL,
+    status_permissao VARCHAR(30) NOT NULL DEFAULT 'Ativa',
+    permissao_acesso BOOLEAN NOT NULL DEFAULT TRUE,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NULL,
+    dias_semana VARCHAR(100) NULL,
+
+    CONSTRAINT fk_permissao_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+
+    CONSTRAINT fk_permissao_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT chk_vigencia_permissao
+        CHECK (data_fim IS NULL OR data_fim >= data_inicio),
+
+    CONSTRAINT chk_horario_permissao
+        CHECK (
+            horario_inicio IS NULL
+            OR horario_fim IS NULL
+            OR horario_fim > horario_inicio
+        )
+) ENGINE=InnoDB;
+
+CREATE TABLE eventos_acessos (
+    id_evento INT AUTO_INCREMENT PRIMARY KEY,
+    id_credencial INT NULL,
+    id_ambiente INT NOT NULL,
+    tipo_acesso VARCHAR(50) NOT NULL,
+    decisao_acesso VARCHAR(30) NOT NULL,
+    token_tentado VARCHAR(255) NULL,
+    status_evento VARCHAR(50) NOT NULL,
+    data_expiracao DATETIME NULL,
+    data_utilizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    motivo VARCHAR(255) NULL,
+
+    CONSTRAINT fk_evento_credencial
+        FOREIGN KEY (id_credencial) REFERENCES credenciais_acesso(id_credencial),
+
+    CONSTRAINT fk_evento_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente)
+) ENGINE=InnoDB;
+
+CREATE TABLE reclamacoes (
+    id_reclamacao INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_ambiente INT NULL,
+    id_dispositivo INT NULL,
+    id_usuario_responsavel INT NULL,
+    status_chamado VARCHAR(50) NOT NULL DEFAULT 'Aberto',
+    data_hora_recebido DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    descricao_usuario TEXT NOT NULL,
+    prioridade VARCHAR(30) NOT NULL DEFAULT 'Media',
+    categoria_problema VARCHAR(80) NULL,
+
+    CONSTRAINT fk_reclamacao_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+
+    CONSTRAINT fk_reclamacao_ambiente
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT fk_reclamacao_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT fk_reclamacao_responsavel
+        FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB;
+
+CREATE TABLE ocorrencia (
+    id_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
+    id_dispositivo INT NOT NULL,
+    id_usuario_abertura INT NULL,
+    id_usuario_responsavel INT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    descricao TEXT NOT NULL,
+    origem ENUM('dispositivo') NOT NULL DEFAULT 'dispositivo',
+    status_ocorrencia VARCHAR(50) NOT NULL DEFAULT 'Aberta',
+    prioridade VARCHAR(30) NOT NULL DEFAULT 'Media',
+    data_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolvida_em DATETIME NULL,
+
+    CONSTRAINT fk_ocorrencia_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT fk_ocorrencia_abertura
+        FOREIGN KEY (id_usuario_abertura) REFERENCES usuario(id_usuario),
+
+    CONSTRAINT fk_ocorrencia_responsavel
+        FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario),
+
+    CONSTRAINT chk_data_resolucao
+        CHECK (resolvida_em IS NULL OR resolvida_em >= data_ocorrencia)
+) ENGINE=InnoDB;
+
+CREATE TABLE historico_ocorrencia (
+    id_historico_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
+    id_ocorrencia INT NOT NULL,
+    id_usuario INT NULL,
+    data_historico_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    observacao TEXT NULL,
+    status_anterior VARCHAR(30) NULL,
+    status_posterior VARCHAR(30) NOT NULL,
+
+    CONSTRAINT fk_hist_ocorrencia_ocorrencia
+        FOREIGN KEY (id_ocorrencia) REFERENCES ocorrencia(id_ocorrencia),
+
+    CONSTRAINT fk_hist_ocorrencia_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB;
+
+CREATE TABLE historico_dispositivo (
+    id_historico_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
+    id_dispositivo INT NOT NULL,
+    status_dispositivo ENUM('ativo', 'instavel', 'manutencao', 'inativo', 'offline') NOT NULL,
+    data_historico_dispositivo DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_inicio_status DATETIME NOT NULL,
+    data_fim_status DATETIME NULL,
+    motivo VARCHAR(255) NULL,
+    consumo_estimado_kwh DECIMAL(12,4) NULL,
+    custo_estimado DECIMAL(12,2) NULL,
+    observacao TEXT NULL,
+
+    CONSTRAINT fk_hist_dispositivo_dispositivo
+        FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
+
+    CONSTRAINT chk_periodo_dispositivo
+        CHECK (data_fim_status IS NULL OR data_fim_status >= data_inicio_status),
+
+    CONSTRAINT chk_consumo_estimado
+        CHECK (consumo_estimado_kwh IS NULL OR consumo_estimado_kwh >= 0),
+
+    CONSTRAINT chk_custo_estimado
+        CHECK (custo_estimado IS NULL OR custo_estimado >= 0)
+) ENGINE=InnoDB;
+
+CREATE INDEX idx_dispositivo_ambiente ON dispositivo(id_ambiente);
+CREATE INDEX idx_dispositivo_status ON dispositivo(status_dispositivo);
+CREATE INDEX idx_ocorrencia_dispositivo ON ocorrencia(id_dispositivo);
+CREATE INDEX idx_hist_temperatura_data ON historico_temperatura(data_temperatura);
+CREATE INDEX idx_hist_iluminacao_data ON historico_iluminacao(data_iluminacao);
+CREATE INDEX idx_hist_energia_data ON historico_energia(data_historico_energia);
+CREATE INDEX idx_eventos_acessos_data ON eventos_acessos(data_utilizacao);
+CREATE INDEX idx_permissao_usuario_ambiente ON permissao_acesso(id_usuario, id_ambiente);
+CREATE INDEX idx_ocorrencia_status ON ocorrencia(status_ocorrencia);
+CREATE INDEX idx_ocorrencia_data ON ocorrencia(data_ocorrencia);
+CREATE INDEX idx_reclamacao_status ON reclamacoes(status_chamado);
+CREATE INDEX idx_hist_ocorrencia_data ON historico_ocorrencia(data_historico_ocorrencia);
+
+INSERT INTO predio
+(id_predio, nome_predio, endereco, rua, bairro, numero, complemento, estado, cep, cidade)
+VALUES
+(1, 'Lumora Business Center', 'Rua das Acacias, 120', 'Rua das Acacias', 'Jardim', '120', NULL, 'SP', '09080-500', 'Santo Andre');
+
+INSERT INTO andar
+(id_andar, id_predio, numero_andar, descricao, data_cadastro)
+VALUES
+(1, 1, 1, 'Recepcao e salas administrativas', '2024-01-10'),
+(2, 1, 2, 'Salas de reuniao', '2024-01-10'),
+(3, 1, 3, 'Area de atendimento', '2024-02-15'),
+(4, 1, 4, 'Escritorios administrativos', '2024-03-20'),
+(5, 1, 5, 'Laboratorio de tecnologia', '2024-04-05');
+
+INSERT INTO ambiente
+(id_ambiente, id_andar, nome, localizacao, capacidade_maxima, horario_abertura, horario_fechamento, requer_reserva)
+VALUES
+(1, 1, 'Recepcao', 'Proximo a entrada principal', 20, '07:00:00', '19:00:00', FALSE),
+(2, 2, 'Sala de reunioes A', 'Ala norte', 12, '08:00:00', '20:00:00', TRUE),
+(3, 3, 'Sala de atendimento', 'Ao lado dos elevadores', 15, '08:00:00', '18:00:00', FALSE),
+(4, 4, 'Escritorio administrativo', 'Ala leste', 30, '07:00:00', '19:00:00', FALSE),
+(5, 5, 'Laboratorio de tecnologia', 'Area restrita', 18, '08:00:00', '22:00:00', TRUE);
+
+INSERT INTO usuario
+(id_usuario, nome, email, senha_hash, telefone, unidade, perfil, cpf, rg, foto, data_nascimento, ativo)
+VALUES
+(1, 'Ana Souza', 'ana.souza@lumora.com.br', 'HASH_DE_TESTE_NAO_UTILIZAR_EM_PRODUCAO', '(11) 90000-1001', 'Administracao', 'administrador', '12345678901', NULL, NULL, '1988-04-12', TRUE),
+(2, 'Bruno Lima', 'bruno.lima@lumora.com.br', 'HASH_DE_TESTE_NAO_UTILIZAR_EM_PRODUCAO', '(11) 90000-1002', 'Manutencao', 'manutencao', '12345678902', NULL, NULL, '1990-08-21', TRUE),
+(3, 'Carla Mendes', 'carla.mendes@lumora.com.br', 'HASH_DE_TESTE_NAO_UTILIZAR_EM_PRODUCAO', '(11) 90000-1003', 'Recepcao', 'consulta', '12345678903', NULL, NULL, '1995-02-03', TRUE),
+(4, 'Diego Alves', 'diego.alves@lumora.com.br', 'HASH_DE_TESTE_NAO_UTILIZAR_EM_PRODUCAO', '(11) 90000-1004', 'Seguranca', 'seguranca', '12345678904', NULL, NULL, '1992-11-17', TRUE),
+(5, 'Elisa Costa', 'elisa.costa@lumora.com.br', 'HASH_DE_TESTE_NAO_UTILIZAR_EM_PRODUCAO', NULL, 'Visitantes', 'visitante', '12345678905', NULL, NULL, '2000-06-25', TRUE);
+
+INSERT INTO dispositivo
+(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, versao, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
+VALUES
+(1, 1, 2, 'Sensor de temperatura da recepcao', 'Temperatura', 'SensTech', 'ST-T100', '1.2', 'Celsius', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
+(2, 2, 2, 'Sensor de iluminacao da sala A', 'Iluminacao', 'LumenPro', 'LP-200', '2.0', 'Lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300', '1.5', 'kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
+(4, 4, 2, 'Sensor de temperatura do escritorio', 'Temperatura', 'SensTech', 'ST-T100', '1.2', 'Celsius', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
+(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'Iluminacao', 'LumenPro', 'LP-250', '2.1', 'Lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
+
+INSERT INTO temperatura
 (id_temperatura, id_ambiente, temperatura_minima, temperatura_maxima)
 VALUES
 (1, 1, 20.00, 26.00),
