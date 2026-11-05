@@ -426,13 +426,13 @@ VALUES
 -- Senha: Lumora@Elisa2026
 
 INSERT INTO dispositivo
-(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, versao, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
+(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
 VALUES
-(1, 1, 2, 'Sensor de temperatura da recepcao', 'Temperatura', 'SensTech', 'ST-T100', '1.2', 'Celsius', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
-(2, 2, 2, 'Sensor de iluminacao da sala A', 'Iluminacao', 'LumenPro', 'LP-200', '2.0', 'Lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
-(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300', '1.5', 'kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
-(4, 4, 2, 'Sensor de temperatura do escritorio', 'Temperatura', 'SensTech', 'ST-T100', '1.2', 'Celsius', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
-(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'Iluminacao', 'LumenPro', 'LP-250', '2.1', 'Lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
+(1, 1, 2, 'Sensor de temperatura da recepcao', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
+(2, 2, 2, 'Sensor de iluminacao da sala A', 'Iluminacao', 'LumenPro', 'LP-200', 'Lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300','kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
+(4, 4, 2, 'Sensor de temperatura do escritorio', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
+(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'Iluminacao', 'LumenPro', 'LP-250', 'Lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
 
 INSERT INTO temperatura
 (id_temperatura, id_ambiente, temperatura_minima, temperatura_maxima)
