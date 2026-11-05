@@ -375,6 +375,7 @@ CREATE TABLE historico_dispositivo (
         CHECK (custo_estimado IS NULL OR custo_estimado >= 0)
 ) ENGINE=InnoDB;
 
+
 CREATE INDEX idx_dispositivo_ambiente ON dispositivo(id_ambiente);
 CREATE INDEX idx_dispositivo_status ON dispositivo(status_dispositivo);
 CREATE INDEX idx_ocorrencia_dispositivo ON ocorrencia(id_dispositivo);
@@ -424,6 +425,7 @@ VALUES
 -- Senha: Lumora@Diego2026    
 (5, 'Elisa Costa', 'elisa.costa@lumora.com.br','$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante','12345678905', NULL, NULL, '2000-06-25', TRUE);
 -- Senha: Lumora@Elisa2026
+
 
 INSERT INTO dispositivo
 (id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
