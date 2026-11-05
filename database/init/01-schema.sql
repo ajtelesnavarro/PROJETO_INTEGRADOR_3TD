@@ -315,7 +315,7 @@ CREATE TABLE reclamacoes (
 CREATE TABLE ocorrencia (
     id_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
     id_dispositivo INT NOT NULL,
-    id_usuario_abertura INT NULL,
+    id_usuario INT NULL,
     id_usuario_responsavel INT NULL,
     titulo VARCHAR(150) NOT NULL,
     descricao TEXT NOT NULL,
@@ -327,9 +327,6 @@ CREATE TABLE ocorrencia (
 
     CONSTRAINT fk_ocorrencia_dispositivo
         FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
-
-    CONSTRAINT fk_ocorrencia_abertura
-        FOREIGN KEY (id_usuario_abertura) REFERENCES usuario(id_usuario),
 
     CONSTRAINT fk_ocorrencia_responsavel
         FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario),
