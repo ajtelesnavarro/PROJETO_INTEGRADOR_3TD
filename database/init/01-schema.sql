@@ -534,13 +534,13 @@ VALUES
 (5, 3, 1, 3.2500, 1.6000, 2.39, 'Boa', '2026-11-04 12:00:00');
 
 INSERT INTO ocorrencia
-(id_ocorrencia, id_dispositivo, id_usuario_abertura, id_usuario_responsavel, titulo, descricao, origem, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
+(id_ocorrencia, id_dispositivo, id_usuario, id_usuario_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
 VALUES
-(1, 1, NULL, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'dispositivo', 'Em andamento', 'Alta', '2026-11-04 08:05:00', NULL),
-(2, 2, NULL, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'dispositivo', 'Aberta', 'Media', '2026-11-04 08:10:00', NULL),
-(3, 3, NULL, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'dispositivo', 'Aberta', 'Alta', '2026-11-04 10:05:00', NULL),
-(4, 4, NULL, 4, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'dispositivo', 'Resolvida', 'Media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
-(5, 5, NULL, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'dispositivo', 'Aberta', 'Alta', '2026-11-04 10:35:00', NULL);
+(1, 1, NULL, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'Em andamento', 'Alta', '2026-11-04 08:05:00', NULL),
+(2, 2, NULL, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'Aberta', 'Media', '2026-11-04 08:10:00', NULL),
+(3, 3, NULL, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'Aberta', 'Alta', '2026-11-04 10:05:00', NULL),
+(4, 4, NULL, 4, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'Resolvida', 'Media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
+(5, 5, NULL, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'Aberta', 'Alta', '2026-11-04 10:35:00', NULL);
 
 INSERT INTO historico_ocorrencia
 (id_historico_ocorrencia, id_ocorrencia, id_usuario, data_historico_ocorrencia, observacao, status_anterior, status_posterior)
