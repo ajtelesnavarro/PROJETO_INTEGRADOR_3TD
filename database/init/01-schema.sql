@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS lumora_smartbuilding
+CREATE DATABASE IF NOT EXISTS db_lumora
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE lumora_smartbuilding;
+USE db_lumora;
 
 CREATE TABLE predio (
     id_predio INT NOT NULL DEFAULT 1 PRIMARY KEY,
