@@ -418,11 +418,11 @@ VALUES
 -- Senha: Lumora@Ana2026
 (2, 'Bruno Lima', 'bruno.lima@lumora.com.br','$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG','(11) 90000-1002', 'Manutencao', 'manutencao','12345678902', NULL, NULL, '1990-08-21', TRUE),
 -- Senha: Lumora@Bruno2026
-(3, 'Carla Mendes', 'carla.mendes@lumora.com.br','$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am''(11) 90000-1003', 'Recepcao', 'consulta','12345678903', NULL, NULL, '1995-02-03', TRUE),
+(3, 'Carla Mendes', 'carla.mendes@lumora.com.br','$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'consulta','12345678903', NULL, NULL, '1995-02-03', TRUE),
 -- Senha: Lumora@Carla2026
 (4, 'Diego Alves', 'diego.alves@lumora.com.br','$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe','(11) 90000-1004', 'Seguranca', 'seguranca','12345678904', NULL, NULL, '1992-11-17', TRUE),
 -- Senha: Lumora@Diego2026    
-(5, 'Elisa Costa', 'elisa.costa@lumora.com.br','$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2',NULL, 'Visitantes', 'visitante','12345678905', NULL, NULL, '2000-06-25', TRUE);
+(5, 'Elisa Costa', 'elisa.costa@lumora.com.br','$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante','12345678905', NULL, NULL, '2000-06-25', TRUE);
 -- Senha: Lumora@Elisa2026
 
 INSERT INTO dispositivo
