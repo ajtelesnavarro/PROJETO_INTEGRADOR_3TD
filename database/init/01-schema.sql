@@ -110,6 +110,7 @@ CREATE TABLE dispositivo (
 CREATE TABLE temperatura (
     id_temperatura INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
+    id_usuario_alteracao INT NULL,
     temperatura_minima DECIMAL(5,2) NOT NULL,
     temperatura_maxima DECIMAL(5,2) NOT NULL,
 
@@ -118,6 +119,9 @@ CREATE TABLE temperatura (
     CONSTRAINT fk_temperatura_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
 
+    CONSTRAINT fk_usuario_alteracao
+        FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
+
     CONSTRAINT chk_limite_temperatura
         CHECK (temperatura_minima <= temperatura_maxima)
 ) ENGINE=InnoDB;
@@ -125,6 +129,7 @@ CREATE TABLE temperatura (
 CREATE TABLE iluminacao (
     id_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
+    id_usuario_alteracao INT NULL,
     iluminacao_minima DECIMAL(10,2) NOT NULL,
     iluminacao_maxima DECIMAL(10,2) NOT NULL,
 
@@ -132,6 +137,9 @@ CREATE TABLE iluminacao (
 
     CONSTRAINT fk_iluminacao_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT fk_usuario_alteracao
+        FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_limite_iluminacao
         CHECK (
@@ -143,6 +151,7 @@ CREATE TABLE iluminacao (
 CREATE TABLE energia (
     id_energia INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
+    id_usuario_alteracao INT NULL,
     consumo_minimo DECIMAL(12,4) NOT NULL,
     consumo_maximo DECIMAL(12,4) NOT NULL,
     potencia_maxima DECIMAL(10,4) NOT NULL,
@@ -151,6 +160,9 @@ CREATE TABLE energia (
 
     CONSTRAINT fk_energia_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT fk_usuario_alteracao
+        FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_limite_consumo
         CHECK (
