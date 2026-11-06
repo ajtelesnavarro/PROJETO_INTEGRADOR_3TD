@@ -1,6 +1,6 @@
 export default function dispositivos() {
     return (
-        <main className="main-content">
+        <>
             <header className="top-header">
                 <div className="breadcrumb">
                 <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
@@ -146,6 +146,6 @@ export default function dispositivos() {
                 </div>
                 </div>
             </div>
-        </main>
+        </>
     )
 }

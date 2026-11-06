@@ -1,3 +1,4 @@
+import Link from "next/link";
 
 export default function Sidebar() {
     return (
@@ -13,70 +14,21 @@ export default function Sidebar() {
             </div>
             <nav className="sidebar-nav">
                 <div className="nav-section">
-                <span className="section-title">MENU PRINCIPAL</span>
-                    <ul>
-                        <li className="active">
-                        <a href="index.html">
-                            <i data-lucide="layout-dashboard" /> Dashboard{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="predio.html">
-                            <i data-lucide="building" /> Prédios{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="#">
-                            <i data-lucide="layers" /> Ambientes{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="dispositivos.html">
-                            <i data-lucide="cpu" /> Dispositivos e Sensores{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="leituras.html">
-                            <i data-lucide="activity" /> Leituras{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="controle_acessos.html">
-                            <i data-lucide="door-open" /> Controle de Acessos{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="ocorrencias.html">
-                            <i data-lucide="alert-triangle" /> Ocorrências{" "}
-                            <span className="badge">5</span>
-                        </a>
-                        </li>
-                        <li>
-                        <a href="#">
-                            <i data-lucide="file-text" /> Relatórios{" "}
-                        </a>
-                        </li>
-                    </ul>
+                    <span className="section-title">MENU PRINCIPAL</span>
+                    <Link href={"/dashboard"}>Dashboard</Link>
+                    <Link href={"/dashboard/predios"}>Prédios</Link>
+                    <Link href={"#"}>Ambiente</Link>
+                    <Link href={"/dashboard/predios/dispositivos"}>Dispositivos</Link>
+                    <Link href={"/dashboard/predios/dispositivos/historico"}>Histórico</Link>
+                    <Link href={"/dashboard/predios/dispositivos/historico/controle_de_acessos"}>Controle de acesso</Link>
+                    <Link href={"/dashboard/predios/dispositivos/historico/controle_de_acessos/ocorrencias"}>Ocorrências</Link>
+                    <Link href={"#"}>Relatórios</Link>
                 </div>
                 <div className="nav-section">
-                <span className="section-title">ADMINISTRAÇÃO</span>
-                    <ul>
-                        <li>
-                        <a href="usuario.html">
-                            <i data-lucide="users" /> Usuários{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="configuracoes.html">
-                            <i data-lucide="settings" /> Configurações{" "}
-                        </a>
-                        </li>
-                        <li>
-                        <a href="sobre.html">
-                            <i data-lucide="help-circle" /> Sobre o Sistema{" "}
-                        </a>
-                        </li>
-                    </ul>
+                    <span className="section-title">ADMINISTRAÇÃO</span>
+                    <Link href={"/dashboard/predios/dispositivos/historico/controle_de_acessos/ocorrencias/usuarios"}>Usuários</Link>
+                    <Link href={"/dashboard/predios/dispositivos/historico/controle_de_acessos/ocorrencias/usuarios/configuracoes"}>Relatórios</Link>
+                    <Link href={"/dashboard/predios/dispositivos/historico/controle_de_acessos/ocorrencias/usuarios/configuracoes/sobre"}>Relatórios</Link>
                 </div>
             </nav>
         </aside>

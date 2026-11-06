@@ -1,6 +1,6 @@
 export default function dashoboard() {
     return (
-        <main className="main-content">
+        <>
             <header className="top-header">
                 <div className="breadcrumb">
                 <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
@@ -11,9 +11,6 @@ export default function dashoboard() {
                     <i data-lucide="search" />
                     <input type="text" placeholder="Buscar no sistema..." />
                 </div>
-                <button className="icon-btn">
-                    <i data-lucide="bell" />
-                </button>
                 <div className="user-profile">
                     <div className="avatar">MC</div>
                     <div className="user-info">
@@ -46,6 +43,6 @@ export default function dashoboard() {
                 </div>
                 </div>
             </div>
-        </main>
+        </>
     )
 }

@@ -1,6 +1,6 @@
 export default function configuracoes() {
     return(
-        <main className="main-content">
+        <>
             <header className="top-header">
                 <div className="breadcrumb">
                 <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
@@ -128,6 +128,6 @@ export default function configuracoes() {
                 </div>
                 </div>
             </div>
-        </main>
+        </>
     )
 }

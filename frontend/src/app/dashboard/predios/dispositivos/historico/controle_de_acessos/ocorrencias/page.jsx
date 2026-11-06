@@ -1,6 +1,6 @@
 export default function ocorrencias() {
     return (
-        <main className="main-content">
+        <>
             <header className="top-header">
                 <div className="breadcrumb">
                 <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
@@ -143,6 +143,6 @@ export default function ocorrencias() {
                 </div>
                 </div>
             </div>
-        </main>
+        </>
     )
 }

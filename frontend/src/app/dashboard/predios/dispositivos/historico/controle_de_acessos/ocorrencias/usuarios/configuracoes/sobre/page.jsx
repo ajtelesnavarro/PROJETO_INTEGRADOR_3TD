@@ -1,6 +1,6 @@
 export default function sobre() {
     return(
-        <main className="main-content">
+        <>
             <header className="top-header">
                 <div className="breadcrumb">
                 <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
@@ -73,6 +73,6 @@ export default function sobre() {
                 </div>
                 </div>
             </div>
-        </main>
+        </>
     )
 }
