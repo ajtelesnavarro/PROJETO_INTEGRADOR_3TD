@@ -5,17 +5,18 @@ CREATE DATABASE IF NOT EXISTS db_lumora
 USE db_lumora;
 
 CREATE TABLE predio (
-    id_predio INT NOT NULL DEFAULT 1 PRIMARY KEY,
+    id_predio INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nome_predio VARCHAR(100) NOT NULL,
-    endereco VARCHAR(255) NULL,
-    rua VARCHAR(100) NOT NULL,
-    bairro VARCHAR(100) NULL,
-    numero VARCHAR(20) NULL,
+    cep CHAR(9) NOT NULL,
+    logradouro VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
     complemento VARCHAR(100) NULL,
-    estado VARCHAR(50) NOT NULL,
-    cep VARCHAR(9) NULL,
-    cidade VARCHAR(100) NOT NULL
+    bairro VARCHAR(100) NOT NULL,
+    cidade VARCHAR(100) NOT NULL,
+    estado CHAR(2) NOT NULL,
+    INDEX idx_cep (cep)
 ) ENGINE=InnoDB;
+
 
 CREATE TABLE andar (
     id_andar INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,9 +32,25 @@ CREATE TABLE andar (
         UNIQUE (id_predio, numero_andar)
 ) ENGINE=InnoDB;
 
+CREATE TABLE setor (
+    id_setor INT AUTO_INCREMENT PRIMARY KEY,
+    id_andar INT NOT NULL,
+    nome_setor VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255) NULL,
+    responsavel VARCHAR(100) NULL,
+
+    CONSTRAINT fk_setor_andar
+        FOREIGN KEY (id_andar)
+        REFERENCES andar(id_andar),
+
+    CONSTRAINT uk_setor_andar
+        UNIQUE (id_andar, nome_setor)
+) ENGINE=InnoDB;
+
 CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
     id_andar INT NOT NULL,
+    id_setor INT NULL;
     nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NULL,
     capacidade_maxima INT NULL,
@@ -46,6 +63,9 @@ CREATE TABLE ambiente (
 
     CONSTRAINT chk_capacidade
         CHECK (capacidade_maxima IS NULL OR capacidade_maxima > 0),
+
+    CONSTRAINT fk_ambiente_setor
+        FOREIGN KEY (id_setor) REFERENCES setor(id_setor);
 
     CONSTRAINT chk_horario_ambiente
         CHECK (
@@ -79,10 +99,34 @@ CREATE TABLE usuario (
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
 ) ENGINE=InnoDB;
 
+CREATE TABLE equipe (
+    id_equipe INT AUTO_INCREMENT PRIMARY KEY,
+    nome_equipe VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255) NULL,
+    status ENUM('ativa', 'inativa') NOT NULL DEFAULT 'ativa'
+) ENGINE=InnoDB;
+
+CREATE TABLE equipe_usuario (
+    id_equipe_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    id_equipe INT NOT NULL,
+    id_usuario INT NOT NULL,
+    data_entrada DATE NOT NULL,
+    data_saida DATE NULL,
+
+    FOREIGN KEY (id_equipe)
+        REFERENCES equipe(id_equipe),
+
+    FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario),
+
+    UNIQUE (id_equipe, id_usuario),
+
+    CHECK (data_saida IS NULL OR data_saida >= data_entrada)
+) ENGINE=InnoDB;
+
 CREATE TABLE dispositivo (
     id_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
-    id_usuario INT NULL,
     nome VARCHAR(100) NOT NULL,
     tipo_dispositivo VARCHAR(80) NOT NULL,
     fabricante VARCHAR(100) NULL,
@@ -90,19 +134,17 @@ CREATE TABLE dispositivo (
     unidade_medida VARCHAR(30) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
-    identificador VARCHAR(100) NOT NULL,
-    status_dispositivo ENUM('ativo', 'instavel', 'manutencao', 'inativo', 'offline') NOT NULL DEFAULT 'ativo',
-
-    CONSTRAINT uk_dispositivo_identificador UNIQUE (identificador),
+    status_dispositivo ENUM(
+        'ativo',
+        'instavel',
+        'manutencao',
+        'inativo',
+        'offline'
+    ) NOT NULL DEFAULT 'ativo',
 
     CONSTRAINT fk_dispositivo_ambiente
-        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
-
-    CONSTRAINT fk_dispositivo_responsavel
-        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
-
-    CONSTRAINT chk_potencia_dispositivo
-        CHECK (potencia_nominal_kw IS NULL OR potencia_nominal_kw >= 0)
+        FOREIGN KEY (id_ambiente)
+        REFERENCES ambiente(id_ambiente)
 ) ENGINE=InnoDB;
 
 CREATE TABLE temperatura (
@@ -173,11 +215,15 @@ CREATE TABLE energia (
 
 CREATE TABLE tarifa_energia (
     id_tarifa INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario_alteracao INT NULL,
     valor_kwh DECIMAL(10,4) NOT NULL,
     data_inicio_vigencia DATE NOT NULL,
     data_fim_vigencia DATE NULL,
 
     CONSTRAINT chk_valor_tarifa CHECK (valor_kwh >= 0),
+    
+    CONSTRAINT fk_usuario_alteracao
+        FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_vigencia_tarifa
         CHECK (
@@ -299,7 +345,7 @@ CREATE TABLE eventos_acessos (
 
 CREATE TABLE reclamacoes (
     id_reclamacao INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
+    id_usuario_abertura INT NOT NULL,
     id_ambiente INT NULL,
     id_dispositivo INT NULL,
     id_usuario_responsavel INT NULL,
@@ -325,8 +371,8 @@ CREATE TABLE reclamacoes (
 CREATE TABLE ocorrencia (
     id_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
     id_dispositivo INT NOT NULL,
-    id_usuario INT NULL,
-    id_usuario_responsavel INT NULL,
+    id_equipe_responsavel INT NULL,
+    id_tecnico_responsavel INT NULL,
     titulo VARCHAR(150) NOT NULL,
     descricao TEXT NOT NULL,
     status_ocorrencia VARCHAR(50) NOT NULL DEFAULT 'Aberta',
@@ -337,8 +383,11 @@ CREATE TABLE ocorrencia (
     CONSTRAINT fk_ocorrencia_dispositivo
         FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
 
-    CONSTRAINT fk_ocorrencia_responsavel
-        FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario),
+    CONSTRAINT fk_ocorrencia_equipe
+        FOREIGN KEY (id_equipe_responsavel) REFERENCES equipe_usuario(id_equipe_usuario),
+
+    CONSTRAINT fk_ocorrencia_usuario
+        FOREIGN KEY (id_tecnico_responsavel) REFERENCES equipe_usuario(id_usuario),
 
     CONSTRAINT chk_data_resolucao
         CHECK (resolvida_em IS NULL OR resolvida_em >= data_ocorrencia)
@@ -347,7 +396,6 @@ CREATE TABLE ocorrencia (
 CREATE TABLE historico_ocorrencia (
     id_historico_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
     id_ocorrencia INT NOT NULL,
-    id_usuario INT NULL,
     data_historico_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     observacao TEXT NULL,
     status_anterior VARCHAR(30) NULL,
@@ -399,6 +447,8 @@ CREATE INDEX idx_ocorrencia_data ON ocorrencia(data_ocorrencia);
 CREATE INDEX idx_reclamacao_status ON reclamacoes(status_chamado);
 CREATE INDEX idx_hist_ocorrencia_data ON historico_ocorrencia(data_historico_ocorrencia);
 
+USE db_lumora;
+
 INSERT INTO predio
 (id_predio, nome_predio, endereco, rua, bairro, numero, complemento, estado, cep, cidade)
 VALUES
@@ -425,24 +475,18 @@ VALUES
 INSERT INTO usuario
 (id_usuario, nome, email, senha_hash, telefone, unidade, perfil, cpf, rg, foto, data_nascimento, ativo)
 VALUES
-(1, 'Ana Souza', 'ana.souza@lumora.com.br','$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva','(11) 90000-1001', 'Administracao', 'administrador','12345678901', NULL, NULL, '1988-04-12', TRUE),
--- Senha: Lumora@Ana2026
-(2, 'Bruno Lima', 'bruno.lima@lumora.com.br','$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG','(11) 90000-1002', 'Manutencao', 'manutencao','12345678902', NULL, NULL, '1990-08-21', TRUE),
--- Senha: Lumora@Bruno2026
-(3, 'Carla Mendes', 'carla.mendes@lumora.com.br','$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'consulta','12345678903', NULL, NULL, '1995-02-03', TRUE),
--- Senha: Lumora@Carla2026
-(4, 'Diego Alves', 'diego.alves@lumora.com.br','$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe','(11) 90000-1004', 'Seguranca', 'seguranca','12345678904', NULL, NULL, '1992-11-17', TRUE),
--- Senha: Lumora@Diego2026    
-(5, 'Elisa Costa', 'elisa.costa@lumora.com.br','$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante','12345678905', NULL, NULL, '2000-06-25', TRUE);
--- Senha: Lumora@Elisa2026
-
+(1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'Administracao', 'administrador', '12345678901', NULL, NULL, '1988-04-12', TRUE),
+(2, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'Manutencao', 'manutencao', '12345678902', NULL, NULL, '1990-08-21', TRUE),
+(3, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'consulta', '12345678903', NULL, NULL, '1995-02-03', TRUE),
+(4, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'Seguranca', 'seguranca', '12345678904', NULL, NULL, '1992-11-17', TRUE),
+(5, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante', '12345678905', NULL, NULL, '2000-06-25', TRUE);
 
 INSERT INTO dispositivo
 (id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
 VALUES
 (1, 1, 2, 'Sensor de temperatura da recepcao', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
 (2, 2, 2, 'Sensor de iluminacao da sala A', 'Iluminacao', 'LumenPro', 'LP-200', 'Lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
-(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300','kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300', 'kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
 (4, 4, 2, 'Sensor de temperatura do escritorio', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
 (5, 5, 2, 'Sensor de iluminacao do laboratorio', 'Iluminacao', 'LumenPro', 'LP-250', 'Lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
 
@@ -510,7 +554,7 @@ VALUES
 (5, NULL, 4, 'Entrada', 'Negado', 'TOKEN-INVALIDO-999', 'Falha', NULL, '2026-11-04 14:10:00', 'Token nao reconhecido');
 
 INSERT INTO reclamacoes
-(id_reclamacao, id_usuario, id_ambiente, id_dispositivo, id_usuario_responsavel, status_chamado, data_hora_recebido, descricao_usuario, prioridade, categoria_problema)
+(id_reclamacao, id_usuario_abertura, id_ambiente, id_dispositivo, id_usuario_responsavel, status_chamado, data_hora_recebido, descricao_usuario, prioridade, categoria_problema)
 VALUES
 (1, 1, 1, 1, 2, 'Em andamento', '2026-11-01 09:15:00', 'Temperatura da recepcao acima do habitual.', 'Alta', 'Climatizacao'),
 (2, 3, 2, 2, 2, 'Em andamento', '2026-11-01 10:30:00', 'Iluminacao da sala de reunioes esta fraca.', 'Media', 'Iluminacao'),
@@ -546,13 +590,13 @@ VALUES
 (5, 3, 1, 3.2500, 1.6000, 2.39, 'Boa', '2026-11-04 12:00:00');
 
 INSERT INTO ocorrencia
-(id_ocorrencia, id_dispositivo, id_usuario, id_usuario_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
+(id_ocorrencia, id_dispositivo, id_usuario_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
 VALUES
-(1, 1, NULL, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'Em andamento', 'Alta', '2026-11-04 08:05:00', NULL),
-(2, 2, NULL, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'Aberta', 'Media', '2026-11-04 08:10:00', NULL),
-(3, 3, NULL, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'Aberta', 'Alta', '2026-11-04 10:05:00', NULL),
-(4, 4, NULL, 4, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'Resolvida', 'Media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
-(5, 5, NULL, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'Aberta', 'Alta', '2026-11-04 10:35:00', NULL);
+(1, 1, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'Em andamento', 'Alta', '2026-11-04 08:05:00', NULL),
+(2, 2, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'Aberta', 'Media', '2026-11-04 08:10:00', NULL),
+(3, 3, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'Aberta', 'Alta', '2026-11-04 10:05:00', NULL),
+(4, 4, 4, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'Resolvida', 'Media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
+(5, 5, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'Aberta', 'Alta', '2026-11-04 10:35:00', NULL);
 
 INSERT INTO historico_ocorrencia
 (id_historico_ocorrencia, id_ocorrencia, id_usuario, data_historico_ocorrencia, observacao, status_anterior, status_posterior)
