@@ -49,98 +49,98 @@ export default function historico() {
                 </div>
                 </div>
                 <div className="table-container">
-                <div className="table-actions">
-                    <div className="search-table">
-                    <i data-lucide="search" />
-                    <input type="text" placeholder="Buscar em leituras..." />
+                    <div className="table-actions">
+                        <div className="search-table">
+                        <i data-lucide="search" />
+                        <input type="text" placeholder="Buscar em leituras..." />
+                        </div>
+                        <button className="btn-secondary">
+                        <i data-lucide="sliders-horizontal" /> Filtros
+                        </button>
                     </div>
-                    <button className="btn-secondary">
-                    <i data-lucide="sliders-horizontal" /> Filtros
-                    </button>
-                </div>
-                <table className="data-table">
-                    <thead>
-                    <tr>
-                        <th>SENSOR</th>
-                        <th>LEITURA</th>
-                        <th>AMBIENTE</th>
-                        <th>HORÁRIO</th>
-                        <th />
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td className="font-bold">TMP-A203</td>
-                        <td className="text-muted">24,2 °C</td>
-                        <td className="text-muted">Lab. Eletrônica</td>
-                        <td>
-                        <span className="tag-status green">
-                            <span className="dot" /> 10:48:32
-                        </span>
-                        </td>
-                        <td className="text-right">
-                        <button className="btn-icon-table">
-                            <i data-lucide="more-horizontal" />
+                    <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>SENSOR</th>
+                                    <th>LEITURA</th>
+                                    <th>AMBIENTE</th>
+                                    <th>HORÁRIO</th>
+                                    <th />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="font-bold">TMP-A203</td>
+                                    <td className="text-muted">24,2 °C</td>
+                                    <td className="text-muted">Lab. Eletrônica</td>
+                                    <td>
+                                        <span className="tag-status green">
+                                            <span className="dot" /> 10:48:32
+                                        </span>
+                                    </td>
+                                    <td className="text-right">
+                                        <button className="btn-icon-table">
+                                            <i data-lucide="more-horizontal" />
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="font-bold">NRG-DC01</td>
+                                    <td className="text-muted">42,4 kWh</td>
+                                    <td className="text-muted">Data Center</td>
+                                    <td>
+                                        <span className="tag-status green">
+                                            <span className="dot" /> 10:48:30
+                                        </span>
+                                    </td>
+                                    <td className="text-right">
+                                        <button className="btn-icon-table">
+                                            <i data-lucide="more-horizontal" />
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="font-bold">LUX-B108</td>
+                                    <td className="text-muted">680 lux</td>
+                                    <td className="text-muted">Sala 03</td>
+                                    <td>
+                                    <span className="tag-status green">
+                                        <span className="dot" /> 10:48:28
+                                    </span>
+                                    </td>
+                                    <td className="text-right">
+                                    <button className="btn-icon-table">
+                                        <i data-lucide="more-horizontal" />
+                                    </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td className="font-bold">HUM-C002</td>
+                                    <td className="text-muted">54%</td>
+                                    <td className="text-muted">Oficina Mecânica</td>
+                                    <td>
+                                    <span className="tag-status green">
+                                        <span className="dot" /> 10:48:24
+                                    </span>
+                                    </td>
+                                    <td className="text-right">
+                                    <button className="btn-icon-table">
+                                        <i data-lucide="more-horizontal" />
+                                    </button>
+                                    </td>
+                                </tr>
+                        </tbody>
+                    </table>
+                    <div className="table-footer">
+                        <span className="footer-info">Mostrando 4 registros</span>
+                        <div className="pagination">
+                        <button className="page-btn" disabled="">
+                            Anterior
                         </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="font-bold">NRG-DC01</td>
-                        <td className="text-muted">42,4 kWh</td>
-                        <td className="text-muted">Data Center</td>
-                        <td>
-                        <span className="tag-status green">
-                            <span className="dot" /> 10:48:30
-                        </span>
-                        </td>
-                        <td className="text-right">
-                        <button className="btn-icon-table">
-                            <i data-lucide="more-horizontal" />
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="font-bold">LUX-B108</td>
-                        <td className="text-muted">680 lux</td>
-                        <td className="text-muted">Sala 03</td>
-                        <td>
-                        <span className="tag-status green">
-                            <span className="dot" /> 10:48:28
-                        </span>
-                        </td>
-                        <td className="text-right">
-                        <button className="btn-icon-table">
-                            <i data-lucide="more-horizontal" />
-                        </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="font-bold">HUM-C002</td>
-                        <td className="text-muted">54%</td>
-                        <td className="text-muted">Oficina Mecânica</td>
-                        <td>
-                        <span className="tag-status green">
-                            <span className="dot" /> 10:48:24
-                        </span>
-                        </td>
-                        <td className="text-right">
-                        <button className="btn-icon-table">
-                            <i data-lucide="more-horizontal" />
-                        </button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <div className="table-footer">
-                    <span className="footer-info">Mostrando 4 registros</span>
-                    <div className="pagination">
-                    <button className="page-btn" disabled="">
-                        Anterior
-                    </button>
-                    <button className="page-btn active">1</button>
-                    <button className="page-btn">Próxima</button>
+                        <button className="page-btn active">1</button>
+                        <button className="page-btn">Próxima</button>
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
         </>
