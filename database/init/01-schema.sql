@@ -434,6 +434,110 @@ CREATE TABLE historico_dispositivo (
 ) ENGINE=InnoDB;
 
 
+-- =========================================
+-- NOVAS MUDANÇAS NO BANCO
+-- =========================================
+
+
+USE lumora_smartbuilding;
+
+CREATE TABLE orcamento (
+    id_orcamento INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Identificação do visitante
+    id_usuario INT NULL,
+    nome_responsavel VARCHAR(150) NOT NULL,
+    nome_empresa VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+
+    -- Informações do edifício
+    endereco_empresa VARCHAR(255) NULL,
+    quantidade_andares INT NOT NULL,
+    quantidade_ambientes INT NOT NULL,
+    quantidade_dispositivos INT NULL,
+
+    -- Necessidade do cliente
+    servicos_desejados TEXT NOT NULL,
+    descricao TEXT NULL,
+
+    -- Valores calculados pela Lumora
+    valor_subtotal DECIMAL(12,2) NULL,
+    valor_desconto DECIMAL(12,2) DEFAULT 0.00,
+    valor_total DECIMAL(12,2) NULL,
+
+    prazo_estimado_dias INT NULL,
+    data_solicitacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_validade DATE NULL,
+
+    status_orcamento ENUM(
+        'solicitado',
+        'em_analise',
+        'enviado',
+        'aprovado',
+        'recusado',
+        'expirado'
+    ) DEFAULT 'solicitado',
+
+    CONSTRAINT fk_orcamento_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE pedido (
+    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_orcamento INT NOT NULL UNIQUE,
+
+    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+    valor_contratado DECIMAL(12,2) NOT NULL,
+
+    status_pedido ENUM(
+        'aguardando_pagamento',
+        'confirmado',
+        'pagamento_recusado',
+        'cancelado'
+    ) DEFAULT 'aguardando_pagamento',
+
+    observacoes TEXT NULL,
+
+    CONSTRAINT fk_pedido_orcamento
+        FOREIGN KEY (id_orcamento)
+        REFERENCES orcamento(id_orcamento)
+);
+
+CREATE TABLE pagamento (
+    id_pagamento INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_pedido INT NOT NULL,
+
+    valor_pago DECIMAL(12,2) NOT NULL,
+
+    metodo_pagamento ENUM(
+        'pix',
+        'cartao_credito',
+        'cartao_debito',
+        'boleto',
+        'transferencia'
+    ) NOT NULL,
+
+    status_pagamento ENUM(
+        'pendente',
+        'aprovado',
+        'recusado',
+        'estornado'
+    ) DEFAULT 'pendente',
+
+    codigo_transacao VARCHAR(150) NULL,
+    data_pagamento DATETIME NULL,
+
+    CONSTRAINT fk_pagamento_pedido
+        FOREIGN KEY (id_pedido)
+        REFERENCES pedido(id_pedido)
+);
+
+
 CREATE INDEX idx_dispositivo_ambiente ON dispositivo(id_ambiente);
 CREATE INDEX idx_dispositivo_status ON dispositivo(status_dispositivo);
 CREATE INDEX idx_ocorrencia_dispositivo ON ocorrencia(id_dispositivo);
