@@ -1,114 +1,147 @@
 export default function dispositivos() {
     return (
-        <main class="main-content">
-            <header class="top-header">
-                <div class="breadcrumb">
-                <span class="subtitle">MONITORAMENTO INTELIGENTE</span>
-                <h1 class="title">Dispositivos e Sensores</h1>
+        <main className="main-content">
+            <header className="top-header">
+                <div className="breadcrumb">
+                <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
+                <h1 className="title">Dispositivos e Sensores</h1>
                 </div>
-
-                <div class="header-actions">
-                <div class="search-global">
-                    <i data-lucide="search"></i>
-                    <input type="text" placeholder="Buscar no sistema..."/>
+                <div className="header-actions">
+                <div className="search-global">
+                    <i data-lucide="search" />
+                    <input type="text" placeholder="Buscar no sistema..." />
                 </div>
-                <button class="icon-btn"><i data-lucide="bell"></i></button>
-                <div class="user-profile">
-                    <div class="avatar">MC</div>
-                    <div class="user-info">
-                    <span class="user-name">Marina Costa</span>
-                    <span class="user-role">Administrador</span>
+                <button className="icon-btn">
+                    <i data-lucide="bell" />
+                </button>
+                <div className="user-profile">
+                    <div className="avatar">MC</div>
+                    <div className="user-info">
+                    <span className="user-name">Marina Costa</span>
+                    <span className="user-role">Administrador</span>
                     </div>
-                    <i data-lucide="chevron-down"></i>
+                    <i data-lucide="chevron-down" />
                 </div>
                 </div>
             </header>
-
-            <div class="content-body">
-                <div class="page-title-bar">
+            <div className="content-body">
+                <div className="page-title-bar">
                 <div>
                     <h2>Dispositivos e Sensores</h2>
                     <p>Gerencie dispositivos, conectividade e manutenção preventiva.</p>
                 </div>
-                <button class="btn-primary">
-                    <i data-lucide="plus"></i> Adicionar dispositivo
+                <button className="btn-primary">
+                    <i data-lucide="plus" /> Adicionar dispositivo
                 </button>
                 </div>
-
-                <div class="cards-grid">
-                <div class="card">
-                    <span class="card-title">Dispositivos</span>
-                    <div class="card-value">130</div>
+                <div className="cards-grid">
+                <div className="card">
+                    <span className="card-title">Dispositivos</span>
+                    <div className="card-value">130</div>
                 </div>
-                <div class="card">
-                    <span class="card-title">Online</span>
-                    <div class="card-value">126</div>
+                <div className="card">
+                    <span className="card-title">Online</span>
+                    <div className="card-value">126</div>
                 </div>
-                <div class="card">
-                    <span class="card-title">Offline</span>
-                    <div class="card-value">04</div>
+                <div className="card">
+                    <span className="card-title">Offline</span>
+                    <div className="card-value">04</div>
                 </div>
                 </div>
-
-                <div class="table-container">
-                <div class="table-actions">
-                    <div class="search-table">
-                    <i data-lucide="search"></i>
-                    <input type="text" placeholder="Buscar em dispositivos e sensores..."/>
+                <div className="table-container">
+                <div className="table-actions">
+                    <div className="search-table">
+                    <i data-lucide="search" />
+                    <input
+                        type="text"
+                        placeholder="Buscar em dispositivos e sensores..."
+                    />
                     </div>
-                    <button class="btn-secondary">
-                    <i data-lucide="sliders-horizontal"></i> Filtros
+                    <button className="btn-secondary">
+                    <i data-lucide="sliders-horizontal" /> Filtros
                     </button>
                 </div>
-
-                <table class="data-table">
+                <table className="data-table">
                     <thead>
                     <tr>
                         <th>DISPOSITIVO</th>
                         <th>TIPO</th>
                         <th>AMBIENTE</th>
                         <th>STATUS</th>
-                        <th></th>
+                        <th />
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
-                        <td class="font-bold">TMP-A203</td>
-                        <td class="text-muted">Temperatura</td>
-                        <td class="text-muted">Lab. Eletrônica</td>
-                        <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
-                        <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+                        <td className="font-bold">TMP-A203</td>
+                        <td className="text-muted">Temperatura</td>
+                        <td className="text-muted">Lab. Eletrônica</td>
+                        <td>
+                        <span className="tag-status green">
+                            <span className="dot" /> Online
+                        </span>
+                        </td>
+                        <td className="text-right">
+                        <button className="btn-icon-table">
+                            <i data-lucide="more-horizontal" />
+                        </button>
+                        </td>
                     </tr>
                     <tr>
-                        <td class="font-bold">NRG-DC01</td>
-                        <td class="text-muted">Energia</td>
-                        <td class="text-muted">Data Center</td>
-                        <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
-                        <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+                        <td className="font-bold">NRG-DC01</td>
+                        <td className="text-muted">Energia</td>
+                        <td className="text-muted">Data Center</td>
+                        <td>
+                        <span className="tag-status green">
+                            <span className="dot" /> Online
+                        </span>
+                        </td>
+                        <td className="text-right">
+                        <button className="btn-icon-table">
+                            <i data-lucide="more-horizontal" />
+                        </button>
+                        </td>
                     </tr>
                     <tr>
-                        <td class="font-bold">LUX-B108</td>
-                        <td class="text-muted">Luminosidade</td>
-                        <td class="text-muted">Sala 03</td>
-                        <td><span class="tag-status amber"><span class="dot"></span> Atenção</span></td>
-                        <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+                        <td className="font-bold">LUX-B108</td>
+                        <td className="text-muted">Luminosidade</td>
+                        <td className="text-muted">Sala 03</td>
+                        <td>
+                        <span className="tag-status amber">
+                            <span className="dot" /> Atenção
+                        </span>
+                        </td>
+                        <td className="text-right">
+                        <button className="btn-icon-table">
+                            <i data-lucide="more-horizontal" />
+                        </button>
+                        </td>
                     </tr>
                     <tr>
-                        <td class="font-bold">ACC-P001</td>
-                        <td class="text-muted">Acesso</td>
-                        <td class="text-muted">Portaria principal</td>
-                        <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
-                        <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+                        <td className="font-bold">ACC-P001</td>
+                        <td className="text-muted">Acesso</td>
+                        <td className="text-muted">Portaria principal</td>
+                        <td>
+                        <span className="tag-status green">
+                            <span className="dot" /> Online
+                        </span>
+                        </td>
+                        <td className="text-right">
+                        <button className="btn-icon-table">
+                            <i data-lucide="more-horizontal" />
+                        </button>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
-
-                <div class="table-footer">
-                    <span class="footer-info">Mostrando 4 registros</span>
-                    <div class="pagination">
-                    <button class="page-btn" disabled>Anterior</button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">Próxima</button>
+                <div className="table-footer">
+                    <span className="footer-info">Mostrando 4 registros</span>
+                    <div className="pagination">
+                    <button className="page-btn" disabled="">
+                        Anterior
+                    </button>
+                    <button className="page-btn active">1</button>
+                    <button className="page-btn">Próxima</button>
                     </div>
                 </div>
                 </div>

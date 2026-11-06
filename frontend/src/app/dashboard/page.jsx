@@ -1,49 +1,48 @@
 export default function dashoboard() {
     return (
-        <main class="main-content">
-            <header class="top-header">
-                <div class="breadcrumb">
-                <span class="subtitle">MONITORAMENTO INTELIGENTE</span>
-                <h1 class="title">Dashboard</h1>
+        <main className="main-content">
+            <header className="top-header">
+                <div className="breadcrumb">
+                <span className="subtitle">MONITORAMENTO INTELIGENTE</span>
+                <h1 className="title">Dashboard</h1>
                 </div>
-
-                <div class="header-actions">
-                <div class="search-global">
-                    <i data-lucide="search"></i>
-                    <input type="text" placeholder="Buscar no sistema..."/>
+                <div className="header-actions">
+                <div className="search-global">
+                    <i data-lucide="search" />
+                    <input type="text" placeholder="Buscar no sistema..." />
                 </div>
-                <button class="icon-btn"><i data-lucide="bell"></i></button>
-                <div class="user-profile">
-                    <div class="avatar">MC</div>
-                    <div class="user-info">
-                    <span class="user-name">Marina Costa</span>
-                    <span class="user-role">Administrador</span>
+                <button className="icon-btn">
+                    <i data-lucide="bell" />
+                </button>
+                <div className="user-profile">
+                    <div className="avatar">MC</div>
+                    <div className="user-info">
+                    <span className="user-name">Marina Costa</span>
+                    <span className="user-role">Administrador</span>
                     </div>
-                    <i data-lucide="chevron-down"></i>
+                    <i data-lucide="chevron-down" />
                 </div>
                 </div>
             </header>
-
-            <div class="content-body">
-                <div class="page-title-bar">
+            <div className="content-body">
+                <div className="page-title-bar">
                 <div>
                     <h2>Bom dia, Marina.</h2>
                     <p>Acompanhe o desempenho dos seus edifícios em tempo real.</p>
                 </div>
                 </div>
-
-                <div class="cards-grid">
-                <div class="card">
-                    <span class="card-title">Prédios cadastrados</span>
-                    <div class="card-value">04</div>
+                <div className="cards-grid">
+                <div className="card">
+                    <span className="card-title">Prédios cadastrados</span>
+                    <div className="card-value">04</div>
                 </div>
-                <div class="card">
-                    <span class="card-title">Ambientes monitorados</span>
-                    <div class="card-value">38</div>
+                <div className="card">
+                    <span className="card-title">Ambientes monitorados</span>
+                    <div className="card-value">38</div>
                 </div>
-                <div class="card">
-                    <span class="card-title">Dispositivos online</span>
-                    <div class="card-value">126</div>
+                <div className="card">
+                    <span className="card-title">Dispositivos online</span>
+                    <div className="card-value">126</div>
                 </div>
                 </div>
             </div>
