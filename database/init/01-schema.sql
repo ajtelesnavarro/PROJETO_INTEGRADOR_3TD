@@ -14,9 +14,7 @@ CREATE TABLE predio (
     complemento VARCHAR(100) NULL,
     estado VARCHAR(50) NOT NULL,
     cep VARCHAR(9) NULL,
-    cidade VARCHAR(100) NOT NULL,
-
-    CONSTRAINT chk_predio_unico CHECK (id_predio = 1)
+    cidade VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE andar (
