@@ -340,7 +340,7 @@ CREATE TABLE eventos_acessos (
         'entrada',
         'saida')
     NOT NULL,
-    decisao_acesso VARCHAR(30) NOT NULL,
+    decisao_acesso ENUM('permitido', 'negado') NOT NULL,
     token_tentado VARCHAR(255) NULL,
     status_evento ENUM(
     'processando',
