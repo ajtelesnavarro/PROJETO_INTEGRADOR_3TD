@@ -336,14 +336,32 @@ CREATE TABLE eventos_acessos (
     id_evento INT AUTO_INCREMENT PRIMARY KEY,
     id_credencial INT NULL,
     id_ambiente INT NOT NULL,
-    tipo_acesso VARCHAR(50) NOT NULL,
+    tipo_acesso ENUM(
+        'entrada',
+        'saida')
+    NOT NULL,
     decisao_acesso VARCHAR(30) NOT NULL,
     token_tentado VARCHAR(255) NULL,
-    status_evento VARCHAR(50) NOT NULL,
+    status_evento ENUM(
+    'processando',
+    'concluido',
+    'pendente',
+    'falha_comunicacao',
+    'sucesso'
+    ) NOT NULL DEFAULT 'pendente'
     data_expiracao DATETIME NULL,
     data_utilizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    motivo VARCHAR(255) NULL,
+    motivo ENUM(
+        'sucesso',
+        'credencial_invalida',
+        'fora_do_horario',
+        'liberacao_manual'
+    ) NULL
 
+
+    CONSTRAINT chk_evento_token
+        FOREIGN KEY (token_tentado) REFERENCES credenciais_acesso(token_acesso),
+    
     CONSTRAINT fk_evento_credencial
         FOREIGN KEY (id_credencial) REFERENCES credenciais_acesso(id_credencial),
 
@@ -442,42 +460,27 @@ CREATE TABLE historico_dispositivo (
 ) ENGINE=InnoDB;
 
 
--- =========================================
--- NOVAS MUDANÇAS NO BANCO
--- =========================================
-
-
 USE lumora_smartbuilding;
 
 CREATE TABLE orcamento (
     id_orcamento INT AUTO_INCREMENT PRIMARY KEY,
-
-    -- Identificação do visitante
     id_usuario INT NULL,
     nome_responsavel VARCHAR(150) NOT NULL,
     nome_empresa VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
-
-    -- Informações do edifício
     endereco_empresa VARCHAR(255) NULL,
     quantidade_andares INT NOT NULL,
     quantidade_ambientes INT NOT NULL,
     quantidade_dispositivos INT NULL,
-
-    -- Necessidade do cliente
     servicos_desejados TEXT NOT NULL,
     descricao TEXT NULL,
-
-    -- Valores calculados pela Lumora
     valor_subtotal DECIMAL(12,2) NULL,
     valor_desconto DECIMAL(12,2) DEFAULT 0.00,
     valor_total DECIMAL(12,2) NULL,
-
     prazo_estimado_dias INT NULL,
     data_solicitacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     data_validade DATE NULL,
-
     status_orcamento ENUM(
         'solicitado',
         'em_analise',
