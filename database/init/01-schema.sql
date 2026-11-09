@@ -77,11 +77,11 @@ CREATE TABLE ambiente (
 
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    id_predio INT NOT NULL
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     telefone VARCHAR(20) NULL,
-    unidade VARCHAR(100) NULL,
     perfil ENUM(
         'administrador',
         'manutencao',
@@ -90,13 +90,15 @@ CREATE TABLE usuario (
         'visitante'
     ) NOT NULL DEFAULT 'visitante',
     cpf CHAR(11) NOT NULL,
-    rg VARCHAR(20) NULL,
     foto VARCHAR(255) NULL,
     data_nascimento DATE NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
+
+    FOREIGN KEY (id_predio)
+        REFERENCES predio(id_predio),
 ) ENGINE=InnoDB;
 
 CREATE TABLE equipe (
@@ -297,11 +299,11 @@ CREATE TABLE credenciais_acesso (
     id_usuario INT NOT NULL,
     status ENUM('ativa', 'bloqueada', 'expirada') NOT NULL DEFAULT 'ativa',
     data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    token_acesso VARCHAR(255) NOT NULL,
+    token_hash CHAR(64) NOT NULL,
     tipo_credencial ENUM('cartao_rfid', 'tag_nfc', 'qr_code') NOT NULL,
     bloqueado_ate DATETIME NULL,
 
-    CONSTRAINT uk_credencial_token UNIQUE (token_acesso),
+    CONSTRAINT uk_credencial_token_hash UNIQUE (token_hash),
 
     CONSTRAINT fk_credencial_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
@@ -314,7 +316,6 @@ CREATE TABLE permissao_acesso (
     horario_inicio TIME NULL,
     horario_fim TIME NULL,
     status_permissao ENUM('ativa', 'inativa', 'suspensa', 'expirada') NOT NULL DEFAULT 'ativa',
-    permissao_acesso BOOLEAN NOT NULL DEFAULT TRUE,
     data_inicio DATE NOT NULL,
     data_fim DATE NULL,
     dias_semana VARCHAR(100) NULL,
@@ -342,7 +343,7 @@ CREATE TABLE eventos_acessos (
     id_ambiente INT NOT NULL,
     tipo_acesso ENUM('entrada', 'saida') NOT NULL,
     decisao_acesso ENUM('permitido', 'negado') NOT NULL,
-    token_tentado VARCHAR(255) NULL,
+    token_hash_tentado CHAR(64) NULL,
     status_evento ENUM('processando', 'concluido', 'pendente', 'falha_comunicacao', 'bloqueado', 'falha') NOT NULL DEFAULT 'pendente',
     data_expiracao DATETIME NULL,
     data_utilizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -378,6 +379,9 @@ CREATE TABLE reclamacoes (
 
     CONSTRAINT fk_reclamacao_responsavel
         FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario)
+,
+    CONSTRAINT chk_reclamacao_local
+        CHECK (id_ambiente IS NOT NULL OR id_dispositivo IS NOT NULL)
 ) ENGINE=InnoDB;
 
 CREATE TABLE ocorrencia (
@@ -627,31 +631,31 @@ VALUES
 (5, 0.6500, '2024-01-01', '2024-06-30');
 
 INSERT INTO credenciais_acesso
-(id_credencial, id_usuario, status, data_cadastro, token_acesso, tipo_credencial, bloqueado_ate)
+(id_credencial, id_usuario, status, data_cadastro, token_hash, tipo_credencial, bloqueado_ate)
 VALUES
-(1, 1, 'ativa', '2026-01-10 08:00:00', 'LUM-ANA-001', 'cartao_rfid', NULL),
-(2, 2, 'ativa', '2026-01-10 08:05:00', 'LUM-BRUNO-002', 'cartao_rfid', NULL),
-(3, 3, 'ativa', '2026-01-11 09:00:00', 'LUM-CARLA-003', 'tag_nfc', NULL),
-(4, 4, 'ativa', '2026-01-12 10:00:00', 'LUM-DIEGO-004', 'cartao_rfid', NULL),
-(5, 5, 'bloqueada', '2026-02-01 11:00:00', 'LUM-ELISA-005', 'qr_code', '2026-11-05 08:00:00');
+(1, 1, 'ativa', '2026-01-10 08:00:00', SHA2('LUM-ANA-001', 256), 'cartao_rfid', NULL),
+(2, 2, 'ativa', '2026-01-10 08:05:00', SHA2('LUM-BRUNO-002', 256), 'cartao_rfid', NULL),
+(3, 3, 'ativa', '2026-01-11 09:00:00', SHA2('LUM-CARLA-003', 256), 'tag_nfc', NULL),
+(4, 4, 'ativa', '2026-01-12 10:00:00', SHA2('LUM-DIEGO-004', 256), 'cartao_rfid', NULL),
+(5, 5, 'bloqueada', '2026-02-01 11:00:00', SHA2('LUM-ELISA-005', 256), 'qr_code', '2026-11-05 08:00:00');
 
 INSERT INTO permissao_acesso
-(id_permissao, id_usuario, id_ambiente, horario_inicio, horario_fim, status_permissao, permissao_acesso, data_inicio, data_fim, dias_semana)
+(id_permissao, id_usuario, id_ambiente, horario_inicio, horario_fim, status_permissao, data_inicio, data_fim, dias_semana)
 VALUES
-(1, 1, 1, '07:00:00', '19:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Segunda a sexta'),
-(2, 2, 5, '08:00:00', '22:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Segunda a sabado'),
-(3, 3, 1, '07:00:00', '18:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Todos os dias'),
-(4, 4, 4, '08:00:00', '19:00:00', 'ativa', TRUE, '2026-02-01', NULL, 'Segunda a sexta'),
-(5, 5, 5, '09:00:00', '17:00:00', 'ativa', TRUE, '2026-11-01', '2026-12-31', 'Segunda a sexta');
+(1, 1, 1, '07:00:00', '19:00:00', 'ativa', '2026-01-01', NULL, 'Segunda a sexta'),
+(2, 2, 5, '08:00:00', '22:00:00', 'ativa', '2026-01-01', NULL, 'Segunda a sabado'),
+(3, 3, 1, '07:00:00', '18:00:00', 'ativa', '2026-01-01', NULL, 'Todos os dias'),
+(4, 4, 4, '08:00:00', '19:00:00', 'ativa', '2026-02-01', NULL, 'Segunda a sexta'),
+(5, 5, 5, '09:00:00', '17:00:00', 'ativa', '2026-11-01', '2026-12-31', 'Segunda a sexta');
 
 INSERT INTO eventos_acessos
-(id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
+(id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_hash_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
 VALUES
-(1, 1, 1, 'entrada', 'permitido', 'LUM-ANA-001', 'concluido', NULL, '2026-11-04 08:00:00', 'Acesso autorizado'),
-(2, 2, 5, 'entrada', 'permitido', 'LUM-BRUNO-002', 'concluido', NULL, '2026-11-04 08:15:00', 'Acesso de manutencao'),
-(3, 3, 1, 'saida', 'permitido', 'LUM-CARLA-003', 'concluido', NULL, '2026-11-04 12:00:00', 'Saida registrada'),
-(4, 5, 5, 'entrada', 'negado', 'LUM-ELISA-005', 'bloqueado', NULL, '2026-11-04 13:20:00', 'Credencial bloqueada'),
-(5, NULL, 4, 'entrada', 'negado', 'TOKEN-INVALIDO-999', 'falha', NULL, '2026-11-04 14:10:00', 'Token nao reconhecido');
+(1, 1, 1, 'entrada', 'permitido', SHA2('LUM-ANA-001', 256), 'concluido', NULL, '2026-11-04 08:00:00', 'Acesso autorizado'),
+(2, 2, 5, 'entrada', 'permitido', SHA2('LUM-BRUNO-002', 256), 'concluido', NULL, '2026-11-04 08:15:00', 'Acesso de manutencao'),
+(3, 3, 1, 'saida', 'permitido', SHA2('LUM-CARLA-003', 256), 'concluido', NULL, '2026-11-04 12:00:00', 'Saida registrada'),
+(4, 5, 5, 'entrada', 'negado', SHA2('LUM-ELISA-005', 256), 'bloqueado', NULL, '2026-11-04 13:20:00', 'Credencial bloqueada'),
+(5, NULL, 4, 'entrada', 'negado', SHA2('TOKEN-INVALIDO-999', 256), 'falha', NULL, '2026-11-04 14:10:00', 'Token nao reconhecido');
 
 INSERT INTO reclamacoes
 (id_reclamacao, id_usuario_abertura, id_ambiente, id_dispositivo, id_usuario_responsavel, status_chamado, data_hora_recebido, descricao_usuario, prioridade, categoria_problema)
