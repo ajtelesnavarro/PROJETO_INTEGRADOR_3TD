@@ -50,7 +50,7 @@ CREATE TABLE setor (
 CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
     id_andar INT NOT NULL,
-    id_setor INT NULL;
+    id_setor INT NULL,
     nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NULL,
     capacidade_maxima INT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE ambiente (
         CHECK (capacidade_maxima IS NULL OR capacidade_maxima > 0),
 
     CONSTRAINT fk_ambiente_setor
-        FOREIGN KEY (id_setor) REFERENCES setor(id_setor);
+        FOREIGN KEY (id_setor) REFERENCES setor(id_setor),
 
     CONSTRAINT chk_horario_ambiente
         CHECK (
@@ -127,6 +127,7 @@ CREATE TABLE equipe_usuario (
 CREATE TABLE dispositivo (
     id_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
+    id_usuario INT NULL,
     nome VARCHAR(100) NOT NULL,
     tipo_dispositivo ENUM(
         'energia',
@@ -142,6 +143,7 @@ CREATE TABLE dispositivo (
     ) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
+    identificador VARCHAR(100) NOT NULL UNIQUE,
     status_dispositivo ENUM(
         'ativo',
         'instavel',
@@ -151,8 +153,10 @@ CREATE TABLE dispositivo (
     ) NOT NULL DEFAULT 'ativo',
 
     CONSTRAINT fk_dispositivo_ambiente
-        FOREIGN KEY (id_ambiente)
-        REFERENCES ambiente(id_ambiente)
+        FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
+
+    CONSTRAINT fk_dispositivo_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 ) ENGINE=InnoDB;
 
 CREATE TABLE temperatura (
@@ -167,7 +171,7 @@ CREATE TABLE temperatura (
     CONSTRAINT fk_temperatura_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
 
-    CONSTRAINT fk_usuario_alteracao
+    CONSTRAINT fk_temperatura_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_limite_temperatura
@@ -186,7 +190,7 @@ CREATE TABLE iluminacao (
     CONSTRAINT fk_iluminacao_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
 
-    CONSTRAINT fk_usuario_alteracao
+    CONSTRAINT fk_iluminacao_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_limite_iluminacao
@@ -209,7 +213,7 @@ CREATE TABLE energia (
     CONSTRAINT fk_energia_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
 
-    CONSTRAINT fk_usuario_alteracao
+    CONSTRAINT fk_energia_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_limite_consumo
@@ -230,7 +234,7 @@ CREATE TABLE tarifa_energia (
 
     CONSTRAINT chk_valor_tarifa CHECK (valor_kwh >= 0),
     
-    CONSTRAINT fk_usuario_alteracao
+    CONSTRAINT fk_tarifa_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_vigencia_tarifa
@@ -273,7 +277,7 @@ CREATE TABLE historico_energia (
     consumo_kwh DECIMAL(12,4) NOT NULL,
     potencia_kw DECIMAL(10,4) NOT NULL,
     custo_estimado DECIMAL(12,2) NULL,
-    qualidade_medicao VARCHAR(50) NULL,
+    qualidade_medicao ENUM('boa', 'regular', 'ruim') NULL,
     data_historico_energia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_hist_energia_dispositivo
@@ -291,10 +295,10 @@ CREATE TABLE historico_energia (
 CREATE TABLE credenciais_acesso (
     id_credencial INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'Ativa',
+    status ENUM('ativa', 'bloqueada', 'expirada') NOT NULL DEFAULT 'ativa',
     data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     token_acesso VARCHAR(255) NOT NULL,
-    tipo_credencial VARCHAR(50) NOT NULL,
+    tipo_credencial ENUM('cartao_rfid', 'tag_nfc', 'qr_code') NOT NULL,
     bloqueado_ate DATETIME NULL,
 
     CONSTRAINT uk_credencial_token UNIQUE (token_acesso),
@@ -309,7 +313,7 @@ CREATE TABLE permissao_acesso (
     id_ambiente INT NOT NULL,
     horario_inicio TIME NULL,
     horario_fim TIME NULL,
-    status_permissao VARCHAR(30) NOT NULL DEFAULT 'Ativa',
+    status_permissao ENUM('ativa', 'inativa', 'suspensa', 'expirada') NOT NULL DEFAULT 'ativa',
     permissao_acesso BOOLEAN NOT NULL DEFAULT TRUE,
     data_inicio DATE NOT NULL,
     data_fim DATE NULL,
@@ -336,32 +340,14 @@ CREATE TABLE eventos_acessos (
     id_evento INT AUTO_INCREMENT PRIMARY KEY,
     id_credencial INT NULL,
     id_ambiente INT NOT NULL,
-    tipo_acesso ENUM(
-        'entrada',
-        'saida')
-    NOT NULL,
+    tipo_acesso ENUM('entrada', 'saida') NOT NULL,
     decisao_acesso ENUM('permitido', 'negado') NOT NULL,
     token_tentado VARCHAR(255) NULL,
-    status_evento ENUM(
-    'processando',
-    'concluido',
-    'pendente',
-    'falha_comunicacao',
-    'sucesso'
-    ) NOT NULL DEFAULT 'pendente'
+    status_evento ENUM('processando', 'concluido', 'pendente', 'falha_comunicacao', 'bloqueado', 'falha') NOT NULL DEFAULT 'pendente',
     data_expiracao DATETIME NULL,
     data_utilizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    motivo ENUM(
-        'sucesso',
-        'credencial_invalida',
-        'fora_do_horario',
-        'liberacao_manual'
-    ) NULL
+    motivo VARCHAR(255) NULL,
 
-
-    CONSTRAINT chk_evento_token
-        FOREIGN KEY (token_tentado) REFERENCES credenciais_acesso(token_acesso),
-    
     CONSTRAINT fk_evento_credencial
         FOREIGN KEY (id_credencial) REFERENCES credenciais_acesso(id_credencial),
 
@@ -375,14 +361,14 @@ CREATE TABLE reclamacoes (
     id_ambiente INT NULL,
     id_dispositivo INT NULL,
     id_usuario_responsavel INT NULL,
-    status_chamado VARCHAR(50) NOT NULL DEFAULT 'Aberto',
+    status_chamado ENUM('aberto', 'em_andamento', 'concluido', 'cancelado') NOT NULL DEFAULT 'aberto',
     data_hora_recebido DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     descricao_usuario TEXT NOT NULL,
-    prioridade VARCHAR(30) NOT NULL DEFAULT 'Media',
-    categoria_problema VARCHAR(80) NULL,
+    prioridade ENUM('baixa', 'media', 'alta') NOT NULL DEFAULT 'media',
+    categoria_problema ENUM('climatizacao', 'iluminacao', 'acesso', 'energia', 'dispositivo', 'outro') NULL,
 
-    CONSTRAINT fk_reclamacao_usuario
-        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    CONSTRAINT fk_reclamacao_abertura
+        FOREIGN KEY (id_usuario_abertura) REFERENCES usuario(id_usuario),
 
     CONSTRAINT fk_reclamacao_ambiente
         FOREIGN KEY (id_ambiente) REFERENCES ambiente(id_ambiente),
@@ -401,8 +387,8 @@ CREATE TABLE ocorrencia (
     id_tecnico_responsavel INT NULL,
     titulo VARCHAR(150) NOT NULL,
     descricao TEXT NOT NULL,
-    status_ocorrencia VARCHAR(50) NOT NULL DEFAULT 'Aberta',
-    prioridade VARCHAR(30) NOT NULL DEFAULT 'Media',
+    status_ocorrencia ENUM('aberta', 'em_andamento', 'resolvida', 'cancelada') NOT NULL DEFAULT 'aberta',
+    prioridade ENUM('baixa', 'media', 'alta') NOT NULL DEFAULT 'media',
     data_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resolvida_em DATETIME NULL,
 
@@ -410,10 +396,10 @@ CREATE TABLE ocorrencia (
         FOREIGN KEY (id_dispositivo) REFERENCES dispositivo(id_dispositivo),
 
     CONSTRAINT fk_ocorrencia_equipe
-        FOREIGN KEY (id_equipe_responsavel) REFERENCES equipe_usuario(id_equipe_usuario),
+        FOREIGN KEY (id_equipe_responsavel) REFERENCES equipe(id_equipe),
 
-    CONSTRAINT fk_ocorrencia_usuario
-        FOREIGN KEY (id_tecnico_responsavel) REFERENCES equipe_usuario(id_usuario),
+    CONSTRAINT fk_ocorrencia_tecnico
+        FOREIGN KEY (id_tecnico_responsavel) REFERENCES usuario(id_usuario),
 
     CONSTRAINT chk_data_resolucao
         CHECK (resolvida_em IS NULL OR resolvida_em >= data_ocorrencia)
@@ -422,10 +408,11 @@ CREATE TABLE ocorrencia (
 CREATE TABLE historico_ocorrencia (
     id_historico_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
     id_ocorrencia INT NOT NULL,
+    id_usuario INT NULL,
     data_historico_ocorrencia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     observacao TEXT NULL,
-    status_anterior VARCHAR(30) NULL,
-    status_posterior VARCHAR(30) NOT NULL,
+    status_anterior ENUM('aberta', 'em_andamento', 'resolvida', 'cancelada') NULL,
+    status_posterior ENUM('aberta', 'em_andamento', 'resolvida', 'cancelada') NOT NULL,
 
     CONSTRAINT fk_hist_ocorrencia_ocorrencia
         FOREIGN KEY (id_ocorrencia) REFERENCES ocorrencia(id_ocorrencia),
@@ -460,7 +447,7 @@ CREATE TABLE historico_dispositivo (
 ) ENGINE=InnoDB;
 
 
-USE lumora_smartbuilding;
+USE db_lumora;
 
 CREATE TABLE orcamento (
     id_orcamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -488,7 +475,7 @@ CREATE TABLE orcamento (
         'aprovado',
         'recusado',
         'expirado'
-    ) DEFAULT 'solicitado',
+    ) NOT NULL DEFAULT 'solicitado',
 
     CONSTRAINT fk_orcamento_usuario
         FOREIGN KEY (id_usuario)
@@ -509,7 +496,7 @@ CREATE TABLE pedido (
         'confirmado',
         'pagamento_recusado',
         'cancelado'
-    ) DEFAULT 'aguardando_pagamento',
+    ) NOT NULL DEFAULT 'aguardando_pagamento',
 
     observacoes TEXT NULL,
 
@@ -538,7 +525,7 @@ CREATE TABLE pagamento (
         'aprovado',
         'recusado',
         'estornado'
-    ) DEFAULT 'pendente',
+    ) NOT NULL DEFAULT 'pendente',
 
     codigo_transacao VARCHAR(150) NULL,
     data_pagamento DATETIME NULL,
@@ -549,9 +536,7 @@ CREATE TABLE pagamento (
 );
 
 
-CREATE INDEX idx_dispositivo_ambiente ON dispositivo(id_ambiente);
 CREATE INDEX idx_dispositivo_status ON dispositivo(status_dispositivo);
-CREATE INDEX idx_ocorrencia_dispositivo ON ocorrencia(id_dispositivo);
 CREATE INDEX idx_hist_temperatura_data ON historico_temperatura(data_temperatura);
 CREATE INDEX idx_hist_iluminacao_data ON historico_iluminacao(data_iluminacao);
 CREATE INDEX idx_hist_energia_data ON historico_energia(data_historico_energia);
@@ -565,9 +550,9 @@ CREATE INDEX idx_hist_ocorrencia_data ON historico_ocorrencia(data_historico_oco
 USE db_lumora;
 
 INSERT INTO predio
-(id_predio, nome_predio, endereco, rua, bairro, numero, complemento, estado, cep, cidade)
+(id_predio, nome_predio, cep, logradouro, numero, complemento, bairro, cidade, estado)
 VALUES
-(1, 'Lumora Business Center', 'Rua das Acacias, 120', 'Rua das Acacias', 'Jardim', '120', NULL, 'SP', '09080-500', 'Santo Andre');
+(1, 'Lumora Business Center', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP');
 
 INSERT INTO andar
 (id_andar, id_predio, numero_andar, descricao, data_cadastro)
@@ -599,11 +584,11 @@ VALUES
 INSERT INTO dispositivo
 (id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, identificador, status_dispositivo)
 VALUES
-(1, 1, 2, 'Sensor de temperatura da recepcao', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
-(2, 2, 2, 'Sensor de iluminacao da sala A', 'Iluminacao', 'LumenPro', 'LP-200', 'Lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
-(3, 3, 2, 'Medidor de energia do atendimento', 'Energia', 'EnerMeter', 'EM-300', 'kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
-(4, 4, 2, 'Sensor de temperatura do escritorio', 'Temperatura', 'SensTech', 'ST-T100', 'Celsius', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
-(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'Iluminacao', 'LumenPro', 'LP-250', 'Lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
+(1, 1, 2, 'Sensor de temperatura da recepcao', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-05-10', 'LUM-SEN-TEMP-001', 'ativo'),
+(2, 2, 2, 'Sensor de iluminacao da sala A', 'iluminacao', 'LumenPro', 'LP-200', 'lux', 0.0080, '2024-05-12', 'LUM-SEN-LUX-002', 'ativo'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'energia', 'EnerMeter', 'EM-300', 'kWh', 0.0150, '2024-06-01', 'LUM-MED-ENE-003', 'instavel'),
+(4, 4, 2, 'Sensor de temperatura do escritorio', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-06-15', 'LUM-SEN-TEMP-004', 'ativo'),
+(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'iluminacao', 'LumenPro', 'LP-250', 'lux', 0.0090, '2024-07-01', 'LUM-SEN-LUX-005', 'ativo');
 
 INSERT INTO temperatura
 (id_temperatura, id_ambiente, temperatura_minima, temperatura_maxima)
@@ -644,38 +629,38 @@ VALUES
 INSERT INTO credenciais_acesso
 (id_credencial, id_usuario, status, data_cadastro, token_acesso, tipo_credencial, bloqueado_ate)
 VALUES
-(1, 1, 'Ativa', '2026-01-10 08:00:00', 'LUM-ANA-001', 'Cartao RFID', NULL),
-(2, 2, 'Ativa', '2026-01-10 08:05:00', 'LUM-BRUNO-002', 'Cartao RFID', NULL),
-(3, 3, 'Ativa', '2026-01-11 09:00:00', 'LUM-CARLA-003', 'Tag NFC', NULL),
-(4, 4, 'Ativa', '2026-01-12 10:00:00', 'LUM-DIEGO-004', 'Cartao RFID', NULL),
-(5, 5, 'Bloqueada', '2026-02-01 11:00:00', 'LUM-ELISA-005', 'QR Code', '2026-11-05 08:00:00');
+(1, 1, 'ativa', '2026-01-10 08:00:00', 'LUM-ANA-001', 'cartao_rfid', NULL),
+(2, 2, 'ativa', '2026-01-10 08:05:00', 'LUM-BRUNO-002', 'cartao_rfid', NULL),
+(3, 3, 'ativa', '2026-01-11 09:00:00', 'LUM-CARLA-003', 'tag_nfc', NULL),
+(4, 4, 'ativa', '2026-01-12 10:00:00', 'LUM-DIEGO-004', 'cartao_rfid', NULL),
+(5, 5, 'bloqueada', '2026-02-01 11:00:00', 'LUM-ELISA-005', 'qr_code', '2026-11-05 08:00:00');
 
 INSERT INTO permissao_acesso
 (id_permissao, id_usuario, id_ambiente, horario_inicio, horario_fim, status_permissao, permissao_acesso, data_inicio, data_fim, dias_semana)
 VALUES
-(1, 1, 1, '07:00:00', '19:00:00', 'Ativa', TRUE, '2026-01-01', NULL, 'Segunda a sexta'),
-(2, 2, 5, '08:00:00', '22:00:00', 'Ativa', TRUE, '2026-01-01', NULL, 'Segunda a sabado'),
-(3, 3, 1, '07:00:00', '18:00:00', 'Ativa', TRUE, '2026-01-01', NULL, 'Todos os dias'),
-(4, 4, 4, '08:00:00', '19:00:00', 'Ativa', TRUE, '2026-02-01', NULL, 'Segunda a sexta'),
-(5, 5, 5, '09:00:00', '17:00:00', 'Ativa', TRUE, '2026-11-01', '2026-12-31', 'Segunda a sexta');
+(1, 1, 1, '07:00:00', '19:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Segunda a sexta'),
+(2, 2, 5, '08:00:00', '22:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Segunda a sabado'),
+(3, 3, 1, '07:00:00', '18:00:00', 'ativa', TRUE, '2026-01-01', NULL, 'Todos os dias'),
+(4, 4, 4, '08:00:00', '19:00:00', 'ativa', TRUE, '2026-02-01', NULL, 'Segunda a sexta'),
+(5, 5, 5, '09:00:00', '17:00:00', 'ativa', TRUE, '2026-11-01', '2026-12-31', 'Segunda a sexta');
 
 INSERT INTO eventos_acessos
 (id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
 VALUES
-(1, 1, 1, 'Entrada', 'Permitido', 'LUM-ANA-001', 'Registrado', NULL, '2026-11-04 08:00:00', 'Acesso autorizado'),
-(2, 2, 5, 'Entrada', 'Permitido', 'LUM-BRUNO-002', 'Registrado', NULL, '2026-11-04 08:15:00', 'Acesso de manutencao'),
-(3, 3, 1, 'Saida', 'Permitido', 'LUM-CARLA-003', 'Registrado', NULL, '2026-11-04 12:00:00', 'Saida registrada'),
-(4, 5, 5, 'Entrada', 'Negado', 'LUM-ELISA-005', 'Bloqueado', NULL, '2026-11-04 13:20:00', 'Credencial bloqueada'),
-(5, NULL, 4, 'Entrada', 'Negado', 'TOKEN-INVALIDO-999', 'Falha', NULL, '2026-11-04 14:10:00', 'Token nao reconhecido');
+(1, 1, 1, 'entrada', 'permitido', 'LUM-ANA-001', 'concluido', NULL, '2026-11-04 08:00:00', 'Acesso autorizado'),
+(2, 2, 5, 'entrada', 'permitido', 'LUM-BRUNO-002', 'concluido', NULL, '2026-11-04 08:15:00', 'Acesso de manutencao'),
+(3, 3, 1, 'saida', 'permitido', 'LUM-CARLA-003', 'concluido', NULL, '2026-11-04 12:00:00', 'Saida registrada'),
+(4, 5, 5, 'entrada', 'negado', 'LUM-ELISA-005', 'bloqueado', NULL, '2026-11-04 13:20:00', 'Credencial bloqueada'),
+(5, NULL, 4, 'entrada', 'negado', 'TOKEN-INVALIDO-999', 'falha', NULL, '2026-11-04 14:10:00', 'Token nao reconhecido');
 
 INSERT INTO reclamacoes
 (id_reclamacao, id_usuario_abertura, id_ambiente, id_dispositivo, id_usuario_responsavel, status_chamado, data_hora_recebido, descricao_usuario, prioridade, categoria_problema)
 VALUES
-(1, 1, 1, 1, 2, 'Em andamento', '2026-11-01 09:15:00', 'Temperatura da recepcao acima do habitual.', 'Alta', 'Climatizacao'),
-(2, 3, 2, 2, 2, 'Em andamento', '2026-11-01 10:30:00', 'Iluminacao da sala de reunioes esta fraca.', 'Media', 'Iluminacao'),
-(3, 5, 5, NULL, 2, 'Aberto', '2026-11-02 14:00:00', 'Acesso ao laboratorio nao foi liberado.', 'Alta', 'Acesso'),
-(4, 2, 3, 3, NULL, 'Concluido', '2026-11-02 15:20:00', 'Medidor de energia apresentou leitura inconsistente.', 'Media', 'Energia'),
-(5, 4, 4, 4, 2, 'Em andamento', '2026-11-03 08:45:00', 'Sensor do escritorio esta sem atualizar as leituras.', 'Alta', 'Dispositivo');
+(1, 1, 1, 1, 2, 'em_andamento', '2026-11-01 09:15:00', 'Temperatura da recepcao acima do habitual.', 'alta', 'climatizacao'),
+(2, 3, 2, 2, 2, 'em_andamento', '2026-11-01 10:30:00', 'Iluminacao da sala de reunioes esta fraca.', 'media', 'iluminacao'),
+(3, 5, 5, NULL, 2, 'aberto', '2026-11-02 14:00:00', 'Acesso ao laboratorio nao foi liberado.', 'alta', 'acesso'),
+(4, 2, 3, 3, NULL, 'concluido', '2026-11-02 15:20:00', 'Medidor de energia apresentou leitura inconsistente.', 'media', 'energia'),
+(5, 4, 4, 4, 2, 'em_andamento', '2026-11-03 08:45:00', 'Sensor do escritorio esta sem atualizar as leituras.', 'alta', 'dispositivo');
 
 INSERT INTO historico_temperatura
 (id_historico_temperatura, id_dispositivo, temperatura_medida, umidade, data_temperatura)
@@ -698,29 +683,29 @@ VALUES
 INSERT INTO historico_energia
 (id_historico_energia, id_dispositivo, id_tarifa, consumo_kwh, potencia_kw, custo_estimado, qualidade_medicao, data_historico_energia)
 VALUES
-(1, 3, 1, 2.4500, 1.2000, 1.80, 'Boa', '2026-11-04 08:00:00'),
-(2, 3, 1, 2.7800, 1.3500, 2.04, 'Boa', '2026-11-04 09:00:00'),
-(3, 3, 1, 3.1000, 1.5000, 2.28, 'Boa', '2026-11-04 10:00:00'),
-(4, 3, 1, 2.9000, 1.4000, 2.13, 'Regular', '2026-11-04 11:00:00'),
-(5, 3, 1, 3.2500, 1.6000, 2.39, 'Boa', '2026-11-04 12:00:00');
+(1, 3, 1, 2.4500, 1.2000, 1.80, 'boa', '2026-11-04 08:00:00'),
+(2, 3, 1, 2.7800, 1.3500, 2.04, 'boa', '2026-11-04 09:00:00'),
+(3, 3, 1, 3.1000, 1.5000, 2.28, 'boa', '2026-11-04 10:00:00'),
+(4, 3, 1, 2.9000, 1.4000, 2.13, 'regular', '2026-11-04 11:00:00'),
+(5, 3, 1, 3.2500, 1.6000, 2.39, 'boa', '2026-11-04 12:00:00');
 
 INSERT INTO ocorrencia
-(id_ocorrencia, id_dispositivo, id_usuario_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
+(id_ocorrencia, id_dispositivo, id_equipe_responsavel, id_tecnico_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
 VALUES
-(1, 1, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'Em andamento', 'Alta', '2026-11-04 08:05:00', NULL),
-(2, 2, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'Aberta', 'Media', '2026-11-04 08:10:00', NULL),
-(3, 3, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'Aberta', 'Alta', '2026-11-04 10:05:00', NULL),
-(4, 4, 4, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'Resolvida', 'Media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
-(5, 5, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'Aberta', 'Alta', '2026-11-04 10:35:00', NULL);
+(1, 1, NULL, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'em_andamento', 'alta', '2026-11-04 08:05:00', NULL),
+(2, 2, NULL, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'aberta', 'media', '2026-11-04 08:10:00', NULL),
+(3, 3, NULL, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'aberta', 'alta', '2026-11-04 10:05:00', NULL),
+(4, 4, NULL, 2, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'resolvida', 'media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
+(5, 5, NULL, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'aberta', 'alta', '2026-11-04 10:35:00', NULL);
 
 INSERT INTO historico_ocorrencia
 (id_historico_ocorrencia, id_ocorrencia, id_usuario, data_historico_ocorrencia, observacao, status_anterior, status_posterior)
 VALUES
-(1, 1, 2, '2026-11-04 08:20:00', 'Responsavel iniciou a verificacao do sensor.', 'Aberta', 'Em andamento'),
-(2, 2, NULL, '2026-11-04 08:10:00', 'Ocorrencia criada automaticamente pelo monitoramento.', NULL, 'Aberta'),
-(3, 3, NULL, '2026-11-04 10:05:00', 'Alerta gerado automaticamente pelo monitoramento de energia.', NULL, 'Aberta'),
-(4, 4, 2, '2026-11-03 16:30:00', 'Sensor reiniciado e leituras normalizadas.', 'Em andamento', 'Resolvida'),
-(5, 5, NULL, '2026-11-04 10:35:00', 'Alerta automatico de iluminacao.', NULL, 'Aberta');
+(1, 1, 2, '2026-11-04 08:20:00', 'Responsavel iniciou a verificacao do sensor.', 'aberta', 'em_andamento'),
+(2, 2, NULL, '2026-11-04 08:10:00', 'Ocorrencia criada automaticamente pelo monitoramento.', NULL, 'aberta'),
+(3, 3, NULL, '2026-11-04 10:05:00', 'Alerta gerado automaticamente pelo monitoramento de energia.', NULL, 'aberta'),
+(4, 4, 2, '2026-11-03 16:30:00', 'Sensor reiniciado e leituras normalizadas.', 'em_andamento', 'resolvida'),
+(5, 5, NULL, '2026-11-04 10:35:00', 'Alerta automatico de iluminacao.', NULL, 'aberta');
 
 INSERT INTO historico_dispositivo
 (id_historico_dispositivo, id_dispositivo, status_dispositivo, data_historico_dispositivo, data_inicio_status, data_fim_status, motivo, consumo_estimado_kwh, custo_estimado, observacao)
