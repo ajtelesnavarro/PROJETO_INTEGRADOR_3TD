@@ -275,9 +275,8 @@ CREATE TABLE historico_energia (
     id_historico_energia INT AUTO_INCREMENT PRIMARY KEY,
     id_dispositivo INT NOT NULL,
     id_tarifa INT NULL,
-    consumo_kwh DECIMAL(12,4) NOT NULL,
-    potencia_kw DECIMAL(10,4) NOT NULL,
-    custo_estimado DECIMAL(12,2) NULL,
+    duracao_minutos INT NOT NULL
+    potencia_kwh DECIMAL(10,4) NOT NULL,
     qualidade_medicao ENUM('boa', 'regular', 'ruim') NULL,
     data_historico_energia DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
