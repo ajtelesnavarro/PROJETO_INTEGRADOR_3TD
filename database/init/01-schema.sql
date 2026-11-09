@@ -128,10 +128,18 @@ CREATE TABLE dispositivo (
     id_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
     id_ambiente INT NOT NULL,
     nome VARCHAR(100) NOT NULL,
-    tipo_dispositivo VARCHAR(80) NOT NULL,
+    tipo_dispositivo ENUM(
+        'energia',
+        'iluminacao',
+        'temperatura'
+    ) NOT NULL,
     fabricante VARCHAR(100) NULL,
     modelo VARCHAR(100) NULL,
-    unidade_medida VARCHAR(30) NULL,
+    unidade_medida ENUM(
+        'kWh', 'kW', 'V',
+        'lux', 'lm',
+        '°C', 'BTU/h'
+    ) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
     status_dispositivo ENUM(
