@@ -136,9 +136,9 @@ CREATE TABLE dispositivo (
     fabricante VARCHAR(100) NULL,
     modelo VARCHAR(100) NULL,
     unidade_medida ENUM(
-        'kWh', 'kW', 'V',
-        'lux', 'lm',
-        '°C', 'BTU/h'
+        'kWh',
+        'lux',
+        '°C'
     ) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
