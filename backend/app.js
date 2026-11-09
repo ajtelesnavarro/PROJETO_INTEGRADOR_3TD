@@ -16,9 +16,35 @@ import {
     autorizarPerfis
 } from './middlewares/AuthMiddleware.js';
 
-export const app = express();
+// Rotas de orçamento, pedido e pagamento
+import { criarOrcamentoRoutes } from './src/routes/orcamentoRoutes.js';
+import { criarPedidoRoutes } from './src/routes/pedidoRoutes.js';
+import { criarPagamentoRoutes } from './src/routes/pagamentoRoutes.js';
 
-// Configuração dos middlewares de segurança
+// Models
+import { criarOrcamentoModel } from './src/models/OrcamentoModel.js';
+import { criarPedidoModel } from './src/models/PedidoModel.js';
+import { criarPagamentoModel } from './src/models/PagamentoModel.js';
+
+// Services
+import { criarOrcamentoService } from './src/services/OrcamentoService.js';
+import { criarPedidoService } from './src/services/PedidoService.js';
+import { criarPagamentoService } from './src/services/PagamentoService.js';
+
+// Controllers
+import { criarOrcamentoController } from './src/controllers/OrcamentoController.js';
+import { criarPedidoController } from './src/controllers/PedidoController.js';
+import { criarPagamentoController } from './src/controllers/PagamentoController.js';
+
+// Conexão com o banco de dados
+import { pool } from './src/config/database.js';
+
+const app = express();
+
+// ==========================================
+// MIDDLEWARES
+// ==========================================
+
 app.use(helmet());
 
 const origensPermitidas = (
@@ -45,13 +71,22 @@ app.use(cors({
 
 app.use(express.json({ limit: '1mb' }));
 
-// Configuração da autenticação das rotas de recursos
+// ==========================================
+// CONFIGURAÇÃO DE SEGURANÇA
+// ==========================================
+
 configurarSegurancaRecursos(autenticar, autorizarPerfis);
 
-// Arquivos estáticos
+// ==========================================
+// ARQUIVOS ESTÁTICOS
+// ==========================================
+
 app.use('/uploads', express.static(resolve('uploads')));
 
-// Verificação da API
+// ==========================================
+// VERIFICAÇÃO DA API
+// ==========================================
+
 app.get('/api/v1/check', (_req, res) => {
     return res.status(200).json({
         sucesso: true,
@@ -60,11 +95,70 @@ app.get('/api/v1/check', (_req, res) => {
     });
 });
 
-// Rotas de autenticação
+// ==========================================
+// ROTAS DE AUTENTICAÇÃO E RECURSOS
+// ==========================================
+
 app.use('/api/v1/auth', authRouter);
 
-// Rotas dos recursos
 app.use('/api/v1', recursosRouter);
+
+// ==========================================
+// CONFIGURAÇÃO DE ORÇAMENTO, PEDIDO E PAGAMENTO
+// ==========================================
+
+// 1. Models
+const orcamentoModel = criarOrcamentoModel({ pool });
+const pedidoModel = criarPedidoModel({ pool });
+const pagamentoModel = criarPagamentoModel({ pool });
+
+// 2. Services
+const orcamentoService = criarOrcamentoService({
+    orcamentoModel
+});
+
+const pedidoService = criarPedidoService({
+    pedidoModel,
+    orcamentoModel
+});
+
+const pagamentoService = criarPagamentoService({
+    pagamentoModel,
+    pedidoModel
+});
+
+// 3. Controllers
+const orcamentoController = criarOrcamentoController({
+    orcamentoService
+});
+
+const pedidoController = criarPedidoController({
+    pedidoService
+});
+
+const pagamentoController = criarPagamentoController({
+    pagamentoService
+});
+
+// 4. Rotas
+app.use(
+    '/api/v1/orcamentos',
+    criarOrcamentoRoutes({ orcamentoController })
+);
+
+app.use(
+    '/api/v1/pedidos',
+    criarPedidoRoutes({ pedidoController })
+);
+
+app.use(
+    '/api/v1/pagamentos',
+    criarPagamentoRoutes({ pagamentoController })
+);
+
+// ==========================================
+// TRATAMENTO DE ERROS
+// ==========================================
 
 // Rota não encontrada
 app.use((_req, res) => {
@@ -74,6 +168,7 @@ app.use((_req, res) => {
     });
 });
 
+// Tratamento centralizado de erros
 app.use((erro, _req, res, _next) => {
     const status =
         Number.isInteger(erro.status) &&
@@ -93,3 +188,5 @@ app.use((erro, _req, res, _next) => {
             : erro.message
     });
 });
+
+export default app;
