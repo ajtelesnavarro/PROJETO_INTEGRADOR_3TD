@@ -56,7 +56,6 @@ CREATE TABLE ambiente (
     capacidade_maxima INT NULL,
     horario_abertura TIME NULL,
     horario_fechamento TIME NULL,
-    requer_reserva BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_ambiente_andar
         FOREIGN KEY (id_andar) REFERENCES andar(id_andar),
