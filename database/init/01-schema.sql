@@ -579,7 +579,10 @@ USE db_lumora;
 INSERT INTO predio
 (id_predio, nome_predio, cep, logradouro, numero, complemento, bairro, cidade, estado)
 VALUES
-(1, 'Lumora Business Center', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP');
+(1, 'Edificio Empresarial Central', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP'),
+(2, 'Centro Empresarial Horizonte', '09020-110', 'Avenida Portugal', '450', 'Bloco A', 'Centro', 'Santo Andre', 'SP'),
+(3, 'Edificio Comercial Nova Era', '09110-300', 'Rua das Figueiras', '780', NULL, 'Campestre', 'Santo Andre', 'SP'),
+(4, 'Condominio Empresarial Park', '09210-050', 'Avenida Industrial', '950', 'Torre 2', 'Jardim', 'Santo Andre', 'SP');
 
 INSERT INTO andar
 (id_andar, id_predio, numero_andar, descricao, data_cadastro)
