@@ -53,7 +53,6 @@ CREATE TABLE setor (
 
 CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
-    id_andar INT NOT NULL,
     id_setor INT NULL,
     nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NULL,
