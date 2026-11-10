@@ -246,7 +246,7 @@ CREATE TABLE tarifa_energia (
     CONSTRAINT chk_valor_tarifa CHECK (valor_kwh >= 0),
 
     CONSTRAINT fk_taria_energia_predio 
-    FOREIGN KEY (id_predio) REFERENTES predio(id_predio),
+    FOREIGN KEY (id_predio) REFERENCES predio(id_predio),
     
     CONSTRAINT fk_tarifa_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
@@ -596,7 +596,7 @@ VALUES
 (1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'Administracao', 'administrador', '12345678901', NULL, NULL, '1988-04-12', TRUE),
 (2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'Manutencao', 'manutencao', '12345678902', NULL, NULL, '1990-08-21', TRUE),
 (3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'porteiro', '12345678903', NULL, NULL, '1995-02-03', TRUE),
-(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'Seguranca', 'secetaria', '12345678904', NULL, NULL, '1992-11-17', TRUE),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'Seguranca', 'secretaria', '12345678904', NULL, NULL, '1992-11-17', TRUE),
 (5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante', '12345678905', NULL, NULL, '2000-06-25', TRUE);
 
 INSERT INTO setor
@@ -699,7 +699,7 @@ VALUES
 (1, 1, 1, 'entrada', 'permitido', 'LUM-ANA-001', 'concluido', NULL, '2026-11-04 08:00:00', 'acesso_autorizado'),
 (2, 2, 5, 'entrada', 'permitido', 'LUM-BRUNO-002', 'concluido', NULL, '2026-11-04 08:15:00', 'acesso_de_manutencao'),
 (3, 3, 1, 'saida', 'permitido', 'LUM-CARLA-003', 'concluido', NULL, '2026-11-04 12:00:00', 'saida_registrada'),
-(4, 5, 5, 'entrada', 'negado', 'LUM-ELISA-005' 'bloqueado', NULL, '2026-11-04 13:20:00', 'credencial_bloqueada'),
+(4, 5, 5, 'entrada', 'negado', 'LUM-ELISA-005', 'bloqueado', NULL, '2026-11-04 13:20:00', 'credencial_bloqueada'),
 (5, NULL, 4, 'entrada', 'negado', 'TOKEN-INVALIDO-999', 'falha', NULL, '2026-11-04 14:10:00', 'token_nao_reconhecido');
 
 INSERT INTO reclamacoes
