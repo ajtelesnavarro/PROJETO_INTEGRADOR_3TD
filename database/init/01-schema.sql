@@ -88,7 +88,7 @@ CREATE TABLE usuario (
         'administrador',
         'manutencao',
         'consulta',
-        'seguranca',
+        'secretaria',
         'visitante'
     ) NOT NULL DEFAULT 'visitante',
     cpf CHAR(11) NOT NULL,
