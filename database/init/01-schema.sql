@@ -37,7 +37,11 @@ CREATE TABLE setor (
     id_andar INT NOT NULL,
     nome_setor VARCHAR(100) NOT NULL,
     descricao VARCHAR(255) NULL,
-    responsavel VARCHAR(100) NULL,
+    id_usuario_responsavel INT NULL, 
+
+    CONSTRAINT fk_setor_usuario_responsavel 
+    FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario)
+
 
     CONSTRAINT fk_setor_andar
         FOREIGN KEY (id_andar)
