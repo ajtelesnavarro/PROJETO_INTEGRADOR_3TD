@@ -360,6 +360,8 @@ CREATE TABLE eventos_acessos (
     data_utilizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     motivo ENUM(
         'acesso_autorizado',
+        'acesso_de_manutencao',
+        'saida_registrada',
         'credencial_bloqueada',
         'credencial_expirada',
         'token_nao_reconhecido',
@@ -368,7 +370,7 @@ CREATE TABLE eventos_acessos (
         'ambiente_restrito',
         'falha_na_validacao',
         'falha_de_comunicacao'
-    ) NULL
+    ) NULL,
 
     CONSTRAINT fk_evento_credencial
         FOREIGN KEY (id_credencial) REFERENCES credenciais_acesso(id_credencial),
@@ -692,7 +694,7 @@ VALUES
 (5, 5, 5, '09:00:00', '17:00:00', 'ativa', '2026-11-01', '2026-12-31', 'Segunda a sexta');
 
 INSERT INTO eventos_acessos
-(id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_hash_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
+(id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
 VALUES
 (1, 1, 1, 'entrada', 'permitido', 'LUM-ANA-001', 'concluido', NULL, '2026-11-04 08:00:00', 'acesso_autorizado'),
 (2, 2, 5, 'entrada', 'permitido', 'LUM-BRUNO-002', 'concluido', NULL, '2026-11-04 08:15:00', 'acesso_de_manutencao'),
