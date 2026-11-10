@@ -16,7 +16,7 @@ export const recursos = {
     ambientes: {
         tabela: 'ambientes',
         id: 'id',
-        campos: [""
+        campos: [
             'predio_id', 'nome', 'tipo', 'andar',
             'descricao', 'responsavel_id', 'status'
         ],

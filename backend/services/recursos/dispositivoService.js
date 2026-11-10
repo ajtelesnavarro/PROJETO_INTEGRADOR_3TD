@@ -1,7 +1,7 @@
 
 import * as Model from '../../models/RecursoModel.js';
-import { recursos } from './RecursoConfig.js';
-import { validarId, preparar } from './ValidacaoService.js';
+import { recursos } from './recursoConfig.js';
+import { validarId, preparar } from './validacaoService.js';
 
 const config = recursos.dispositivos;
 

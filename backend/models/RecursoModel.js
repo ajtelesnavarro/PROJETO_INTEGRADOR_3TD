@@ -1,7 +1,4 @@
-
-import { criarPool } from '../config/database.js';
-
-const obterPool = () => criarPool();
+import { pool } from '../src/config/database.js';
 
 // Tipos de leitura e respectivas tabelas
 const tiposLeitura = {
@@ -10,7 +7,7 @@ const tiposLeitura = {
         id: 'id_historico_temperatura',
         colunaValor: 'temperatura_medida',
         colunaData: 'data_temperatura',
-        unidadePadrao: '°C'
+        unidadePadrao: '\u00B0C'
     },
     iluminacao: {
         tabela: 'historico_iluminacao',
@@ -89,7 +86,7 @@ export async function listar(
         ? `WHERE ${where.join(' AND ')}`
         : '';
 
-    const [dados] = await obterPool().query(
+    const [dados] = await pool.query(
         `SELECT *
          FROM \`${config.tabela}\`
          ${clausula}
@@ -98,7 +95,7 @@ export async function listar(
         [...valores, limite, offset]
     );
 
-    const [[{ total }]] = await obterPool().query(
+    const [[{ total }]] = await pool.query(
         `SELECT COUNT(*) AS total
          FROM \`${config.tabela}\`
          ${clausula}`,
@@ -117,7 +114,7 @@ export async function listar(
 // ========================================
 
 export async function buscar(config, id) {
-    const [linhas] = await obterPool().query(
+    const [linhas] = await pool.query(
         `SELECT *
          FROM \`${config.tabela}\`
          WHERE \`${config.id}\` = ?
@@ -143,6 +140,8 @@ export async function listarLeituras({
 } = {}) {
     const consultas = [];
     const valores = [];
+    limite = Math.max(1, Math.min(1000, Number(limite) || 50));
+    offset = Math.max(0, Number(offset) || 0);
 
     const tipos = tipo
         ? [obterTipoLeitura(tipo)]
@@ -194,7 +193,7 @@ export async function listarLeituras({
         LIMIT ? OFFSET ?
     `;
 
-    const [dados] = await obterPool().query(
+    const [dados] = await pool.query(
         sqlFinal,
         [...valores, limite, offset]
     );
@@ -204,7 +203,7 @@ export async function listarLeituras({
         FROM (${consultas.join(' UNION ALL ')}) AS leituras
     `;
 
-    const [[{ total }]] = await obterPool().query(
+    const [[{ total }]] = await pool.query(
         sqlContagem,
         valores
     );
@@ -223,7 +222,7 @@ export async function listarLeituras({
 export async function buscarLeitura(tipo, id) {
     const config = obterTipoLeitura(tipo);
 
-    const [linhas] = await obterPool().query(
+    const [linhas] = await pool.query(
         `SELECT
             h.${config.id} AS id,
             h.id_dispositivo AS dispositivo_id,
@@ -254,7 +253,7 @@ export async function criarLeitura(tipo, dados) {
     let resultado;
 
     if (config.tipo === 'temperatura') {
-        const [res] = await obterPool().query(
+        const [res] = await pool.query(
             `INSERT INTO historico_temperatura
                 (id_dispositivo, temperatura_medida, umidade, data_temperatura)
              VALUES (?, ?, ?, ?)`,
@@ -270,7 +269,7 @@ export async function criarLeitura(tipo, dados) {
     }
 
     if (config.tipo === 'iluminacao') {
-        const [res] = await obterPool().query(
+        const [res] = await pool.query(
             `INSERT INTO historico_iluminacao
                 (id_dispositivo, iluminacao_medida, data_iluminacao)
              VALUES (?, ?, ?)`,
@@ -291,7 +290,7 @@ export async function criarLeitura(tipo, dados) {
             );
         }
 
-        const [res] = await obterPool().query(
+        const [res] = await pool.query(
             `INSERT INTO historico_energia
                 (id_dispositivo, id_tarifa, consumo_kwh,
                  data_historico_energia, potencia_kw, qualidade_medicao)
@@ -318,7 +317,7 @@ export async function criarLeitura(tipo, dados) {
 // ========================================
 
 export async function buscarDispositivo(id) {
-    const [linhas] = await obterPool().query(
+    const [linhas] = await pool.query(
         `SELECT *
          FROM dispositivo
          WHERE id_dispositivo = ?
@@ -357,7 +356,7 @@ export async function buscarLimites(dispositivoId, tipo) {
 
     const limite = tabelas[config.tipo];
 
-    const [linhas] = await obterPool().query(
+    const [linhas] = await pool.query(
         `SELECT
             t.${limite.minimo} AS limite_minimo,
             t.${limite.maximo} AS limite_maximo
@@ -378,11 +377,11 @@ export async function buscarLimites(dispositivoId, tipo) {
 // ========================================
 
 export async function buscarOcorrenciaAberta(dispositivoId) {
-    const [linhas] = await obterPool().query(
+    const [linhas] = await pool.query(
         `SELECT *
          FROM ocorrencia
          WHERE id_dispositivo = ?
-         AND status IN ('Aberta', 'Em Atendimento')
+         AND status_ocorrencia IN ('aberta', 'em_andamento')
          ORDER BY id_ocorrencia DESC
          LIMIT 1`,
         [dispositivoId]
@@ -390,7 +389,6 @@ export async function buscarOcorrenciaAberta(dispositivoId) {
 
     return linhas[0] || null;
 }
-
 
 // ========================================
 // 9. INSERÇÃO DE RECURSOS CADASTRAIS
@@ -411,7 +409,7 @@ export async function criar(config, dados) {
         .map(() => '?')
         .join(', ');
 
-    const [resultado] = await obterPool().query(
+    const [resultado] = await pool.query(
         `INSERT INTO \`${config.tabela}\`
             (${colunas})
          VALUES (${placeholders})`,
@@ -445,7 +443,7 @@ export async function atualizar(config, id, dados) {
         .map(campo => `\`${campo}\` = ?`)
         .join(', ');
 
-    await obterPool().query(
+    await pool.query(
         `UPDATE \`${config.tabela}\`
          SET ${set}
          WHERE \`${config.id}\` = ?`,
@@ -461,7 +459,7 @@ export async function atualizar(config, id, dados) {
 // ========================================
 
 export async function excluir(config, id) {
-    const [resultado] = await obterPool().query(
+    const [resultado] = await pool.query(
         `DELETE FROM \`${config.tabela}\`
          WHERE \`${config.id}\` = ?`,
         [id]
@@ -488,25 +486,27 @@ export async function relatorios(filtros = {}) {
     const valores = [];
 
     if (filtros.ambienteId) {
-        condicoes.push('id_ambiente = ?');
+        condicoes.push('d.id_ambiente = ?');
         valores.push(filtros.ambienteId);
     }
 
     if (filtros.dataInicio) {
-        condicoes.push('data_ocorrencia >= ?');
+        condicoes.push('o.data_ocorrencia >= ?');
         valores.push(filtros.dataInicio);
     }
 
     if (filtros.dataFim) {
-        condicoes.push('data_ocorrencia <= ?');
+        condicoes.push('o.data_ocorrencia <= ?');
         valores.push(filtros.dataFim);
     }
 
-    const [ocorrencias] = await obterPool().query(
-        `SELECT *
-         FROM ocorrencia
+    const [ocorrencias] = await pool.query(
+        `SELECT o.*
+         FROM ocorrencia o
+         INNER JOIN dispositivo d
+            ON d.id_dispositivo = o.id_dispositivo
          WHERE ${condicoes.join(' AND ')}
-         ORDER BY data_ocorrencia DESC
+         ORDER BY o.data_ocorrencia DESC
          LIMIT 1000`,
         valores
     );

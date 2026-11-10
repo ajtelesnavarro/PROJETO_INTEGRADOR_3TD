@@ -1,4 +1,4 @@
-import * as AuthService from '../services/AuthService.js';
+import * as AuthService from '../src/services/AuthService.js';
 
 function responderErro(erro, res, next) {
     if (erro instanceof TypeError) {

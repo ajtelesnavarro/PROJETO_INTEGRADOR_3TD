@@ -1,5 +1,5 @@
 
-import { recursos } from './RecursoConfig.js';
+import { recursos } from './recursoConfig.js';
 
 // Valida identificadores
 export function validarId(valor, campo = 'ID') {
@@ -168,10 +168,13 @@ export function preparar(
     const camposId = [
         'id_predio',
         'id_andar',
+        'id_setor',
         'id_ambiente',
         'id_dispositivo',
+        'id_usuario',
         'id_credencial',
-        'id_usuario_responsavel'
+        'id_equipe_responsavel',
+        'id_tecnico_responsavel'
     ];
 
     for (const campo of camposId) {
@@ -223,9 +226,13 @@ export function preparar(
 
     // Valida status de ocorrência
     if (
-        resultado.status !== undefined &&
-        !['Aberta', 'Em Atendimento', 'Resolvida']
-            .includes(resultado.status)
+        resultado.status_ocorrencia !== undefined &&
+        ![
+            'aberta',
+            'em_andamento',
+            'resolvida',
+            'cancelada'
+        ].includes(resultado.status_ocorrencia)
     ) {
         throw new TypeError(
             'Status de ocorrência inválido.'

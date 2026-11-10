@@ -5,16 +5,23 @@ export const recursos = {
         id: 'id_predio',
         campos: [
             'nome_predio',
-            'endereco',
-            'rua',
-            'bairro',
-            'complemento',
-            'numero',
-            'estado',
             'cep',
-            'cidade'
+            'logradouro',
+            'numero',
+            'complemento',
+            'bairro',
+            'cidade',
+            'estado'
         ],
-        obrigatorios: ['nome_predio']
+        obrigatorios: [
+            'nome_predio',
+            'cep',
+            'logradouro',
+            'numero',
+            'bairro',
+            'cidade',
+            'estado'
+        ]
     },
 
     andares: {
@@ -24,7 +31,7 @@ export const recursos = {
             'id_predio',
             'numero_andar',
             'descricao',
-            'data_andar'
+            'data_cadastro'
         ],
         obrigatorios: [
             'id_predio',
@@ -37,11 +44,12 @@ export const recursos = {
         id: 'id_ambiente',
         campos: [
             'id_andar',
+            'id_setor',
+            'requer_reserva',
+            'nome',
             'localizacao',
             'capacidade_maxima',
-            'requer_reserva',
             'horario_abertura',
-            'nome',
             'horario_fechamento'
         ],
         obrigatorios: [
@@ -55,17 +63,22 @@ export const recursos = {
         id: 'id_dispositivo',
         campos: [
             'id_ambiente',
+            'id_usuario',
+            'nome',
             'tipo_dispositivo',
             'fabricante',
             'modelo',
-            'versao',
             'unidade_medida',
+            'potencia_nominal_kw',
             'data_dispositivo',
-            'potencia_nominal_kw'
+            'identificador',
+            'status_dispositivo'
         ],
         obrigatorios: [
             'id_ambiente',
-            'tipo_dispositivo'
+            'nome',
+            'tipo_dispositivo',
+            'identificador'
         ]
     },
 
@@ -73,14 +86,15 @@ export const recursos = {
         tabela: 'eventos_acessos',
         id: 'id_evento',
         campos: [
-            'id_ambiente',
             'id_credencial',
-            'motivo',
+            'id_ambiente',
             'tipo_acesso',
             'decisao_acesso',
             'token_tentado',
+            'status_evento',
             'data_expiracao',
-            'data_utilizacao'
+            'data_utilizacao',
+            'motivo'
         ],
         obrigatorios: [
             'id_ambiente',
@@ -94,18 +108,19 @@ export const recursos = {
         id: 'id_ocorrencia',
         campos: [
             'id_dispositivo',
-            'id_ambiente',
-            'id_usuario_responsavel',
+            'id_equipe_responsavel',
+            'id_tecnico_responsavel',
             'titulo',
             'descricao',
-            'status',
+            'status_ocorrencia',
+            'prioridade',
             'data_ocorrencia',
-            'origem'
+            'resolvida_em'
         ],
         obrigatorios: [
             'id_dispositivo',
-            'id_ambiente',
-            'titulo'
+            'titulo',
+            'descricao'
         ]
     }
 };
@@ -116,7 +131,7 @@ export const tiposLeitura = {
         id: 'id_historico_temperatura',
         campoValor: 'temperatura_medida',
         campoData: 'data_temperatura',
-        unidade: '°C'
+        unidade: '\u00B0C'
     },
 
     iluminacao: {

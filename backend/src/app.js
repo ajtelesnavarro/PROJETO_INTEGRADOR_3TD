@@ -7,17 +7,9 @@ import cors from "cors";
 import { resolve } from "node:path";
 
 // Rotas existentes
-import { authRouter } from "../routes/AuthRoutes.js";
+import { authRouter } from "./routes/AuthRoutes.js";
 
-import {
-    recursosRouter,
-    configurarSegurancaRecursos
-} from "../routes/recursosRoutes.js";
-
-import {
-    autenticar,
-    autorizarPerfis
-} from "../middlewares/AuthMiddleware.js";
+import { recursosRouter } from "./routes/RecursoRoutes.js";
 
 // Rotas de orçamento, pedido e pagamento
 import { criarOrcamentoRoutes } from "./routes/orcamentoRoutes.js";
@@ -71,12 +63,6 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "1mb" }));
-
-// ==========================================
-// SEGURANÇA
-// ==========================================
-
-configurarSegurancaRecursos(autenticar, autorizarPerfis);
 
 // ==========================================
 // ARQUIVOS ESTÁTICOS
