@@ -595,8 +595,8 @@ INSERT INTO usuario
 VALUES
 (1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'Administracao', 'administrador', '12345678901', NULL, NULL, '1988-04-12', TRUE),
 (2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'Manutencao', 'manutencao', '12345678902', NULL, NULL, '1990-08-21', TRUE),
-(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'consulta', '12345678903', NULL, NULL, '1995-02-03', TRUE),
-(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'Seguranca', 'seguranca', '12345678904', NULL, NULL, '1992-11-17', TRUE),
+(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'Recepcao', 'porteiro', '12345678903', NULL, NULL, '1995-02-03', TRUE),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'Seguranca', 'secetaria', '12345678904', NULL, NULL, '1992-11-17', TRUE),
 (5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'Visitantes', 'visitante', '12345678905', NULL, NULL, '2000-06-25', TRUE);
 
 INSERT INTO setor
@@ -667,13 +667,13 @@ VALUES
 (5, 5, 1, 0.5000, 40.0000, 12.0000);
 
 INSERT INTO tarifa_energia
-(id_tarifa, id_usuario_alteracao, valor_kwh, data_inicio_vigencia, data_fim_vigencia)
+(id_tarifa, id_usuario_alteracao, id_predio, valor_kwh, data_inicio_vigencia, data_fim_vigencia)
 VALUES
-(1, 1, 0.7350, '2026-01-01', NULL),
-(2, 1, 0.7210, '2025-07-01', '2025-12-31'),
-(3, 1, 0.6980, '2025-01-01', '2025-06-30'),
-(4, 1, 0.6750, '2024-07-01', '2024-12-31'),
-(5, 1, 0.6500, '2024-01-01', '2024-06-30');
+(1, 1, 1, 0.7350, '2026-01-01', NULL),
+(2, 1, 1, 0.7210, '2025-07-01', '2025-12-31'),
+(3, 1, 1, 0.6980, '2025-01-01', '2025-06-30'),
+(4, 1, 1, 0.6750, '2024-07-01', '2024-12-31'),
+(5, 1, 1, 0.6500, '2024-01-01', '2024-06-30');
 
 INSERT INTO credenciais_acesso
 (id_credencial, id_usuario, status, data_cadastro, token_hash, tipo_credencial, bloqueado_ate)
