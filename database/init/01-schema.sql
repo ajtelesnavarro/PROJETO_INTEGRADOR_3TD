@@ -238,11 +238,15 @@ CREATE TABLE energia (
 CREATE TABLE tarifa_energia (
     id_tarifa INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario_alteracao INT NULL,
+    id_predio INT NOT NULL,
     valor_kwh DECIMAL(10,4) NOT NULL,
     data_inicio_vigencia DATE NOT NULL,
     data_fim_vigencia DATE NULL,
 
     CONSTRAINT chk_valor_tarifa CHECK (valor_kwh >= 0),
+
+    CONSTRAINT fk_taria_energia_predio 
+    FOREIGN KEY (id_predio) REFERENTES predio(id_predio),
     
     CONSTRAINT fk_tarifa_usuario_alteracao
         FOREIGN KEY (id_usuario_alteracao) REFERENCES usuario(id_usuario),
