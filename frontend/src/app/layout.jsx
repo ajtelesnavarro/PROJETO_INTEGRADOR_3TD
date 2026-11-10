@@ -1,5 +1,5 @@
 import "./globals.css";
-import Sidebar from "@/componets/Sidebar";
+import Sidebar from "@/components/Sidebar";
 
 export const metadata = {
   title: "Projeto Base",
