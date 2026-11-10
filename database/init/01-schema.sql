@@ -32,27 +32,9 @@ CREATE TABLE andar (
         UNIQUE (id_predio, numero_andar)
 ) ENGINE=InnoDB;
 
-CREATE TABLE setor (
-    id_setor INT AUTO_INCREMENT PRIMARY KEY,
-    id_andar INT NOT NULL,
-    nome_setor VARCHAR(100) NOT NULL,
-    descricao VARCHAR(255) NULL,
-    id_usuario_responsavel INT NULL, 
-
-    CONSTRAINT fk_setor_usuario_responsavel 
-    FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario)
-
-
-    CONSTRAINT fk_setor_andar
-        FOREIGN KEY (id_andar)
-        REFERENCES andar(id_andar),
-
-    CONSTRAINT uk_setor_andar
-        UNIQUE (id_andar, nome_setor)
-) ENGINE=InnoDB;
-
 CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
+    id_andar INT NOT NULL,
     id_setor INT NULL,
     nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NULL,
@@ -79,7 +61,7 @@ CREATE TABLE ambiente (
 
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    id_predio INT NOT NULL
+    id_predio INT NOT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
@@ -97,10 +79,29 @@ CREATE TABLE usuario (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT uk_usuario_email UNIQUE (email),
-    CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
+    CONSTRAINT uk_usuario_cpf UNIQUE (cpf),
 
     FOREIGN KEY (id_predio)
         REFERENCES predio(id_predio),
+) ENGINE=InnoDB;
+
+CREATE TABLE setor (
+    id_setor INT AUTO_INCREMENT PRIMARY KEY,
+    id_andar INT NOT NULL,
+    nome_setor VARCHAR(100) NOT NULL,
+    descricao VARCHAR(255) NULL,
+    id_usuario_responsavel INT NULL, 
+
+    CONSTRAINT fk_setor_usuario_responsavel 
+    FOREIGN KEY (id_usuario_responsavel) REFERENCES usuario(id_usuario)
+
+
+    CONSTRAINT fk_setor_andar
+        FOREIGN KEY (id_andar)
+        REFERENCES andar(id_andar),
+
+    CONSTRAINT uk_setor_andar
+        UNIQUE (id_andar, nome_setor)
 ) ENGINE=InnoDB;
 
 CREATE TABLE equipe (
