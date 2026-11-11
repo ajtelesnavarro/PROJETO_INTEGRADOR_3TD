@@ -1,9 +1,18 @@
 import "dotenv/config";
 
 import app from "./app.js";
+import {
+    carregarAmbiente,
+    exibirDiagnostico
+} from "./config/ambiente.js";
 
-const port = Number(process.env.PORT || 8080);
+// Carrega e valida as configurações
+const configuracao = carregarAmbiente();
 
-app.listen(port, () => {
-  console.log(`API running on port ${port}`);
+// Exibe informações do ambiente
+exibirDiagnostico(configuracao);
+
+// Inicia a API
+app.listen(configuracao.porta, () => {
+    console.log(`API running on port ${configuracao.porta}`);
 });
