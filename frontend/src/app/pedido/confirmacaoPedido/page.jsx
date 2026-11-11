@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 
-export default function ConfirmacaoPedidoPage() {
+function ConfirmacaoPedidoConteudo() {
     const searchParams = useSearchParams();
 
     const idPagamento = searchParams.get("idPagamento");
@@ -50,5 +50,13 @@ export default function ConfirmacaoPedidoPage() {
                 </>
             )}
         </div>
+    );
+}
+
+export default function ConfirmacaoPedidoPage() {
+    return (
+        <Suspense fallback={<p>Consultando pagamento...</p>}>
+            <ConfirmacaoPedidoConteudo />
+        </Suspense>
     );
 }

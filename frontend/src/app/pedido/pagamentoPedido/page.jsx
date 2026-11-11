@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 
-export default function PagamentoPedidoPage() {
+function PagamentoPedidoConteudo() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -56,5 +56,13 @@ export default function PagamentoPedidoPage() {
                 <button type="submit">Continuar pagamento</button>
             </form>
         </div>
+    );
+}
+
+export default function PagamentoPedidoPage() {
+    return (
+        <Suspense fallback={<p>Carregando pagamento...</p>}>
+            <PagamentoPedidoConteudo />
+        </Suspense>
     );
 }

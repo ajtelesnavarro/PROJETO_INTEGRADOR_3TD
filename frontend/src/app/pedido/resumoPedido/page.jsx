@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 
-export default function ResumoPedidoPage() {
+function ResumoPedidoConteudo() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -40,5 +40,13 @@ export default function ResumoPedidoPage() {
                 Realizar pagamento
             </button>
         </div>
+    );
+}
+
+export default function ResumoPedidoPage() {
+    return (
+        <Suspense fallback={<p>Carregando pedido...</p>}>
+            <ResumoPedidoConteudo />
+        </Suspense>
     );
 }

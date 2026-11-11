@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 
-export default function ResumoOrcamentoPage() {
+function ResumoOrcamentoConteudo() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -66,5 +66,13 @@ export default function ResumoOrcamentoPage() {
             <button onClick={aprovar}>Aprovar</button>
             <button onClick={recusar}>Recusar</button>
         </div>
+    );
+}
+
+export default function ResumoOrcamentoPage() {
+    return (
+        <Suspense fallback={<p>Carregando orçamento...</p>}>
+            <ResumoOrcamentoConteudo />
+        </Suspense>
     );
 }

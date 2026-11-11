@@ -1,29 +1,25 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "mysql": "^2.18.1"
-=======
-  "name": "api-lumora-smartbuilding",
+  "name": "lumora-smartbuilding",
   "version": "1.0.0",
-  "description": "API REST do Lumora SmartBuilding",
+  "private": true,
+  "description": "Projeto Integrador - Lumora SmartBuilding",
   "main": "app.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "criar-admin": "node scripts/criar-admin.js"
+    "start": "node backend/src/server.js",
+    "dev": "node --watch backend/src/server.js",
+    "criar-admin": "node backend/src/scripts/criar-admin.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
-  "private": true,
   "dependencies": {
+    "mysql": "^2.18.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.24.4"
->>>>>>> origin/andre
   }
 }

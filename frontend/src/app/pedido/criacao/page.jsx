@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 
-export default function CriarPedidoPage() {
+function CriarPedidoConteudo() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -42,5 +42,13 @@ export default function CriarPedidoPage() {
             {carregando && <p>Criando pedido...</p>}
             {erro && <p>{erro}</p>}
         </div>
+    );
+}
+
+export default function CriarPedidoPage() {
+    return (
+        <Suspense fallback={<p>Criando pedido...</p>}>
+            <CriarPedidoConteudo />
+        </Suspense>
     );
 }
