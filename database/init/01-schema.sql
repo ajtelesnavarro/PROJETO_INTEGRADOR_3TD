@@ -153,7 +153,6 @@ CREATE TABLE dispositivo (
     ) NULL,
     potencia_nominal_kw DECIMAL(10,4) NULL,
     data_dispositivo DATE NULL,
-    identificador VARCHAR(100) NOT NULL UNIQUE,
     status_dispositivo ENUM(
         'ativo',
         'instavel',
