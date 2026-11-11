@@ -790,41 +790,6 @@ VALUES
 (5, 5, 'ativo', '2026-11-04 10:30:00', '2026-11-04 08:00:00', NULL, 'Operacao normal', 0.0090, 0.01, 'Sensor ativo no laboratorio'),
 (6, 4, 'ativo', '2026-11-03 16:30:00', '2026-11-03 16:30:00', NULL, 'Retorno da manutencao', 0.0120, 0.01, 'Dispositivo voltou ao funcionamento normal');
 
-INSERT INTO pagamento (
-    id_pedido,
-    valor_pago,
-    metodo_pagamento,
-    status_pagamento,
-    codigo_transacao,
-    data_pagamento
-) VALUES
-(1, 4200.00, 'pix', 'pendente', NULL, NULL),
-(2, 5000.00, 'cartao_credito', 'aprovado','LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
-
-INSERT INTO pedido (
-    id_orcamento,
-    valor_contratado,
-    status_pedido,
-    observacoes
-) VALUES
-(2, 4200.00, 'aguardando_pagamento','Orçamento aprovado. Aguardando confirmação do pagamento.'),
-(4, 5000.00, 'confirmado','Pedido confirmado após aprovação do pagamento.');
-
-INSERT INTO orcamento_servico (id_orcamento, id_servico)
-VALUES
-(1, 1),
-(1, 3),
-(2, 2),
-(2, 4),
-(3, 1),
-(3, 5),
-(4, 3),
-(4, 4),
-(4, 5),
-(5, 1),
-(5, 2),
-(5, 3);
-
 INSERT INTO servico (nome_servico, descricao, valor_base)
 VALUES
 ('monitoramento_temperatura',
@@ -869,3 +834,39 @@ INSERT INTO orcamento (
 (NULL, 'Roberto Almeida', 'Centro Empresarial Alfa','roberto@empresarialalfa.com.br', '(11) 98888-1003',3, 15, 25, 'Monitoramento de temperatura e dispositivos.',2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
 (NULL, 'Fernanda Costa', 'Shopping Nova Era','fernanda@shoppingnovaera.com.br', '(11) 98888-1004',6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.',5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
 (NULL, 'Lucas Ferreira', 'Hotel Bela Vista','lucas@hotelbelavista.com.br', '(11) 98888-1005',4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.', 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
+
+
+INSERT INTO pagamento (
+    id_pedido,
+    valor_pago,
+    metodo_pagamento,
+    status_pagamento,
+    codigo_transacao,
+    data_pagamento
+) VALUES
+(1, 4200.00, 'pix', 'pendente', NULL, NULL),
+(2, 5000.00, 'cartao_credito', 'aprovado','LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
+
+INSERT INTO pedido (
+    id_orcamento,
+    valor_contratado,
+    status_pedido,
+    observacoes
+) VALUES
+(2, 4200.00, 'aguardando_pagamento','Orçamento aprovado. Aguardando confirmação do pagamento.'),
+(4, 5000.00, 'confirmado','Pedido confirmado após aprovação do pagamento.');
+
+INSERT INTO orcamento_servico (id_orcamento, id_servico)
+VALUES
+(1, 1),
+(1, 3),
+(2, 2),
+(2, 4),
+(3, 1),
+(3, 5),
+(4, 3),
+(4, 4),
+(4, 5),
+(5, 1),
+(5, 2),
+(5, 3);
