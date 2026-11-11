@@ -863,29 +863,9 @@ INSERT INTO orcamento (
     prazo_estimado_dias,
     data_validade,
     status_orcamento
-)
-VALUES
-(NULL, 'Carlos Mendes', 'Edifício Central',
- 'carlos@edificiocentral.com.br', '(11) 98888-1001',
- 5, 20, 35, 'Instalação de monitoramento de temperatura e energia.',
- 3300.00, 0.00, 3300.00, 20, '2026-12-10', 'enviado'),
-
-(NULL, 'Mariana Oliveira', 'Residencial Jardim',
- 'mariana@residencialjardim.com.br', '(11) 98888-1002',
- 8, 40, 60, 'Implantação de controle de iluminação e acesso.',
- 4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
-
-(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa',
- 'roberto@empresarialalfa.com.br', '(11) 98888-1003',
- 3, 15, 25, 'Monitoramento de temperatura e dispositivos.',
- 2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
-
-(NULL, 'Fernanda Costa', 'Shopping Nova Era',
- 'fernanda@shoppingnovaera.com.br', '(11) 98888-1004',
- 6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.',
- 5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
-
-(NULL, 'Lucas Ferreira', 'Hotel Bela Vista',
- 'lucas@hotelbelavista.com.br', '(11) 98888-1005',
- 4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.',
- 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
+) VALUES
+(NULL, 'Carlos Mendes', 'Edifício Central', 'carlos@edificiocentral.com.br', '(11) 98888-1001', 5, 20, 35, 'Instalação de monitoramento de temperatura e energia.', 3300.00, 0.00, 3300.00, 20, '2026-12-10', 'enviado'),
+(NULL, 'Mariana Oliveira', 'Residencial Jardim','mariana@residencialjardim.com.br', '(11) 98888-1002',8, 40, 60, 'Implantação de controle de iluminação e acesso.',4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
+(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa','roberto@empresarialalfa.com.br', '(11) 98888-1003',3, 15, 25, 'Monitoramento de temperatura e dispositivos.',2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
+(NULL, 'Fernanda Costa', 'Shopping Nova Era','fernanda@shoppingnovaera.com.br', '(11) 98888-1004',6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.',5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
+(NULL, 'Lucas Ferreira', 'Hotel Bela Vista','lucas@hotelbelavista.com.br', '(11) 98888-1005',4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.', 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
