@@ -53,7 +53,6 @@ CREATE TABLE usuario (
     perfil ENUM(
         'administrador',
         'manutencao',
-        'secretaria',
         'porteiro',
         'visitante'
     ) NOT NULL DEFAULT 'visitante',
