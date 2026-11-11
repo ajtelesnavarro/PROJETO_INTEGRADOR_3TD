@@ -6,6 +6,7 @@ import * as AmbienteService from '../services/recursos/ambienteService.js';
 import * as OcorrenciaService from '../services/recursos/ocorrenciaService.js';
 import * as AcessoService from '../services/recursos/acessoService.js';
 import { validarPaginacao } from '../services/recursos/validacaoService.js';
+import * as LeituraService from '../services/recursos/leituraService.js';
 
 // Serviços disponíveis por recurso
 const servicos = {
@@ -158,4 +159,71 @@ export function excluir(nome) {
             return responderErro(erro, res, next);
         }
     };
+}
+
+// 6. Listagem de leituras
+export function listarLeituras(req, res, next) {
+    return (async () => {
+        try {
+            const paginacao = validarPaginacao(req.query);
+
+            const filtros = { ...req.query };
+            delete filtros.pagina;
+            delete filtros.limite;
+
+            const resultado = await LeituraService.listar(
+                filtros,
+                paginacao
+            );
+
+            return res.status(200).json({
+                sucesso: true,
+                dados: resultado.dados,
+                paginacao: {
+                    pagina: paginacao.pagina,
+                    limite: paginacao.limite,
+                    total: resultado.total,
+                    totalPaginas: Math.ceil(
+                        resultado.total / paginacao.limite
+                    )
+                }
+            });
+        } catch (erro) {
+            return responderErro(erro, res, next);
+        }
+    })();
+}
+
+// 7. Busca de leitura por tipo e ID
+export async function buscarLeitura(req, res, next) {
+    try {
+        const resultado = await LeituraService.buscar(
+            req.params.tipo,
+            req.params.id
+        );
+
+        return res.status(200).json({
+            sucesso: true,
+            dados: resultado
+        });
+    } catch (erro) {
+        return responderErro(erro, res, next);
+    }
+}
+
+// 8. Criação de leitura
+export async function criarLeitura(req, res, next) {
+    try {
+        const resultado = await LeituraService.criar(
+            req.params.tipo,
+            req.body
+        );
+
+        return res.status(201).json({
+            sucesso: true,
+            dados: resultado
+        });
+    } catch (erro) {
+        return responderErro(erro, res, next);
+    }
 }

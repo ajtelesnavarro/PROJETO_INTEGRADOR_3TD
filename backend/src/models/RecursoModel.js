@@ -284,12 +284,6 @@ export async function criarLeitura(tipo, dados) {
     }
 
     if (config.tipo === 'energia') {
-        if (!dados.tarifa_id) {
-            throw new TypeError(
-                'A tarifa de energia Ã© obrigatÃ³ria para registrar consumo.'
-            );
-        }
-
         const [res] = await pool.query(
             `INSERT INTO historico_energia
                 (id_dispositivo, id_tarifa, consumo_kwh,
@@ -297,14 +291,14 @@ export async function criarLeitura(tipo, dados) {
              VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 dados.dispositivo_id,
-                dados.tarifa_id,
+                dados.tarifa_id ?? null,
                 dados.valor,
                 dados.data_hora,
-                dados.potencia_kw ?? null,
+                dados.potencia_kw,
                 dados.qualidade_medicao ?? null
             ]
         );
-
+    
         resultado = res;
     }
 

@@ -103,3 +103,36 @@ for (const recurso of rotas) {
 
     recursosRouter.use(`/${recurso.nome}`, router);
 }
+
+// Rotas de leituras dos sensores
+const leiturasRouter = express.Router();
+
+// Permissões para registrar leituras
+const escritaLeituras = autorizarPerfis(
+    'administrador',
+    'manutencao'
+);
+
+// Consultar todas as leituras
+leiturasRouter.get(
+    '/',
+    consulta,
+    Controller.listarLeituras
+);
+
+// Buscar uma leitura específica
+leiturasRouter.get(
+    '/:tipo/:id',
+    consulta,
+    Controller.buscarLeitura
+);
+
+// Registrar uma nova leitura
+leiturasRouter.post(
+    '/:tipo',
+    escritaLeituras,
+    Controller.criarLeitura
+);
+
+// Disponibilizar as rotas
+recursosRouter.use('/leituras', leiturasRouter);
