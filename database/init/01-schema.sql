@@ -597,6 +597,24 @@ CREATE INDEX idx_hist_ocorrencia_data ON historico_ocorrencia(data_historico_oco
 
 USE db_lumora;
 
+INSERT INTO usuario
+(id_usuario, id_predio, nome, email, senha_hash, telefone, perfil, cpf, foto, data_nascimento, ativo)
+VALUES
+(1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
+(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
+(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'secretaria', '12345678904', NULL, '1992-11-17', 'ativo'),
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'visitante', '12345678905', NULL, '2000-06-25', 'ativo');
+
+INSERT INTO ambiente
+(id_ambiente, id_andar, id_setor, nome, localizacao, capacidade_maxima, horario_abertura, horario_fechamento)
+VALUES
+(1, 1, 1, 'Recepcao', 'Proximo a entrada principal', 20, '07:00:00', '19:00:00'),
+(2, 2, 2, 'Sala de reunioes A', 'Ala norte', 12, '08:00:00', '20:00:00'),
+(3, 3, 3, 'Sala de atendimento', 'Ao lado dos elevadores', 15, '08:00:00', '18:00:00'),
+(4, 4, 4, 'Escritorio administrativo', 'Ala leste', 30, '07:00:00', '19:00:00'),
+(5, 5, 5, 'Laboratorio de tecnologia', 'Area restrita', 18, '08:00:00', '22:00:00');
+
 INSERT INTO predio
 (id_predio, nome_predio, cep, logradouro, numero, complemento, bairro, cidade, estado)
 VALUES
@@ -792,69 +810,23 @@ VALUES
 
 INSERT INTO servico (nome_servico, descricao, valor_base)
 VALUES
-('monitoramento_temperatura',
- 'Monitoramento da temperatura dos ambientes e identificação de alterações fora dos limites configurados.',
- 1500.00),
-
-('controle_iluminacao',
- 'Monitoramento dos níveis de iluminação dos ambientes conforme os limites definidos.',
- 2000.00),
-
-('monitoramento_energia',
- 'Acompanhamento do consumo e da potência elétrica, com estimativa de custos de energia.',
- 1800.00),
-
-('controle_acesso',
- 'Gerenciamento de credenciais, permissões e registros de entrada e saída dos ambientes.',
- 2500.00),
-
-('monitoramento_dispositivos',
- 'Acompanhamento do funcionamento e do status dos dispositivos instalados no prédio.',
- 1200.00);
+('monitoramento_temperatura', 'Monitoramento da temperatura dos ambientes e identificação de alterações fora dos limites configurados.', 1500.00),
+('controle_iluminacao', 'Monitoramento dos níveis de iluminação dos ambientes conforme os limites definidos.', 2000.00),
+('monitoramento_energia', 'Acompanhamento do consumo e da potência elétrica, com estimativa de custos de energia.', 1800.00),
+('controle_acesso', 'Gerenciamento de credenciais, permissões e registros de entrada e saída dos ambientes.', 2500.00),
+('monitoramento_dispositivos', 'Acompanhamento do funcionamento e do status dos dispositivos instalados no prédio.', 1200.00);
 
 INSERT INTO orcamento (
-    id_usuario,
-    nome_responsavel,
-    nome_empresa,
-    email,
-    telefone,
-    quantidade_andares,
-    quantidade_ambientes,
-    quantidade_dispositivos,
-    descricao,
-    valor_subtotal,
-    valor_desconto,
-    valor_total,
-    prazo_estimado_dias,
-    data_validade,
-    status_orcamento
+    id_usuario, nome_responsavel, nome_empresa, email, telefone,
+    quantidade_andares, quantidade_ambientes, quantidade_dispositivos,
+    descricao, valor_subtotal, valor_desconto, valor_total,
+    prazo_estimado_dias, data_validade, status_orcamento
 ) VALUES
 (NULL, 'Carlos Mendes', 'Edifício Central', 'carlos@edificiocentral.com.br', '(11) 98888-1001', 5, 20, 35, 'Instalação de monitoramento de temperatura e energia.', 3300.00, 0.00, 3300.00, 20, '2026-12-10', 'enviado'),
-(NULL, 'Mariana Oliveira', 'Residencial Jardim','mariana@residencialjardim.com.br', '(11) 98888-1002',8, 40, 60, 'Implantação de controle de iluminação e acesso.',4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
-(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa','roberto@empresarialalfa.com.br', '(11) 98888-1003',3, 15, 25, 'Monitoramento de temperatura e dispositivos.',2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
-(NULL, 'Fernanda Costa', 'Shopping Nova Era','fernanda@shoppingnovaera.com.br', '(11) 98888-1004',6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.',5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
-(NULL, 'Lucas Ferreira', 'Hotel Bela Vista','lucas@hotelbelavista.com.br', '(11) 98888-1005',4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.', 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
-
-
-INSERT INTO pagamento (
-    id_pedido,
-    valor_pago,
-    metodo_pagamento,
-    status_pagamento,
-    codigo_transacao,
-    data_pagamento
-) VALUES
-(1, 4200.00, 'pix', 'pendente', NULL, NULL),
-(2, 5000.00, 'cartao_credito', 'aprovado','LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
-
-INSERT INTO pedido (
-    id_orcamento,
-    valor_contratado,
-    status_pedido,
-    observacoes
-) VALUES
-(2, 4200.00, 'aguardando_pagamento','Orçamento aprovado. Aguardando confirmação do pagamento.'),
-(4, 5000.00, 'confirmado','Pedido confirmado após aprovação do pagamento.');
+(NULL, 'Mariana Oliveira', 'Residencial Jardim', 'mariana@residencialjardim.com.br', '(11) 98888-1002', 8, 40, 60, 'Implantação de controle de iluminação e acesso.', 4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
+(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa', 'roberto@empresarialalfa.com.br', '(11) 98888-1003', 3, 15, 25, 'Monitoramento de temperatura e dispositivos.', 2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
+(NULL, 'Fernanda Costa', 'Shopping Nova Era', 'fernanda@shoppingnovaera.com.br', '(11) 98888-1004', 6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.', 5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
+(NULL, 'Lucas Ferreira', 'Hotel Bela Vista', 'lucas@hotelbelavista.com.br', '(11) 98888-1005', 4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.', 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
 
 INSERT INTO orcamento_servico (id_orcamento, id_servico)
 VALUES
@@ -862,6 +834,26 @@ VALUES
 (1, 3),
 (2, 2),
 (2, 4),
+(3, 1),
+(3, 5),
+(4, 3),
+(4, 4),
+(4, 5),
+(5, 1),
+(5, 2),
+(5, 3);
+
+INSERT INTO pedido (id_orcamento, valor_contratado, status_pedido, observacoes)
+VALUES
+(2, 4200.00, 'aguardando_pagamento', 'Orçamento aprovado. Aguardando confirmação do pagamento.'),
+(4, 5000.00, 'confirmado', 'Pedido confirmado após aprovação do pagamento.');
+
+INSERT INTO pagamento (
+    id_pedido, valor_pago, metodo_pagamento,
+    status_pagamento, codigo_transacao, data_pagamento
+) VALUES
+(1, 4200.00, 'pix', 'pendente', NULL, NULL),
+(2, 5000.00, 'cartao_credito', 'aprovado', 'LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
 (3, 1),
 (3, 5),
 (4, 3),
