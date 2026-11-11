@@ -5,10 +5,7 @@ CREATE DATABASE IF NOT EXISTS db_lumora
 
 USE db_lumora;
 
-
--- =========================================
 -- 1. PREDIO
--- =========================================
 
 CREATE TABLE predio (
     id_predio INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -24,10 +21,7 @@ CREATE TABLE predio (
     INDEX idx_cep (cep)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 2. ANDAR
--- =========================================
 
 CREATE TABLE andar (
     id_andar INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,10 +38,7 @@ CREATE TABLE andar (
         UNIQUE (id_predio, numero_andar)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 3. USUARIO
--- =========================================
 
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,10 +74,7 @@ CREATE TABLE usuario (
         REFERENCES predio(id_predio)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 4. SETOR
--- =========================================
 
 CREATE TABLE setor (
     id_setor INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,10 +98,7 @@ CREATE TABLE setor (
         UNIQUE (id_setor, id_andar)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 5. AMBIENTE
--- =========================================
 
 CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,10 +128,7 @@ CREATE TABLE ambiente (
         CHECK (horario_fechamento > horario_abertura)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 6. EQUIPE
--- =========================================
 
 CREATE TABLE equipe (
     id_equipe INT AUTO_INCREMENT PRIMARY KEY,
@@ -168,9 +150,7 @@ CREATE TABLE equipe (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 7. EQUIPE_USUARIO
--- =========================================
 
 CREATE TABLE equipe_usuario (
     id_equipe_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -196,10 +176,7 @@ CREATE TABLE equipe_usuario (
     )
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 8. DISPOSITIVO
--- =========================================
 
 CREATE TABLE dispositivo (
     id_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
@@ -246,10 +223,7 @@ CREATE TABLE dispositivo (
         REFERENCES usuario(id_usuario)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 9. TEMPERATURA
--- =========================================
 
 CREATE TABLE temperatura (
     id_temperatura INT AUTO_INCREMENT PRIMARY KEY,
@@ -273,10 +247,8 @@ CREATE TABLE temperatura (
         CHECK (temperatura_minima <= temperatura_maxima)
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 10. ILUMINACAO
--- =========================================
+
 
 CREATE TABLE iluminacao (
     id_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
@@ -303,10 +275,7 @@ CREATE TABLE iluminacao (
         )
 ) ENGINE=InnoDB;
 
-
--- =========================================
 -- 11. ENERGIA
--- =========================================
 
 CREATE TABLE energia (
     id_energia INT AUTO_INCREMENT PRIMARY KEY,
@@ -338,9 +307,7 @@ CREATE TABLE energia (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 12. TARIFA_ENERGIA
--- =========================================
 
 CREATE TABLE tarifa_energia (
     id_tarifa INT AUTO_INCREMENT PRIMARY KEY,
@@ -369,9 +336,7 @@ CREATE TABLE tarifa_energia (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 13. HISTORICO_TEMPERATURA
--- =========================================
 
 CREATE TABLE historico_temperatura (
     id_historico_temperatura INT AUTO_INCREMENT PRIMARY KEY,
@@ -392,9 +357,7 @@ CREATE TABLE historico_temperatura (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 14. HISTORICO_ILUMINACAO
--- =========================================
 
 CREATE TABLE historico_iluminacao (
     id_historico_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
@@ -411,9 +374,7 @@ CREATE TABLE historico_iluminacao (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 15. HISTORICO_ENERGIA
--- =========================================
 
 CREATE TABLE historico_energia (
     id_historico_energia INT AUTO_INCREMENT PRIMARY KEY,
@@ -453,9 +414,7 @@ CREATE TABLE historico_energia (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 16. CREDENCIAIS_ACESSO
--- =========================================
 
 CREATE TABLE credenciais_acesso (
     id_credencial INT AUTO_INCREMENT PRIMARY KEY,
@@ -487,9 +446,7 @@ CREATE TABLE credenciais_acesso (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 17. PERMISSAO_ACESSO
--- =========================================
 
 CREATE TABLE permissao_acesso (
     id_permissao INT AUTO_INCREMENT PRIMARY KEY,
@@ -532,9 +489,7 @@ CREATE TABLE permissao_acesso (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 18. EVENTOS_ACESSOS
--- =========================================
 
 CREATE TABLE eventos_acessos (
     id_evento INT AUTO_INCREMENT PRIMARY KEY,
@@ -589,9 +544,7 @@ CREATE TABLE eventos_acessos (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 19. RECLAMACOES
--- =========================================
 
 CREATE TABLE reclamacoes (
     id_reclamacao INT AUTO_INCREMENT PRIMARY KEY,
@@ -649,9 +602,7 @@ CREATE TABLE reclamacoes (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 20. OCORRENCIA
--- =========================================
 
 CREATE TABLE ocorrencia (
     id_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
@@ -697,9 +648,7 @@ CREATE TABLE ocorrencia (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 21. HISTORICO_OCORRENCIA
--- =========================================
 
 CREATE TABLE historico_ocorrencia (
     id_historico_ocorrencia INT AUTO_INCREMENT PRIMARY KEY,
@@ -732,9 +681,7 @@ CREATE TABLE historico_ocorrencia (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 22. HISTORICO_DISPOSITIVO
--- =========================================
 
 CREATE TABLE historico_dispositivo (
     id_historico_dispositivo INT AUTO_INCREMENT PRIMARY KEY,
@@ -780,9 +727,7 @@ CREATE TABLE historico_dispositivo (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 23. SERVICO
--- =========================================
 
 CREATE TABLE servico (
     id_servico INT AUTO_INCREMENT PRIMARY KEY,
@@ -806,9 +751,7 @@ CREATE TABLE servico (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 24. ORCAMENTO
--- =========================================
 
 CREATE TABLE orcamento (
     id_orcamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -878,9 +821,7 @@ CREATE TABLE orcamento (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 25. ORCAMENTO_SERVICO
--- =========================================
 
 CREATE TABLE orcamento_servico (
     id_orcamento INT NOT NULL,
@@ -902,9 +843,7 @@ CREATE TABLE orcamento_servico (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 26. PEDIDO
--- =========================================
 
 CREATE TABLE pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
@@ -930,9 +869,7 @@ CREATE TABLE pedido (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 27. PAGAMENTO
--- =========================================
 
 CREATE TABLE pagamento (
     id_pagamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -966,9 +903,7 @@ CREATE TABLE pagamento (
 ) ENGINE=InnoDB;
 
 
--- =========================================
 -- 28. INDICES
--- =========================================
 
 CREATE INDEX idx_dispositivo_status
     ON dispositivo(status_dispositivo);
@@ -999,11 +934,6 @@ CREATE INDEX idx_reclamacao_status
 
 CREATE INDEX idx_hist_ocorrencia_data
     ON historico_ocorrencia(data_historico_ocorrencia);
-
-
--- =========================================
--- 29. DADOS INICIAIS
--- =========================================
 
 
 -- PREDIO
@@ -1264,10 +1194,7 @@ VALUES
 (5, 5, 'ativo', '2026-11-04 10:30:00', '2026-11-04 08:00:00', NULL, 'Operacao normal', 0.0090, 0.01, 'Sensor ativo no laboratorio'),
 (6, 4, 'ativo', '2026-11-03 16:30:00', '2026-11-03 16:30:00', NULL, 'Retorno da manutencao', 0.0120, 0.01, 'Dispositivo voltou ao funcionamento normal');
 
-
--- =========================================
--- 30. DADOS COMERCIAIS
--- =========================================
+-- INSERT INTO ( REGISTROS )
 
 
 -- SERVICO
