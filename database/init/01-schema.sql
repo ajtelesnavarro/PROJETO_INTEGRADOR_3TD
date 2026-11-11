@@ -38,7 +38,6 @@ CREATE TABLE usuario (
     email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     telefone VARCHAR(20) NULL,
-    unidade VARCHAR(100) NULL,
     perfil ENUM(
         'administrador',
         'manutencao',
