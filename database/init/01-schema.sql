@@ -46,10 +46,12 @@ CREATE TABLE usuario (
         'visitante'
     ) NOT NULL DEFAULT 'visitante',
     cpf CHAR(11) NOT NULL,
-    rg VARCHAR(20) NULL,
     foto VARCHAR(255) NULL,
     data_nascimento DATE NULL,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    ativo ENUM(
+    'ativo',
+    'inativo'
+    ) NOT NULL DEFAULT 'ativo',
 
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf),
@@ -81,7 +83,6 @@ CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
     id_andar INT NOT NULL,
     id_setor INT NULL,
-    requer_reserva BOOLEAN NOT NULL DEFAULT FALSE,
     nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NULL,
     capacidade_maxima INT NULL,
@@ -482,7 +483,6 @@ CREATE TABLE orcamento (
     nome_empresa VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL,
     telefone VARCHAR(20) NOT NULL,
-    endereco_empresa VARCHAR(255) NULL,
     quantidade_andares INT NOT NULL,
     quantidade_ambientes INT NOT NULL,
     quantidade_dispositivos INT NULL,
