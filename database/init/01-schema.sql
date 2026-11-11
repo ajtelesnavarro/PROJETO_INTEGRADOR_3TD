@@ -21,6 +21,7 @@ CREATE TABLE predio (
     INDEX idx_cep (cep)
 ) ENGINE=InnoDB;
 
+
 -- 2. ANDAR
 
 CREATE TABLE andar (
@@ -37,6 +38,7 @@ CREATE TABLE andar (
     CONSTRAINT uk_andar_predio_numero
         UNIQUE (id_predio, numero_andar)
 ) ENGINE=InnoDB;
+
 
 -- 3. USUARIO
 
@@ -74,6 +76,7 @@ CREATE TABLE usuario (
         REFERENCES predio(id_predio)
 ) ENGINE=InnoDB;
 
+
 -- 4. SETOR
 
 CREATE TABLE setor (
@@ -97,6 +100,7 @@ CREATE TABLE setor (
     CONSTRAINT uk_setor_id_andar
         UNIQUE (id_setor, id_andar)
 ) ENGINE=InnoDB;
+
 
 -- 5. AMBIENTE
 
@@ -127,6 +131,7 @@ CREATE TABLE ambiente (
     CONSTRAINT chk_horario_ambiente
         CHECK (horario_fechamento > horario_abertura)
 ) ENGINE=InnoDB;
+
 
 -- 6. EQUIPE
 
@@ -176,6 +181,7 @@ CREATE TABLE equipe_usuario (
     )
 ) ENGINE=InnoDB;
 
+
 -- 8. DISPOSITIVO
 
 CREATE TABLE dispositivo (
@@ -192,7 +198,6 @@ CREATE TABLE dispositivo (
 
     fabricante VARCHAR(100) NULL,
     modelo VARCHAR(100) NULL,
-    identificador VARCHAR(100) NOT NULL,
 
     unidade_medida ENUM(
         'kWh',
@@ -210,9 +215,6 @@ CREATE TABLE dispositivo (
         'inativo',
         'offline'
     ) NOT NULL DEFAULT 'ativo',
-
-    CONSTRAINT uk_dispositivo_identificador
-        UNIQUE (identificador),
 
     CONSTRAINT fk_dispositivo_ambiente
         FOREIGN KEY (id_ambiente)
@@ -247,8 +249,8 @@ CREATE TABLE temperatura (
         CHECK (temperatura_minima <= temperatura_maxima)
 ) ENGINE=InnoDB;
 
--- 10. ILUMINACAO
 
+-- 10. ILUMINACAO
 
 CREATE TABLE iluminacao (
     id_iluminacao INT AUTO_INCREMENT PRIMARY KEY,
@@ -274,6 +276,7 @@ CREATE TABLE iluminacao (
             AND iluminacao_minima <= iluminacao_maxima
         )
 ) ENGINE=InnoDB;
+
 
 -- 11. ENERGIA
 
@@ -936,6 +939,9 @@ CREATE INDEX idx_hist_ocorrencia_data
     ON historico_ocorrencia(data_historico_ocorrencia);
 
 
+-- REGISTROS
+
+
 -- PREDIO
 
 INSERT INTO predio
@@ -1017,13 +1023,13 @@ VALUES
 -- DISPOSITIVO
 
 INSERT INTO dispositivo
-(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, identificador, unidade_medida, potencia_nominal_kw, data_dispositivo, status_dispositivo)
+(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, status_dispositivo)
 VALUES
-(1, 1, 2, 'Sensor de temperatura da recepcao', 'temperatura', 'SensTech', 'ST-T100', 'LUM-SEN-TEMP-001', '°C', 0.0120, '2024-05-10', 'ativo'),
-(2, 2, 2, 'Sensor de iluminacao da sala A', 'iluminacao', 'LumenPro', 'LP-200', 'LUM-SEN-LUX-002', 'lux', 0.0080, '2024-05-12', 'ativo'),
-(3, 3, 2, 'Medidor de energia do atendimento', 'energia', 'EnerMeter', 'EM-300', 'LUM-MED-ENE-003', 'kWh', 0.0150, '2024-06-01', 'instavel'),
-(4, 4, 2, 'Sensor de temperatura do escritorio', 'temperatura', 'SensTech', 'ST-T100', 'LUM-SEN-TEMP-004', '°C', 0.0120, '2024-06-15', 'ativo'),
-(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'iluminacao', 'LumenPro', 'LP-250', 'LUM-SEN-LUX-005', 'lux', 0.0090, '2024-07-01', 'ativo');
+(1, 1, 2, 'Sensor de temperatura da recepcao', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-05-10', 'ativo'),
+(2, 2, 2, 'Sensor de iluminacao da sala A', 'iluminacao', 'LumenPro', 'LP-200', 'lux', 0.0080, '2024-05-12', 'ativo'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'energia', 'EnerMeter', 'EM-300', 'kWh', 0.0150, '2024-06-01', 'instavel'),
+(4, 4, 2, 'Sensor de temperatura do escritorio', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-06-15', 'ativo'),
+(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'iluminacao', 'LumenPro', 'LP-250', 'lux', 0.0090, '2024-07-01', 'ativo');
 
 
 -- TEMPERATURA
@@ -1193,8 +1199,6 @@ VALUES
 (4, 4, 'instavel', '2026-11-03 14:00:00', '2026-11-03 14:00:00', '2026-11-03 16:30:00', 'Leituras inconsistentes', 0.0120, 0.01, 'Dispositivo apresentou leituras inconsistentes antes da manutencao'),
 (5, 5, 'ativo', '2026-11-04 10:30:00', '2026-11-04 08:00:00', NULL, 'Operacao normal', 0.0090, 0.01, 'Sensor ativo no laboratorio'),
 (6, 4, 'ativo', '2026-11-03 16:30:00', '2026-11-03 16:30:00', NULL, 'Retorno da manutencao', 0.0120, 0.01, 'Dispositivo voltou ao funcionamento normal');
-
--- INSERT INTO ( REGISTROS )
 
 
 -- SERVICO
