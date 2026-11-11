@@ -84,10 +84,10 @@ CREATE TABLE ambiente (
     id_andar INT NOT NULL,
     id_setor INT NULL,
     nome VARCHAR(100) NOT NULL,
-    localizacao VARCHAR(255) NULL,
+    localizacao VARCHAR(255) NOT NULL,
     capacidade_maxima INT NULL,
-    horario_abertura TIME NULL,
-    horario_fechamento TIME NULL,
+    horario_abertura TIME NOT NULL,
+    horario_fechamento TIME NOT NULL,
 
     CONSTRAINT fk_ambiente_andar
         FOREIGN KEY (id_andar) REFERENCES andar(id_andar),
