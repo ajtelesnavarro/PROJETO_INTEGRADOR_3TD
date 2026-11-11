@@ -473,8 +473,18 @@ CREATE TABLE historico_dispositivo (
         CHECK (custo_estimado IS NULL OR custo_estimado >= 0)
 ) ENGINE=InnoDB;
 
-
-USE db_lumora;
+CREATE TABLE servico (
+    id_servico INT AUTO_INCREMENT PRIMARY KEY,
+    nome_servico ENUM(
+        'monitoramento_temperatura',
+        'controle_iluminacao',
+        'monitoramento_energia',
+        'controle_acesso',
+        'monitoramento_dispositivos'
+    ) NOT NULL,
+    valor_base DECIMAL(12,2) NOT NULL,
+    descricao VARCHAR(255) NULL
+);
 
 CREATE TABLE orcamento (
     id_orcamento INT AUTO_INCREMENT PRIMARY KEY,
@@ -486,7 +496,6 @@ CREATE TABLE orcamento (
     quantidade_andares INT NOT NULL,
     quantidade_ambientes INT NOT NULL,
     quantidade_dispositivos INT NULL,
-    servicos_desejados TEXT NOT NULL,
     descricao TEXT NULL,
     valor_subtotal DECIMAL(12,2) NULL,
     valor_desconto DECIMAL(12,2) DEFAULT 0.00,
@@ -507,6 +516,19 @@ CREATE TABLE orcamento (
         FOREIGN KEY (id_usuario)
         REFERENCES usuario(id_usuario)
         ON DELETE SET NULL
+);
+
+CREATE TABLE orcamento_servico (
+    id_orcamento INT NOT NULL,
+    id_servico INT NOT NULL,
+
+    PRIMARY KEY (id_orcamento, id_servico),
+
+    FOREIGN KEY (id_orcamento)
+        REFERENCES orcamento(id_orcamento),
+
+    FOREIGN KEY (id_servico)
+        REFERENCES servico(id_servico)
 );
 
 CREATE TABLE pedido (
@@ -767,3 +789,103 @@ VALUES
 (4, 4, 'instavel', '2026-11-03 14:00:00', '2026-11-03 14:00:00', '2026-11-03 16:30:00', 'Leituras inconsistentes', 0.0120, 0.01, 'Dispositivo apresentou leituras inconsistentes antes da manutencao'),
 (5, 5, 'ativo', '2026-11-04 10:30:00', '2026-11-04 08:00:00', NULL, 'Operacao normal', 0.0090, 0.01, 'Sensor ativo no laboratorio'),
 (6, 4, 'ativo', '2026-11-03 16:30:00', '2026-11-03 16:30:00', NULL, 'Retorno da manutencao', 0.0120, 0.01, 'Dispositivo voltou ao funcionamento normal');
+
+INSERT INTO pagamento (
+    id_pedido,
+    valor_pago,
+    metodo_pagamento,
+    status_pagamento,
+    codigo_transacao,
+    data_pagamento
+) VALUES
+(1, 4200.00, 'pix', 'pendente', NULL, NULL),
+(2, 5000.00, 'cartao_credito', 'aprovado','LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
+
+INSERT INTO pedido (
+    id_orcamento,
+    valor_contratado,
+    status_pedido,
+    observacoes
+) VALUES
+(2, 4200.00, 'aguardando_pagamento','Orçamento aprovado. Aguardando confirmação do pagamento.'),
+(4, 5000.00, 'confirmado','Pedido confirmado após aprovação do pagamento.');
+
+INSERT INTO orcamento_servico (id_orcamento, id_servico)
+VALUES
+(1, 1),
+(1, 3),
+(2, 2),
+(2, 4),
+(3, 1),
+(3, 5),
+(4, 3),
+(4, 4),
+(4, 5),
+(5, 1),
+(5, 2),
+(5, 3);
+
+INSERT INTO servico (nome_servico, descricao, valor_base)
+VALUES
+('monitoramento_temperatura',
+ 'Monitoramento da temperatura dos ambientes e identificação de alterações fora dos limites configurados.',
+ 1500.00),
+
+('controle_iluminacao',
+ 'Monitoramento dos níveis de iluminação dos ambientes conforme os limites definidos.',
+ 2000.00),
+
+('monitoramento_energia',
+ 'Acompanhamento do consumo e da potência elétrica, com estimativa de custos de energia.',
+ 1800.00),
+
+('controle_acesso',
+ 'Gerenciamento de credenciais, permissões e registros de entrada e saída dos ambientes.',
+ 2500.00),
+
+('monitoramento_dispositivos',
+ 'Acompanhamento do funcionamento e do status dos dispositivos instalados no prédio.',
+ 1200.00);
+
+INSERT INTO orcamento (
+    id_usuario,
+    nome_responsavel,
+    nome_empresa,
+    email,
+    telefone,
+    quantidade_andares,
+    quantidade_ambientes,
+    quantidade_dispositivos,
+    descricao,
+    valor_subtotal,
+    valor_desconto,
+    valor_total,
+    prazo_estimado_dias,
+    data_validade,
+    status_orcamento
+)
+VALUES
+(NULL, 'Carlos Mendes', 'Edifício Central',
+ 'carlos@edificiocentral.com.br', '(11) 98888-1001',
+ 5, 20, 35, 'Instalação de monitoramento de temperatura e energia.',
+ 3300.00, 0.00, 3300.00, 20, '2026-12-10', 'enviado'),
+
+(NULL, 'Mariana Oliveira', 'Residencial Jardim',
+ 'mariana@residencialjardim.com.br', '(11) 98888-1002',
+ 8, 40, 60, 'Implantação de controle de iluminação e acesso.',
+ 4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
+
+(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa',
+ 'roberto@empresarialalfa.com.br', '(11) 98888-1003',
+ 3, 15, 25, 'Monitoramento de temperatura e dispositivos.',
+ 2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
+
+(NULL, 'Fernanda Costa', 'Shopping Nova Era',
+ 'fernanda@shoppingnovaera.com.br', '(11) 98888-1004',
+ 6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.',
+ 5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
+
+(NULL, 'Lucas Ferreira', 'Hotel Bela Vista',
+ 'lucas@hotelbelavista.com.br', '(11) 98888-1005',
+ 4, 30, 45, 'Monitoramento de temperatura, iluminação e energia.',
+ 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
