@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
             <div className="footer-column"><b>Comece por aqui</b><a href="/orcamento">Solicitar orçamento</a><a href="/login">Acessar plataforma</a></div>
             <div className="footer-note"><span className="footer-status"><i/> TECNOLOGIA PARA EDIFÍCIOS</span><p>Uma operação mais conectada começa com uma boa conversa.</p><a href="/orcamento">Fale com a Lumora ↗</a></div>
           </div>
-          <div className="container footer-bottom"><span>© {new Date().getFullYear()} Lumora. Todos os direitos reservados.</span><span>Smart buildings. Better decisions.</span></div>
+          <div className="container footer-bottom"><span>© {new Date().getFullYear()} Lumora. Todos os direitos reservados para um projeto exclusivo de cunho educativo do ©SENAI .</span><span>Tema: SmartBuildings.</span></div>
         </footer>
       </body>
     </html>

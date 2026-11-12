@@ -89,7 +89,7 @@ button,input,textarea,select {
     color:var(--blue)
 }
 .nav-cta {
-    font-size:11px;
+    font-size:13px;
     font-weight:800;
     background:var(--blue);
     color:#fff;
@@ -176,7 +176,7 @@ button,input,textarea,select {
     border:0;
     border-radius:7px;
     padding:14px 20px;
-    font-size:11px;
+    font-size:13px;
     font-weight:800;
     cursor:pointer
 }
@@ -266,7 +266,7 @@ button,input,textarea,select {
 }
 .live {
     margin-left:auto;
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     color:#84919b
 }
 .live b {
@@ -285,7 +285,7 @@ button,input,textarea,select {
     justify-content:space-between
 }
 .micro,.small-label {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1px;
     color:#91a0aa
 }
@@ -413,7 +413,7 @@ button,input,textarea,select {
     display:flex;
     align-items:center;
     gap:28px;
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     letter-spacing:2px;
     min-width:max-content
 }
@@ -424,7 +424,7 @@ button,input,textarea,select {
     padding:125px 0
 }
 .section-kicker {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:var(--aqua);
     letter-spacing:1.5px
 }
@@ -454,7 +454,7 @@ button,input,textarea,select {
 .under-link {
     display:inline-block;
     margin-top:30px;
-    font-size:11px;
+    font-size:13px;
     font-weight:800;
     color:var(--blue);
     border-bottom:1px solid #cad7dd;
@@ -506,7 +506,7 @@ button,input,textarea,select {
     color:#fff
 }
 .card-number {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:#94a4ae;
     position:absolute;
     top:24px;
@@ -573,7 +573,7 @@ button,input,textarea,select {
     bottom:25px
 }
 .bottom-copy span {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     color:#72ddd2;
     letter-spacing:1px
 }
@@ -599,7 +599,7 @@ button,input,textarea,select {
     color:var(--aqua)
 }
 .energy p,.incidents p {
-    font-size:11px;
+    font-size:13px;
     color:var(--muted);
     line-height:1.6
 }
@@ -759,7 +759,7 @@ button,input,textarea,select {
     color:var(--blue)
 }
 .layer>span {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:#a2afb7
 }
 .layer b {
@@ -942,7 +942,7 @@ button,input,textarea,select {
     padding-top:22px
 }
 .value span {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:#69dfd3
 }
 .value h3 {
@@ -958,7 +958,7 @@ button,input,textarea,select {
 }
 .audience {
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:2fr 3fr;
     gap:100px
 }
 .audience h2 {
@@ -972,7 +972,7 @@ button,input,textarea,select {
 .roles span {
     padding:18px;
     border:1px solid var(--line);
-    font-size:11px;
+    font-size:13px;
     font-weight:800;
     color:var(--blue);
     border-radius:7px
@@ -1149,7 +1149,7 @@ button,input,textarea,select {
     padding:17px 0
 }
 .quote-steps b {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:var(--aqua)
 }
 .quote-steps span {
@@ -1183,7 +1183,7 @@ button,input,textarea,select {
     margin:8px 0 0
 }
 .form-top>span {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     color:#9aa7af
 }
 .form-grid {
@@ -1622,7 +1622,7 @@ button,input,textarea,select {
     color:#fff
 }
 .about-image-copy span,.mission-card>span {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     letter-spacing:1.5px;
     color:#73e0d4
 }
@@ -1641,7 +1641,7 @@ button,input,textarea,select {
     gap:16px;
     align-items:center;
     color:#e5f2f4;
-    font:9px "DM Mono"
+    font:12px "DM Mono"
 }
 .about-image-note b {
     color:#71dfd4
@@ -1779,7 +1779,7 @@ button,input,textarea,select {
     box-shadow:0 18px 45px rgba(18,48,71,.08)
 }
 .platform-number {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:#9aa8b2
 }
 .platform-icon {
@@ -2008,12 +2008,12 @@ button,input,textarea,select {
     gap:13px
 }
 .footer-column b {
-    font-size:11px;
+    font-size:13px;
     color:#eaf4f5;
     margin-bottom:7px
 }
 .footer-column a,.footer-note>a {
-    font-size:11px;
+    font-size:13px;
     color:#a6bbc5;
     transition:color .2s
 }
@@ -2021,7 +2021,7 @@ button,input,textarea,select {
     color:#6be0d4
 }
 .footer-status {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1px;
     color:#6be0d4
 }
@@ -2132,7 +2132,7 @@ button,input,textarea,select {
     box-shadow:0 12px 35px rgba(18,48,71,.09);
     border-radius:9px;
     padding:13px 16px;
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:.7px;
     color:var(--blue)
 }
@@ -2203,7 +2203,7 @@ button,input,textarea,select {
     align-items:center;
     justify-content:space-between;
     color:#9baab3;
-    font:10px "DM Mono"
+    font:14px "DM Mono"
 }
 .solution-card-top i {
     font-style:normal;
@@ -2612,7 +2612,7 @@ button,input,textarea,select {
     flex-wrap:wrap
 }
 .tech-hero-foot span {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1px;
     color:#a7c0c9
 }
@@ -2732,7 +2732,7 @@ button,input,textarea,select {
 .network-caption {
     position:absolute;
     bottom:0;
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1.5px;
     color:#91b4bc
 }
@@ -2819,7 +2819,7 @@ button,input,textarea,select {
     font-size:25px
 }
 .layer-copy>span {
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1px;
     color:var(--aqua)
 }
@@ -2829,7 +2829,7 @@ button,input,textarea,select {
     margin:7px 0
 }
 .layer-copy p {
-    font-size:11px;
+    font-size:13px;
     line-height:1.8;
     color:var(--muted);
     margin:0;
@@ -2853,7 +2853,7 @@ button,input,textarea,select {
     display:flex;
     justify-content:space-between;
     gap:10px;
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     letter-spacing:1px;
     color:#b8d0d5
 }
@@ -2873,7 +2873,7 @@ button,input,textarea,select {
     border-bottom:1px solid rgba(255,255,255,.1)
 }
 .flow-step span {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:#5ed8cb
 }
 .flow-step b {
@@ -2944,7 +2944,7 @@ button,input,textarea,select {
     min-height:260px
 }
 .tech-pillars-grid article>span {
-    font:10px "DM Mono";
+    font:14px "DM Mono";
     color:var(--aqua)
 }
 .pillar-symbol {
@@ -3023,7 +3023,7 @@ button,input,textarea,select {
     border:1px solid #e1e9ec;
     border-radius:7px;
     padding:10px 13px;
-    font:9px "DM Mono";
+    font:12px "DM Mono";
     color:var(--blue);
     box-shadow:0 10px 25px rgba(18,48,71,.07)
 }
@@ -3064,7 +3064,7 @@ button,input,textarea,select {
     align-items:flex-start;
     padding:10px 0;
     color:var(--blue);
-    font-size:11px;
+    font-size:13px;
     font-weight:700;
     border-bottom:1px solid #e1e9ec
 }
