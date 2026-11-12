@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUMORA - Dispositivos e Sensores</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i data-lucide="building-2" class="logo-icon"></i>
+          <div>
+            <h2>LUMORA</h2>
+            <span>EDIFÍCIOS INTELIGENTES</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <span class="section-title">MENU PRINCIPAL</span>
+          <ul>
+            <li><a href="index.html"><i data-lucide="layout-dashboard"></i> Dashboard </a></li>
+            <li><a href="predio.html"><i data-lucide="building"></i> Prédios </a></li>
+            <li><a href="#"><i data-lucide="layers"></i> Ambientes </a></li>
+            <li class="active"><a href="dispositivos.html"><i data-lucide="cpu"></i> Dispositivos e Sensores </a></li>
+            <li><a href="leituras.html"><i data-lucide="activity"></i> Leituras </a></li>
+            <li><a href="controle_acessos.html"><i data-lucide="door-open"></i> Controle de Acessos </a></li>
+            <li><a href="ocorrencias.html"><i data-lucide="alert-triangle"></i> Ocorrências <span class="badge">5</span></a></li>
+            <li><a href="#"><i data-lucide="file-text"></i> Relatórios </a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <span class="section-title">ADMINISTRAÇÃO</span>
+          <ul>
+            <li><a href="usuario.html"><i data-lucide="users"></i> Usuários </a></li>
+            <li><a href="configuracoes.html"><i data-lucide="settings"></i> Configurações </a></li>
+            <li><a href="sobre.html"><i data-lucide="help-circle"></i> Sobre o Sistema </a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-item">
+          <span class="status-dot green"></span>
+          <span>Sistema operacional</span>
+          <span class="status-ms">API - 32 ms</span>
+        </div>
+        <div class="eco-mode">
+          <i data-lucide="leaf"></i>
+          <span>Modo sustentável</span>
+        </div>
+        <button class="cookie-btn">Gerenciar cookies ou desativar</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-header">
+        <div class="breadcrumb">
+          <span class="subtitle">MONITORAMENTO INTELIGENTE</span>
+          <h1 class="title">Dispositivos e Sensores</h1>
+        </div>
+
+        <div class="header-actions">
+          <div class="search-global">
+            <i data-lucide="search"></i>
+            <input type="text" placeholder="Buscar no sistema...">
+            <kbd>⌘ K</kbd>
+          </div>
+          <button class="icon-btn"><i data-lucide="bell"></i></button>
+          <div class="user-profile">
+            <div class="avatar">MC</div>
+            <div class="user-info">
+              <span class="user-name">Marina Costa</span>
+              <span class="user-role">Administrador</span>
+            </div>
+            <i data-lucide="chevron-down"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <div class="page-title-bar">
+          <div>
+            <h2>Dispositivos e Sensores</h2>
+            <p>Gerencie dispositivos, conectividade e manutenção preventiva.</p>
+          </div>
+          <button class="btn-primary">
+            <i data-lucide="plus"></i> Adicionar dispositivo
+          </button>
+        </div>
+
+        <div class="cards-grid">
+          <div class="card">
+            <span class="card-title">Dispositivos</span>
+            <div class="card-value">130</div>
+          </div>
+          <div class="card">
+            <span class="card-title">Online</span>
+            <div class="card-value">126</div>
+          </div>
+          <div class="card">
+            <span class="card-title">Offline</span>
+            <div class="card-value">04</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-actions">
+            <div class="search-table">
+              <i data-lucide="search"></i>
+              <input type="text" placeholder="Buscar em dispositivos e sensores...">
+            </div>
+            <button class="btn-secondary">
+              <i data-lucide="sliders-horizontal"></i> Filtros
+            </button>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>DISPOSITIVO</th>
+                <th>TIPO</th>
+                <th>AMBIENTE</th>
+                <th>STATUS</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-bold">TMP-A203</td>
+                <td class="text-muted">Temperatura</td>
+                <td class="text-muted">Lab. Eletrônica</td>
+                <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
+                <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+              </tr>
+              <tr>
+                <td class="font-bold">NRG-DC01</td>
+                <td class="text-muted">Energia</td>
+                <td class="text-muted">Data Center</td>
+                <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
+                <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+              </tr>
+              <tr>
+                <td class="font-bold">LUX-B108</td>
+                <td class="text-muted">Luminosidade</td>
+                <td class="text-muted">Sala 03</td>
+                <td><span class="tag-status amber"><span class="dot"></span> Atenção</span></td>
+                <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+              </tr>
+              <tr>
+                <td class="font-bold">ACC-P001</td>
+                <td class="text-muted">Acesso</td>
+                <td class="text-muted">Portaria principal</td>
+                <td><span class="tag-status green"><span class="dot"></span> Online</span></td>
+                <td class="text-right"><button class="btn-icon-table"><i data-lucide="more-horizontal"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="table-footer">
+            <span class="footer-info">Mostrando 4 registros</span>
+            <div class="pagination">
+              <button class="page-btn" disabled>Anterior</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">Próxima</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
