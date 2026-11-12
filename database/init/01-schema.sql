@@ -45,7 +45,7 @@ CREATE TABLE andar (
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     id_predio INT NOT NULL,
-    nome_usuario VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     telefone VARCHAR(20) NULL,
@@ -107,7 +107,7 @@ CREATE TABLE ambiente (
     id_ambiente INT AUTO_INCREMENT PRIMARY KEY,
     id_andar INT NOT NULL,
     id_setor INT NULL,
-    nome_ambiente VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
     localizacao VARCHAR(255) NOT NULL,
     capacidade_maxima INT NULL,
     horario_abertura TIME NOT NULL,
@@ -967,7 +967,7 @@ VALUES
 -- USUARIO
 
 INSERT INTO usuario
-(id_usuario, id_predio, nome_usuario, email, senha_hash, telefone, perfil, cpf, foto, data_nascimento, ativo)
+(id_usuario, id_predio, nome, email, senha_hash, telefone, perfil, cpf, foto, data_nascimento, ativo)
 VALUES
 (1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
 (2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
@@ -991,7 +991,7 @@ VALUES
 -- AMBIENTE
 
 INSERT INTO ambiente
-(id_ambiente, id_andar, id_setor, nome_ambiente, localizacao, capacidade_maxima, horario_abertura, horario_fechamento)
+(id_ambiente, id_andar, id_setor, nome, localizacao, capacidade_maxima, horario_abertura, horario_fechamento)
 VALUES
 (1, 1, 1, 'Recepcao', 'Proximo a entrada principal', 20, '07:00:00', '19:00:00'),
 (2, 2, 2, 'Sala de reunioes A', 'Ala norte', 12, '08:00:00', '20:00:00'),
