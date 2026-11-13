@@ -1,0 +1,313 @@
+
+/* LOGIN — LUMORA */
+
+.auth-core {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #172B46, #344B70 65%, #514B78);
+    border: 1px solid rgba(169, 155, 232, .65);
+    box-shadow: 0 18px 40px rgba(10, 20, 40, .28);
+}
+
+.auth-core {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #172B46, #344B70 65%, #514B78);
+    border: 1px solid rgba(169, 155, 232, .65);
+    box-shadow: 0 18px 40px rgba(10, 20, 40, .28);
+}
+
+.auth-letter {
+    font-family: 'Manrope', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    color: #F5F7FF;
+    letter-spacing: -3px;
+    padding-right: 3px;
+}
+.auth {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/* LADO ESQUERDO */
+
+.auth-left {
+    background: linear-gradient(
+        135deg,
+        #0B132B 0%,
+        #172B5E 50%,
+        #35216B 100%
+    );
+    position: relative;
+    overflow: hidden;
+    padding: 42px 55px;
+    color: #fff;
+}
+
+.white-brand {
+    color: #fff;
+}
+
+.auth-visual {
+    position: absolute;
+    right: 70px;
+    top: 120px;
+    width: 330px;
+    height: 330px;
+    display: grid;
+    place-items: center;
+}
+
+.auth-ring {
+    position: absolute;
+    border: 1px solid rgba(167, 139, 250, .35);
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+}
+
+.r2 {
+    width: 62%;
+    height: 62%;
+    border-color: rgba(96, 165, 250, .4);
+}
+
+.auth-core {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(
+        135deg,
+        #2563EB,
+        #7C3AED
+    );
+    border-radius: 24px;
+    display: grid;
+    place-items: center;
+    font-family: "Plus Jakarta Sans";
+    font-size: 30px;
+    box-shadow: 0 0 80px rgba(124, 58, 237, .45);
+    z-index: 2;
+}
+
+.auth-message {
+    position: absolute;
+    bottom: 75px;
+    left: 55px;
+    max-width: 470px;
+}
+
+.auth-message h1 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 52px;
+    line-height: 1.04;
+    letter-spacing: -3px;
+    margin: 20px 0;
+}
+
+.auth-message h1 em {
+    font-style: normal;
+    color: #A78BFA;
+}
+
+.auth-message p {
+    color: #C2D2E8;
+    line-height: 1.8;
+    font-size: 13px;
+}
+
+/* LADO DIREITO */
+
+.auth-right {
+    display: grid;
+    place-items: center;
+    background: #F1F5FF;
+}
+
+.login-form {
+    width: min(400px, calc(100% - 60px));
+}
+
+.login-form h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 31px;
+    color: #172B5E;
+    margin: 20px 0 8px;
+}
+
+.login-form > p {
+    font-size: 12px;
+    color: #708090;
+    line-height: 1.7;
+    margin-bottom: 35px;
+}
+
+.login-form label {
+    display: block;
+    color: #172B5E;
+    font-size: 10px;
+    font-weight: 800;
+    margin-bottom: 17px;
+}
+
+.login-form input {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    padding: 13px 14px;
+    border: 1px solid #D8E1F2;
+    border-radius: 6px;
+    background: #fff;
+    outline: none;
+    font-size: 12px;
+    color: #10202E;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.login-form input:focus {
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, .1);
+}
+
+/* TÍTULO E IDENTIFICAÇÃO */
+
+.login-form .section-kicker {
+    color: #7C3AED;
+}
+
+/* BOTÃO */
+
+.login-form .button.primary {
+    background: linear-gradient(
+        110deg,
+        #2563EB,
+        #7C3AED
+    );
+    color: #fff;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.login-form .button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(37, 99, 235, .2);
+}
+
+.login-form .button.full {
+    width: 100%;
+    margin-top: 22px;
+}
+
+/* MENSAGEM DE RETORNO */
+
+.auth-message-box {
+    margin-top: 15px;
+    background: #EDE9FE;
+    border: 1px solid #DDD6FE;
+    color: #5B21B6;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+/* VOLTAR */
+
+.back {
+    display: block;
+    text-align: center;
+    color: #708090;
+    font-size: 10px;
+    margin-top: 25px;
+    transition: color .2s;
+}
+
+.back:hover {
+    color: #2563EB;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+    .auth {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-left {
+        min-height: 570px;
+    }
+
+    .auth-visual {
+        right: 30px;
+        top: 90px;
+    }
+
+    .auth-message {
+        left: 35px;
+    }
+
+    .auth-right {
+        padding: 70px 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .auth-left {
+        padding: 30px;
+        min-height: 500px;
+    }
+
+    .auth-message {
+        left: 30px;
+        bottom: 45px;
+    }
+
+    .auth-message h1 {
+        font-size: 38px;
+    }
+
+    .auth-visual {
+        width: 260px;
+        height: 260px;
+        right: -40px;
+        top: 75px;
+    }
+
+    .login-form {
+        width: calc(100% - 36px);
+    }
+}
+
+.auth-left {
+    background: linear-gradient(145deg, #172B46, #344B70 65%, #514B78);
+}
+
+.auth-ring {
+    border-color: rgba(169, 155, 232, .25);
+}
+
+.auth-ring.r2 {
+    border-color: rgba(169, 155, 232, .4);
+}
+
+.auth-wordmark {
+    color: #F5F7FF;
+}
+
+.white-brand {
+    color: #F5F7FF;
+}
+
+.auth-message h1 em {
+    color: #A99BE8;
+}
+
+.dark-pill {
+    background: rgba(169, 155, 232, .14);
+    border: 1px solid rgba(169, 155, 232, .35);
+    color: #DCD6FF;
+}
+

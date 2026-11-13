@@ -1,4 +1,6 @@
 import Link from "next/link";
+import "./tecnologia.css";
+import Image from "next/image";
 
 const layers = [
   { n: "01", title: "Dispositivos e sensores", text: "A base física do edifício: equipamentos, medidores e sensores que podem fornecer informações sobre os ambientes e a infraestrutura.", icon: "⌁", tags: ["Sensores", "Medidores", "Equipamentos"] },
@@ -29,7 +31,17 @@ export default function Tecnologia() {
         <div className="tech-network" aria-label="Ilustração conceitual de sistemas conectados">
           <div className="network-ring ring-one"/><div className="network-ring ring-two"/><div className="network-ring ring-three"/>
           <div className="network-line line-one"/><div className="network-line line-two"/><div className="network-line line-three"/>
-          <div className="network-node node-center"><span>L</span><small>LUMORA CORE</small></div>
+          <div className="network-node node-center">
+            <Image
+              src="/images/logo.png"
+              alt="Símbolo Lumora"
+              width={70}
+              height={60}
+              className="logo-simbolo"
+              priority
+              />
+            <small>LUMORA CORE</small>
+            </div>
           <div className="network-node node-top"><b>⌁</b><small>SENSORES</small></div>
           <div className="network-node node-left"><b>ϟ</b><small>ENERGIA</small></div>
           <div className="network-node node-right"><b>⌘</b><small>SISTEMAS</small></div>

@@ -1,0 +1,223 @@
+
+/* PÁGINA DE ORÇAMENTO */
+
+.quote-page {
+    min-height: calc(100vh - 80px);
+    background: linear-gradient(180deg, #F1F5FF 0%, #F8F9FF 45%, #FFFFFF 100%);
+    padding: 105px 0;
+}
+
+.quote-grid {
+    display: grid;
+    grid-template-columns: .85fr 1.15fr;
+    gap: 100px;
+}
+
+/* INTRODUÇÃO */
+
+.quote-intro .pill {
+    color: #344B70;
+    border-color: rgba(81, 75, 120, .22);
+    background: rgba(255, 255, 255, .8);
+}
+
+.quote-intro h1 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 57px;
+    line-height: 1.03;
+    letter-spacing: -3px;
+    color: #172B46;
+    margin: 23px 0;
+}
+
+.quote-intro h1 em {
+    font-style: normal;
+    color: #7C3AED;
+}
+
+.quote-intro > p {
+    color: #64748B;
+    font-size: 14px;
+    line-height: 1.9;
+    max-width: 520px;
+}
+
+/* ETAPAS */
+
+.quote-steps {
+    border-top: 1px solid #E0E5F0;
+    margin-top: 45px;
+}
+
+.quote-steps > div {
+    display: grid;
+    grid-template-columns: 35px 1fr 20px;
+    align-items: center;
+    border-bottom: 1px solid #E0E5F0;
+    padding: 17px 0;
+}
+
+.quote-steps b {
+    font: 10px "DM Mono";
+    color: #7C3AED;
+}
+
+.quote-steps span {
+    font-size: 10px;
+    font-weight: 800;
+    color: #263E60;
+}
+
+.quote-steps i {
+    font-style: normal;
+    color: #8B91AA;
+}
+
+/* FORMULÁRIO */
+
+.quote-form {
+    background: #FFFFFF;
+    border: 1px solid rgba(81, 75, 120, .16);
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 25px 70px rgba(23, 43, 70, .08);
+}
+
+.form-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    border-bottom: 1px solid #E5E7F0;
+    padding-bottom: 22px;
+    margin-bottom: 25px;
+}
+
+.form-top .section-kicker {
+    color: #7C3AED;
+}
+
+.form-top h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 22px;
+    color: #172B46;
+    margin: 8px 0 0;
+}
+
+.form-top > span {
+    font: 9px "DM Mono";
+    color: #9299AD;
+}
+
+/* CAMPOS */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+}
+
+.quote-form label {
+    display: block;
+    color: #263E60;
+    font-size: 10px;
+    font-weight: 800;
+    margin-bottom: 17px;
+}
+
+.quote-form input,
+.quote-form textarea,
+.quote-form select {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    padding: 13px 14px;
+    border: 1px solid #DCE2EF;
+    border-radius: 6px;
+    background: #FAFBFF;
+    outline: none;
+    font-size: 12px;
+    color: #172B46;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.quote-form input::placeholder,
+.quote-form textarea::placeholder {
+    color: #9AA3B8;
+}
+
+.quote-form input:focus,
+.quote-form textarea:focus,
+.quote-form select:focus {
+    border-color: #7C3AED;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, .09);
+}
+
+.quote-form select {
+    cursor: pointer;
+}
+
+.quote-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* BOTÃO */
+
+.quote-form .button.primary {
+    background: linear-gradient(110deg, #2563EB, #514B78);
+    color: #FFFFFF;
+    border: none;
+    transition: transform .2s, box-shadow .2s, filter .2s;
+}
+
+.quote-form .button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(37, 99, 235, .2);
+    filter: brightness(1.08);
+}
+
+.quote-form .button.full {
+    width: 100%;
+    margin-top: 22px;
+}
+
+/* MENSAGEM DE SUCESSO */
+
+.quote-form .success {
+    background: #F0EDFF;
+    border: 1px solid #D8CCFF;
+    color: #514B78;
+    border-radius: 7px;
+    padding: 14px;
+    font-size: 10px;
+    line-height: 1.6;
+    margin-top: 15px;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+    .quote-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+}
+
+@media (max-width: 560px) {
+    .quote-page {
+        padding: 70px 0;
+    }
+
+    .quote-intro h1 {
+        font-size: 40px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quote-form {
+        padding: 22px;
+    }
+}

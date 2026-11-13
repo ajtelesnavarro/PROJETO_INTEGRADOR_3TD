@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import "./orcamento.css";
 
 export default function Orcamento() {
   const [status, setStatus] = useState("");
@@ -28,7 +29,14 @@ export default function Orcamento() {
             <Field label="Empresa" name="empresa" value={form.empresa} onChange={set} placeholder="Nome da empresa" />
             <Field label="E-mail *" autoComplete="email" type="email" name="email" value={form.email} onChange={set} placeholder="voce@empresa.com" required />
             <Field label="Telefone" autoComplete="tel" name="telefone" value={form.telefone} onChange={set} placeholder="(11) 99999-9999" />
-            <label>Tipo de edifício<select name="tipo" value={form.tipo} onChange={set}><option>Comercial</option><option>Corporativo</option><option>Residencial</option><option>Outro</option></select></label>
+            <label>Tipo de edifício
+              <select name="tipo">
+                <option disabled>Comercial</option>
+                <option>Corporativo</option>
+                <option disabled>Residencial</option>
+                <option disabled>Outro</option>
+                </select>
+            </label>
             <Field label="Quantidade de ambientes" type="number" min="1" name="ambientes" value={form.ambientes} onChange={set} placeholder="Ex.: 40" />
             <label>Principal necessidade<select name="prioridade" value={form.prioridade} onChange={set}><option>Monitoramento</option><option>Gestão de energia</option><option>Automação</option><option>Controle de acessos</option><option>Alertas e ocorrências</option><option>Integração de sistemas</option><option>Outra necessidade</option></select></label>
           </div>

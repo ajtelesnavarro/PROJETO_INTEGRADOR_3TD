@@ -2,7 +2,6 @@ import Link from "next/link";
 import Reveal from "@/components/animations/Reveal";
 
 export default async function Home() {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   return (
     <>
       <section className="hero hero-video">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import "./solucoes.css";
 
 const solutions = [
   { n: "01", icon: "◉", title: "Monitoramento inteligente", text: "Acompanhe em uma visão centralizada as condições dos ambientes, dispositivos e sistemas conectados.", tags: ["Sensores", "Status", "Histórico"] },

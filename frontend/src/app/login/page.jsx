@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import "./login.css";
+import Image from "next/image";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", senha: "" });
@@ -30,9 +32,22 @@ export default function Login() {
   return (
     <main className="auth">
       <div className="auth-left">
-        <Link href="/" className="brand white-brand"><span className="logo-mark">L</span>lumora</Link>
-        <div className="auth-visual"><div className="auth-ring r1"></div><div className="auth-ring r2"></div><div className="auth-core">L</div></div>
-        <div className="auth-message"><div className="pill dark-pill">PLATAFORMA LUMORA</div><h1>Uma visão.<br /><em>Todo o edifício.</em></h1><p>Entre para acompanhar ambientes, dispositivos, energia e ocorrências.</p></div>
+
+        <div className="auth-visual">
+          <div className="auth-ring r1"></div>
+          <div className="auth-ring r2"></div>
+
+          <div className="auth-core">
+            <span className="auth-letter">L</span>
+          </div>
+
+        </div>
+
+        <div className="auth-message">
+          <div className="pill dark-pill">PLATAFORMA LUMORA</div>
+          <h1>Uma visão.<br /><em>Todo o edifício.</em></h1>
+          <p>Entre para acompanhar ambientes, dispositivos, energia e ocorrências.</p>
+        </div>
       </div>
       <div className="auth-right">
         <form className="login-form" onSubmit={submit}>
