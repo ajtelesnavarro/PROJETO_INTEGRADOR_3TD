@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import * as UsuarioModel from '../models/AuthModel.js';
+import * as AuthModel from '../models/AuthModel.js';
 
 const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -41,7 +41,7 @@ export async function registrar({
         );
     }
 
-    const usuarioExistente = await UsuarioModel.buscarPorEmail(emailLimpo);
+    const usuarioExistente = await AuthModel.buscarPorEmail(emailLimpo);
 
     if (usuarioExistente) {
         const erro = new Error('E-mail já cadastrado.');
@@ -57,7 +57,7 @@ export async function registrar({
 
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    return await UsuarioModel.criar({
+    return await AuthModel.criar({
         nome: nomeLimpo,
         email: emailLimpo,
         senha_hash: senhaHash,
@@ -83,7 +83,7 @@ export async function login({ email, senha } = {}) {
         throw erro;
     }
 
-    const usuario = await UsuarioModel.buscarPorEmail(emailLimpo);
+    const usuario = await AuthModel.buscarPorEmail(emailLimpo);
 
     if (!usuario || !usuario.senha_hash || usuario.ativo !== 'ativo') {
         const erro = new Error('Credenciais inválidas.');
@@ -94,7 +94,7 @@ export async function login({ email, senha } = {}) {
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (!senhaValida) {
-        const erro = new Error('Credenciais inválidas.');
+        const erro = new Error('Credenciais inválidas.' + senhaValida);
         erro.status = 401;
         throw erro;
     }
