@@ -1,68 +1,156 @@
-export function criarOrcamentoModel({ pool }) {
-    async function criar(dados) {
-        const [resultado] = await pool.query(
-            `INSERT INTO orcamento (
-                id_usuario,
-                nome_responsavel,
-                nome_empresa,
-                email,
-                telefone,
-                endereco_empresa,
-                quantidade_andares,
-                quantidade_ambientes,
-                quantidade_dispositivos,
-                servicos_desejados,
-                descricao,
-                valor_subtotal,
-                valor_desconto,
-                valor_total,
-                prazo_estimado_dias,
-                data_validade,
-                status_orcamento
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                dados.idUsuario,
-                dados.nomeResponsavel,
-                dados.nomeEmpresa,
-                dados.email,
-                dados.telefone,
-                dados.enderecoEmpresa,
-                dados.quantidadeAndares,
-                dados.quantidadeAmbientes,
-                dados.quantidadeDispositivos,
-                dados.servicosDesejados,
-                dados.descricao,
-                dados.valorSubtotal,
-                dados.valorDesconto,
-                dados.valorTotal,
-                dados.prazoEstimadoDias,
-                dados.dataValidade,
-                "solicitado"
-            ]
-        );
 
-        return resultado.insertId;
-    }
+import { pool } from '../config/database.js';
 
-    async function buscarPorId(id) {
-        const [resultado] = await pool.query(
-            "SELECT * FROM orcamento WHERE id_orcamento = ?",
-            [id]
-        );
+export const listar = async () => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM orcamento ORDER BY data_solicitacao DESC'
+    );
 
-        return resultado[0];
-    }
+    return resultado;
+};
 
-    async function atualizarStatus(id, status) {
-        await pool.query(
-            "UPDATE orcamento SET status_orcamento = ? WHERE id_orcamento = ?",
-            [status, id]
-        );
-    }
+export const buscarPorEmail = async (email) => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM orcamento WHERE email = ?',
+        [email]
+    );
 
-    return {
-        criar,
-        buscarPorId,
-        atualizarStatus
-    };
-}
+    return resultado;
+};
+
+export const buscarPorId = async (id) => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM orcamento WHERE id_orcamento = ?',
+        [id]
+    );
+
+    return resultado[0];
+};
+
+export const criar = async (dados) => {
+    const {
+        id_usuario,
+        nome_responsavel,
+        nome_empresa,
+        email,
+        telefone,
+        quantidade_andares,
+        quantidade_ambientes,
+        quantidade_dispositivos,
+        descricao,
+        valor_subtotal,
+        valor_desconto,
+        valor_total,
+        prazo_estimado_dias,
+        data_validade,
+        status_orcamento
+    } = dados;
+
+    const [resultado] = await pool.query(
+        `INSERT INTO orcamento (
+            id_usuario,
+            nome_responsavel,
+            nome_empresa,
+            email,
+            telefone,
+            quantidade_andares,
+            quantidade_ambientes,
+            quantidade_dispositivos,
+            descricao,
+            valor_subtotal,
+            valor_desconto,
+            valor_total,
+            prazo_estimado_dias,
+            data_validade,
+            status_orcamento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            id_usuario ?? null,
+            nome_responsavel,
+            nome_empresa,
+            email,
+            telefone,
+            quantidade_andares,
+            quantidade_ambientes,
+            quantidade_dispositivos ?? null,
+            descricao ?? null,
+            valor_subtotal ?? null,
+            valor_desconto ?? 0,
+            valor_total ?? null,
+            prazo_estimado_dias ?? null,
+            data_validade ?? null,
+            status_orcamento ?? 'solicitado'
+        ]
+    );
+
+    return resultado.insertId;
+};
+
+export const atualizar = async (id, dados) => {
+    const {
+        id_usuario,
+        nome_responsavel,
+        nome_empresa,
+        email,
+        telefone,
+        quantidade_andares,
+        quantidade_ambientes,
+        quantidade_dispositivos,
+        descricao,
+        valor_subtotal,
+        valor_desconto,
+        valor_total,
+        prazo_estimado_dias,
+        data_validade,
+        status_orcamento
+    } = dados;
+
+    const [resultado] = await pool.query(
+        `UPDATE orcamento SET
+            id_usuario = ?,
+            nome_responsavel = ?,
+            nome_empresa = ?,
+            email = ?,
+            telefone = ?,
+            quantidade_andares = ?,
+            quantidade_ambientes = ?,
+            quantidade_dispositivos = ?,
+            descricao = ?,
+            valor_subtotal = ?,
+            valor_desconto = ?,
+            valor_total = ?,
+            prazo_estimado_dias = ?,
+            data_validade = ?,
+            status_orcamento = ?
+        WHERE id_orcamento = ?`,
+        [
+            id_usuario ?? null,
+            nome_responsavel,
+            nome_empresa,
+            email,
+            telefone,
+            quantidade_andares,
+            quantidade_ambientes,
+            quantidade_dispositivos ?? null,
+            descricao ?? null,
+            valor_subtotal ?? null,
+            valor_desconto ?? 0,
+            valor_total ?? null,
+            prazo_estimado_dias ?? null,
+            data_validade ?? null,
+            status_orcamento ?? 'solicitado',
+            id
+        ]
+    );
+
+    return resultado.affectedRows;
+};
+
+export const excluir = async (id) => {
+    const [resultado] = await pool.query(
+        'DELETE FROM orcamento WHERE id_orcamento = ?',
+        [id]
+    );
+
+    return resultado.affectedRows;
+};

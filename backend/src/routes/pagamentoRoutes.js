@@ -1,10 +1,13 @@
-import { Router } from "express";
 
-export function criarPagamentoRoutes({ pagamentoController }) {
-    const router = Router();
+import { Router } from 'express';
+import * as PagamentoController from '../controllers/PagamentoController.js';
 
-    router.post("/", pagamentoController.criar);
-    router.get("/:id", pagamentoController.buscarPorId);
+const router = Router();
 
-    return router;
-}
+router.get('/', PagamentoController.listar);
+router.get('/:id', PagamentoController.buscarPorId);
+router.post('/', PagamentoController.criar);
+router.put('/:id', PagamentoController.atualizar);
+router.delete('/:id', PagamentoController.excluir);
+
+export default router;

@@ -1,18 +1,18 @@
-
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 export function autenticar(req, res, next) {
-    const headerAuth = req.headers.authorization;
+    const authorization = req.headers.authorization;
 
-    const [tipo, token, ...extras] =
-        typeof headerAuth === "string"
-            ? headerAuth.split(" ")
-            : [];
+    const partes = typeof authorization === 'string'
+        ? authorization.trim().split(/\s+/)
+        : [];
 
-    if (tipo !== "Bearer" || !token || extras.length > 0) {
+    const [tipo, token, ...resto] = partes;
+
+    if (tipo?.toLowerCase() !== 'bearer' || !token || resto.length !== 0) {
         return res.status(401).json({
             sucesso: false,
-            erro: "Token de acesso ausente."
+            erro: 'Token de acesso não informado.'
         });
     }
 
@@ -21,18 +21,16 @@ export function autenticar(req, res, next) {
     if (!jwtSecret) {
         return res.status(500).json({
             sucesso: false,
-            erro: "Configuração de autenticação indisponível."
+            erro: 'Configuração de autenticação indisponível.'
         });
     }
 
     try {
-        const payload = jwt.verify(token, jwtSecret, {
-            issuer: "lumora-smartbuilding"
-        });
+        const dadosToken = jwt.verify(token, jwtSecret);
 
         req.usuario = {
-            id: Number(payload.sub),
-            perfil: payload.perfil
+            id: Number(dadosToken.sub),
+            perfil: dadosToken.perfil
         };
 
         return next();
@@ -40,24 +38,25 @@ export function autenticar(req, res, next) {
     } catch {
         return res.status(401).json({
             sucesso: false,
-            erro: "Token inválido ou expirado."
+            erro: 'Token inválido ou expirado.'
         });
     }
 }
 
 export function autorizarPerfis(...perfisPermitidos) {
-    return function autorizar(req, res, next) {
+    return (req, res, next) => {
+
         if (!req.usuario) {
             return res.status(401).json({
                 sucesso: false,
-                erro: "Autenticação necessária."
+                erro: 'É necessário realizar a autenticação.'
             });
         }
 
         if (!perfisPermitidos.includes(req.usuario.perfil)) {
             return res.status(403).json({
                 sucesso: false,
-                erro: "Usuário sem permissão para esta operação."
+                erro: 'Acesso não autorizado para este perfil.'
             });
         }
 
@@ -65,4 +64,4 @@ export function autorizarPerfis(...perfisPermitidos) {
     };
 }
 
-export const somenteAdmin = autorizarPerfis("administrador");
+export const autorizarAdmin = autorizarPerfis('administrador');

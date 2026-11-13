@@ -1,57 +1,40 @@
-export function criarOrcamentoService({ orcamentoModel }) {
 
-    async function criar(dados) {
-        if (
-            !dados.nomeResponsavel ||
-            !dados.nomeEmpresa ||
-            !dados.email ||
-            !dados.telefone ||
-            !dados.quantidadeAndares ||
-            !dados.quantidadeAmbientes ||
-            !dados.servicosDesejados
-        ) {
-            throw new Error("Preencha todos os campos obrigatórios.");
-        }
+import * as OrcamentoModel from '../models/OrcamentoModels.js';
 
-        // Os valores precisam ser calculados
-        // conforme a regra comercial da Lumora.
+export const listar = async () => {
+    return await OrcamentoModel.listar();
+};
 
-        const idOrcamento = await orcamentoModel.criar({
-            ...dados,
-            valorSubtotal: null,
-            valorDesconto: 0,
-            valorTotal: null,
-            prazoEstimadoDias: null,
-            dataValidade: null
-        });
+export const buscarPorEmail = async (email) => {
+    const orcamentos = await OrcamentoModel.buscarPorEmail(email);
 
-        return { idOrcamento };
+    if (orcamentos.length === 0) {
+        throw new Error('Nenhum orçamento encontrado para esse email.');
     }
 
-    async function buscarPorId(id) {
-        const orcamento = await orcamentoModel.buscarPorId(id);
+    return orcamentos;
+};
 
-        if (!orcamento) {
-            throw new Error("Orçamento não encontrado.");
-        }
+export const criar = async (dados) => {
+    return await OrcamentoModel.criar(dados);
+};
 
-        return orcamento;
+export const atualizar = async (id, dados) => {
+    const orcamento = await OrcamentoModel.buscarPorId(id);
+
+    if (!orcamento) {
+        throw new Error('Orçamento não encontrado.');
     }
 
-    async function atualizarStatus(id, status) {
-        const orcamento = await buscarPorId(id);
+    return await OrcamentoModel.atualizar(id, dados);
+};
 
-        if (orcamento.status_orcamento === "aprovado" ||
-            orcamento.status_orcamento === "recusado") {
-            throw new Error("Este orçamento já foi finalizado.");
-        }
+export const excluir = async (id) => {
+    const orcamento = await OrcamentoModel.buscarPorId(id);
 
-        await orcamentoModel.atualizarStatus(id, status);
+    if (!orcamento) {
+        throw new Error('Orçamento não encontrado.');
     }
 
-    return {
-        criar,
-        buscarPorId,
-        atualizarStatus
-    };
-}
+    return await OrcamentoModel.excluir(id);
+};

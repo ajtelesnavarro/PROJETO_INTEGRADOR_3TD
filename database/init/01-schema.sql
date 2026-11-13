@@ -44,7 +44,7 @@ CREATE TABLE andar (
 
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    id_predio INT NOT NULL,
+    id_predio INT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
@@ -54,8 +54,8 @@ CREATE TABLE usuario (
         'administrador',
         'manutencao',
         'porteiro',
-        'visitante'
-    ) NOT NULL DEFAULT 'visitante',
+        'locador'
+    ) NOT NULL DEFAULT 'locador',
 
     cpf CHAR(11) NOT NULL,
     foto VARCHAR(255) NULL,
@@ -68,7 +68,6 @@ CREATE TABLE usuario (
 
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf),
-    CONSTRAINT uk_usuario_predio UNIQUE (id_usuario, id_predio),
 
     CONSTRAINT fk_usuario_predio
         FOREIGN KEY (id_predio)
@@ -944,7 +943,7 @@ CREATE INDEX idx_hist_ocorrencia_data
 -- PREDIO
 
 INSERT INTO predio
-(id_predio, nome_predio, cep, logradouro, numero, complemento, bairro, cidade, estado)
+(id_predio, nome_predio, cep, rua, numero, complemento, bairro, cidade, estado)
 VALUES
 (1, 'Edificio Empresarial Central', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP'),
 (2, 'Centro Empresarial Horizonte', '09020-110', 'Avenida Portugal', '450', 'Bloco A', 'Centro', 'Santo Andre', 'SP'),
@@ -969,11 +968,20 @@ VALUES
 INSERT INTO usuario
 (id_usuario, id_predio, nome, email, senha_hash, telefone, perfil, cpf, foto, data_nascimento, ativo)
 VALUES
-(1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
-(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
-(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
-(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'secretaria', '12345678904', NULL, '1992-11-17', 'ativo'),
-(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'visitante', '12345678905', NULL, '2000-06-25', 'ativo');
+-- Perfil: Administrador | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
+(1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
+
+-- Perfil: Manutenção | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
+(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
+
+-- Perfil: Porteiro | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
+(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
+
+-- Perfil: Secretaria | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1004', 'secretaria', '12345678904', NULL, '1992-11-17', 'ativo'),
+
+-- Perfil: Visitante | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', NULL, 'visitante', '12345678905', NULL, '2000-06-25', 'ativo');
 
 
 -- SETOR

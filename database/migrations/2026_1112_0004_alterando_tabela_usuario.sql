@@ -1,0 +1,2 @@
+ALTER TABLE usuario
+MODIFY COLUMN id_predio INT NULL;

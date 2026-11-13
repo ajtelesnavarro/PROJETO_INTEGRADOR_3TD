@@ -1,65 +1,64 @@
-export function criarOrcamentoController({ orcamentoService }) {
 
-    async function criar(req, res) {
-        try {
-            const resultado = await orcamentoService.criar(req.body);
+import * as OrcamentoService from '../services/OrcamentoService.js';
 
-            res.status(201).json(resultado);
-        } catch (erro) {
-            res.status(400).json({
-                mensagem: erro.message
-            });
-        }
+export const listar = async (req, res) => {
+    try {
+        const orcamentos = await OrcamentoService.listar();
+        res.status(200).json(orcamentos);
+    } catch (erro) {
+        res.status(500).json({ mensagem: erro.message });
     }
+};
 
-    async function buscarPorId(req, res) {
-        try {
-            const resultado = await orcamentoService.buscarPorId(
-                req.params.id
-            );
+export const buscarPorEmail = async (req, res) => {
+    try {
+        const { email } = req.params;
 
-            res.json(resultado);
-        } catch (erro) {
-            res.status(404).json({
-                mensagem: erro.message
-            });
-        }
+        const orcamentos = await OrcamentoService.buscarPorEmail(email);
+
+        res.status(200).json(orcamentos);
+    } catch (erro) {
+        res.status(404).json({ mensagem: erro.message });
     }
+};
 
-    async function aprovar(req, res) {
-        try {
-            await orcamentoService.atualizarStatus(
-                req.params.id,
-                "aprovado"
-            );
+export const criar = async (req, res) => {
+    try {
+        const id = await OrcamentoService.criar(req.body);
 
-            res.json({ mensagem: "Orçamento aprovado." });
-        } catch (erro) {
-            res.status(400).json({
-                mensagem: erro.message
-            });
-        }
+        res.status(201).json({
+            mensagem: 'Orçamento criado com sucesso!',
+            id_orcamento: id
+        });
+    } catch (erro) {
+        res.status(500).json({ mensagem: erro.message });
     }
+};
 
-    async function recusar(req, res) {
-        try {
-            await orcamentoService.atualizarStatus(
-                req.params.id,
-                "recusado"
-            );
+export const atualizar = async (req, res) => {
+    try {
+        const { id } = req.params;
 
-            res.json({ mensagem: "Orçamento recusado." });
-        } catch (erro) {
-            res.status(400).json({
-                mensagem: erro.message
-            });
-        }
+        await OrcamentoService.atualizar(id, req.body);
+
+        res.status(200).json({
+            mensagem: 'Orçamento atualizado com sucesso!'
+        });
+    } catch (erro) {
+        res.status(500).json({ mensagem: erro.message });
     }
+};
 
-    return {
-        criar,
-        buscarPorId,
-        aprovar,
-        recusar
-    };
-}
+export const excluir = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await OrcamentoService.excluir(id);
+
+        res.status(200).json({
+            mensagem: 'Orçamento excluído com sucesso!'
+        });
+    } catch (erro) {
+        res.status(500).json({ mensagem: erro.message });
+    }
+};

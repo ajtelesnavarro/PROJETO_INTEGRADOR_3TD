@@ -1,0 +1,340 @@
+-- REGISTROS
+
+
+-- PREDIO
+
+INSERT INTO predio
+(id_predio, nome_predio, cep, rua, numero, complemento, bairro, cidade, estado)
+VALUES
+(1, 'Edificio Empresarial Central', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP'),
+(2, 'Centro Empresarial Horizonte', '09020-110', 'Avenida Portugal', '450', 'Bloco A', 'Centro', 'Santo Andre', 'SP'),
+(3, 'Edificio Comercial Nova Era', '09110-300', 'Rua das Figueiras', '780', NULL, 'Campestre', 'Santo Andre', 'SP'),
+(4, 'Condominio Empresarial Park', '09210-050', 'Avenida Industrial', '950', 'Torre 2', 'Jardim', 'Santo Andre', 'SP');
+
+
+-- ANDAR
+
+INSERT INTO andar
+(id_andar, id_predio, numero_andar, descricao, data_cadastro)
+VALUES
+(1, 1, 1, 'Recepcao e salas administrativas', '2024-01-10'),
+(2, 1, 2, 'Salas de reuniao', '2024-01-10'),
+(3, 1, 3, 'Area de atendimento', '2024-02-15'),
+(4, 1, 4, 'Escritorios administrativos', '2024-03-20'),
+(5, 1, 5, 'Laboratorio de tecnologia', '2024-04-05');
+
+
+-- USUARIO
+
+INSERT INTO usuario
+(id_usuario, id_predio, nome, email, senha_hash, telefone, perfil, cpf, foto, data_nascimento, ativo)
+VALUES
+(1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$dNrDRKBlcFKTEA6D9I28I.2koUVLLm5i9lmy2bS/phFfZ/9ENiBva', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
+(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
+(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'secretaria', '12345678904', NULL, '1992-11-17', 'ativo'),
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'visitante', '12345678905', NULL, '2000-06-25', 'ativo');
+
+
+-- SETOR
+
+INSERT INTO setor
+(id_setor, id_andar, nome_setor, descricao, id_usuario_responsavel)
+VALUES
+(1, 1, 'Recepcao', 'Setor de atendimento e controle de entrada', 1),
+(2, 2, 'Reunioes', 'Setor de salas de reuniao', 1),
+(3, 3, 'Atendimento', 'Setor de atendimento ao publico', 3),
+(4, 4, 'Administracao', 'Setor administrativo', 1),
+(5, 5, 'Tecnologia', 'Setor de laboratorio e tecnologia', 2);
+
+
+-- AMBIENTE
+
+INSERT INTO ambiente
+(id_ambiente, id_andar, id_setor, nome, localizacao, capacidade_maxima, horario_abertura, horario_fechamento)
+VALUES
+(1, 1, 1, 'Recepcao', 'Proximo a entrada principal', 20, '07:00:00', '19:00:00'),
+(2, 2, 2, 'Sala de reunioes A', 'Ala norte', 12, '08:00:00', '20:00:00'),
+(3, 3, 3, 'Sala de atendimento', 'Ao lado dos elevadores', 15, '08:00:00', '18:00:00'),
+(4, 4, 4, 'Escritorio administrativo', 'Ala leste', 30, '07:00:00', '19:00:00'),
+(5, 5, 5, 'Laboratorio de tecnologia', 'Area restrita', 18, '08:00:00', '22:00:00');
+
+
+-- EQUIPE
+
+INSERT INTO equipe
+(id_equipe, id_predio, nome_equipe, descricao, status)
+VALUES
+(1, 1, 'Manutencao predial', 'Equipe responsavel por manutencao dos ambientes e dispositivos', 'ativa'),
+(2, 1, 'Suporte tecnico', 'Equipe responsavel por suporte e verificacao tecnica', 'ativa');
+
+
+-- EQUIPE_USUARIO
+
+INSERT INTO equipe_usuario
+(id_equipe_usuario, id_equipe, id_usuario, id_predio, data_entrada, data_saida)
+VALUES
+(1, 1, 2, 1, '2024-02-01', NULL),
+(2, 2, 2, 1, '2024-02-01', NULL),
+(3, 2, 4, 1, '2024-02-10', NULL);
+
+
+-- DISPOSITIVO
+
+INSERT INTO dispositivo
+(id_dispositivo, id_ambiente, id_usuario, nome, tipo_dispositivo, fabricante, modelo, unidade_medida, potencia_nominal_kw, data_dispositivo, status_dispositivo)
+VALUES
+(1, 1, 2, 'Sensor de temperatura da recepcao', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-05-10', 'ativo'),
+(2, 2, 2, 'Sensor de iluminacao da sala A', 'iluminacao', 'LumenPro', 'LP-200', 'lux', 0.0080, '2024-05-12', 'ativo'),
+(3, 3, 2, 'Medidor de energia do atendimento', 'energia', 'EnerMeter', 'EM-300', 'kWh', 0.0150, '2024-06-01', 'instavel'),
+(4, 4, 2, 'Sensor de temperatura do escritorio', 'temperatura', 'SensTech', 'ST-T100', '°C', 0.0120, '2024-06-15', 'ativo'),
+(5, 5, 2, 'Sensor de iluminacao do laboratorio', 'iluminacao', 'LumenPro', 'LP-250', 'lux', 0.0090, '2024-07-01', 'ativo');
+
+
+-- TEMPERATURA
+
+INSERT INTO temperatura
+(id_temperatura, id_ambiente, id_usuario_alteracao, temperatura_minima, temperatura_maxima)
+VALUES
+(1, 1, 1, 20.00, 26.00),
+(2, 2, 1, 19.00, 25.00),
+(3, 3, 1, 20.00, 27.00),
+(4, 4, 1, 20.00, 26.00),
+(5, 5, 1, 18.00, 24.00);
+
+
+-- ILUMINACAO
+
+INSERT INTO iluminacao
+(id_iluminacao, id_ambiente, id_usuario_alteracao, iluminacao_minima, iluminacao_maxima)
+VALUES
+(1, 1, 1, 150.00, 500.00),
+(2, 2, 1, 300.00, 750.00),
+(3, 3, 1, 200.00, 600.00),
+(4, 4, 1, 300.00, 700.00),
+(5, 5, 1, 500.00, 1000.00);
+
+
+-- ENERGIA
+
+INSERT INTO energia
+(id_energia, id_ambiente, id_usuario_alteracao, consumo_minimo, consumo_maximo, potencia_maxima)
+VALUES
+(1, 1, 1, 0.1000, 12.0000, 3.5000),
+(2, 2, 1, 0.2000, 18.0000, 5.0000),
+(3, 3, 1, 0.1500, 15.0000, 4.0000),
+(4, 4, 1, 0.3000, 25.0000, 7.5000),
+(5, 5, 1, 0.5000, 40.0000, 12.0000);
+
+
+-- TARIFA_ENERGIA
+
+INSERT INTO tarifa_energia
+(id_tarifa, id_usuario_alteracao, id_predio, valor_kwh, data_inicio_vigencia, data_fim_vigencia)
+VALUES
+(1, 1, 1, 0.7350, '2026-01-01', NULL),
+(2, 1, 1, 0.7210, '2025-07-01', '2025-12-31'),
+(3, 1, 1, 0.6980, '2025-01-01', '2025-06-30'),
+(4, 1, 1, 0.6750, '2024-07-01', '2024-12-31'),
+(5, 1, 1, 0.6500, '2024-01-01', '2024-06-30');
+
+
+-- CREDENCIAIS_ACESSO
+
+INSERT INTO credenciais_acesso
+(id_credencial, id_usuario, status, data_cadastro, token_hash, tipo_credencial, bloqueado_ate)
+VALUES
+(1, 1, 'ativa', '2026-01-10 08:00:00', SHA2('LUM-ANA-001', 256), 'cartao_rfid', NULL),
+(2, 2, 'ativa', '2026-01-10 08:05:00', SHA2('LUM-BRUNO-002', 256), 'cartao_rfid', NULL),
+(3, 3, 'ativa', '2026-01-11 09:00:00', SHA2('LUM-CARLA-003', 256), 'tag_nfc', NULL),
+(4, 4, 'ativa', '2026-01-12 10:00:00', SHA2('LUM-DIEGO-004', 256), 'cartao_rfid', NULL),
+(5, 5, 'bloqueada', '2026-02-01 11:00:00', SHA2('LUM-ELISA-005', 256), 'qr_code', '2026-11-05 08:00:00');
+
+
+-- PERMISSAO_ACESSO
+
+INSERT INTO permissao_acesso
+(id_permissao, id_usuario, id_ambiente, horario_inicio, horario_fim, status_permissao, data_inicio, data_fim, dias_semana)
+VALUES
+(1, 1, 1, '07:00:00', '19:00:00', 'ativa', '2026-01-01', NULL, 'Segunda a sexta'),
+(2, 2, 5, '08:00:00', '22:00:00', 'ativa', '2026-01-01', NULL, 'Segunda a sabado'),
+(3, 3, 1, '07:00:00', '18:00:00', 'ativa', '2026-01-01', NULL, 'Todos os dias'),
+(4, 4, 4, '08:00:00', '19:00:00', 'ativa', '2026-02-01', NULL, 'Segunda a sexta'),
+(5, 5, 5, '09:00:00', '17:00:00', 'ativa', '2026-11-01', '2026-12-31', 'Segunda a sexta');
+
+
+-- EVENTOS_ACESSOS
+
+INSERT INTO eventos_acessos
+(id_evento, id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_tentado, status_evento, data_expiracao, data_utilizacao, motivo)
+VALUES
+(1, 1, 1, 'entrada', 'permitido', SHA2('LUM-ANA-001', 256), 'concluido', NULL, '2026-11-04 08:00:00', 'acesso_autorizado'),
+(2, 2, 5, 'entrada', 'permitido', SHA2('LUM-BRUNO-002', 256), 'concluido', NULL, '2026-11-04 08:15:00', 'acesso_de_manutencao'),
+(3, 3, 1, 'saida', 'permitido', SHA2('LUM-CARLA-003', 256), 'concluido', NULL, '2026-11-04 12:00:00', 'saida_registrada'),
+(4, 5, 5, 'entrada', 'negado', SHA2('LUM-ELISA-005', 256), 'bloqueado', NULL, '2026-11-04 13:20:00', 'credencial_bloqueada'),
+(5, NULL, 4, 'entrada', 'negado', SHA2('TOKEN-INVALIDO-999', 256), 'falha', NULL, '2026-11-04 14:10:00', 'token_nao_reconhecido');
+
+
+-- RECLAMACOES
+
+INSERT INTO reclamacoes
+(id_reclamacao, id_usuario_abertura, id_ambiente, id_dispositivo, id_usuario_responsavel, status_chamado, data_hora_recebido, descricao_usuario, prioridade, categoria_problema)
+VALUES
+(1, 1, 1, 1, 2, 'em_andamento', '2026-11-01 09:15:00', 'Temperatura da recepcao acima do habitual.', 'alta', 'climatizacao'),
+(2, 3, 2, 2, 2, 'em_andamento', '2026-11-01 10:30:00', 'Iluminacao da sala de reunioes esta fraca.', 'media', 'iluminacao'),
+(3, 5, 5, NULL, 2, 'aberto', '2026-11-02 14:00:00', 'Acesso ao laboratorio nao foi liberado.', 'alta', 'acesso'),
+(4, 2, 3, 3, NULL, 'concluido', '2026-11-02 15:20:00', 'Medidor de energia apresentou leitura inconsistente.', 'media', 'energia'),
+(5, 4, 4, 4, 2, 'em_andamento', '2026-11-03 08:45:00', 'Sensor do escritorio esta sem atualizar as leituras.', 'alta', 'dispositivo');
+
+
+-- HISTORICO_TEMPERATURA
+
+INSERT INTO historico_temperatura
+(id_historico_temperatura, id_dispositivo, temperatura_medida, umidade, data_temperatura)
+VALUES
+(1, 1, 27.50, 58.00, '2026-11-04 08:00:00'),
+(2, 1, 26.80, 57.00, '2026-11-04 09:00:00'),
+(3, 4, 23.20, 49.00, '2026-11-04 09:15:00'),
+(4, 4, 24.10, NULL, '2026-11-04 10:15:00'),
+(5, 1, 25.50, 55.00, '2026-11-04 11:00:00');
+
+
+-- HISTORICO_ILUMINACAO
+
+INSERT INTO historico_iluminacao
+(id_historico_iluminacao, id_dispositivo, iluminacao_medida, data_iluminacao)
+VALUES
+(1, 2, 250.00, '2026-11-04 08:00:00'),
+(2, 2, 320.00, '2026-11-04 09:00:00'),
+(3, 5, 620.00, '2026-11-04 09:30:00'),
+(4, 5, 480.00, '2026-11-04 10:30:00'),
+(5, 2, 410.00, '2026-11-04 11:00:00');
+
+
+-- HISTORICO_ENERGIA
+
+INSERT INTO historico_energia
+(id_historico_energia, id_dispositivo, id_tarifa, consumo_kwh, potencia_kw, custo_estimado, qualidade_medicao, data_historico_energia)
+VALUES
+(1, 3, 1, 2.4500, 1.2000, 1.80, 'boa', '2026-11-04 08:00:00'),
+(2, 3, 1, 2.7800, 1.3500, 2.04, 'boa', '2026-11-04 09:00:00'),
+(3, 3, 1, 3.1000, 1.5000, 2.28, 'boa', '2026-11-04 10:00:00'),
+(4, 3, 1, 2.9000, 1.4000, 2.13, 'regular', '2026-11-04 11:00:00'),
+(5, 3, 1, 3.2500, 1.6000, 2.39, 'boa', '2026-11-04 12:00:00');
+
+
+-- OCORRENCIA
+
+INSERT INTO ocorrencia
+(id_ocorrencia, id_dispositivo, id_equipe_responsavel, id_tecnico_responsavel, titulo, descricao, status_ocorrencia, prioridade, data_ocorrencia, resolvida_em)
+VALUES
+(1, 1, 1, 2, 'Temperatura acima do limite', 'Sensor registrou 27,5 graus, acima do limite configurado para a recepcao.', 'em_andamento', 'alta', '2026-11-04 08:05:00', NULL),
+(2, 2, NULL, NULL, 'Iluminacao abaixo do limite', 'Iluminacao da sala de reunioes ficou abaixo do minimo configurado.', 'aberta', 'media', '2026-11-04 08:10:00', NULL),
+(3, 3, 1, NULL, 'Consumo elevado de energia', 'Consumo medido se aproximou do limite definido para o ambiente.', 'aberta', 'alta', '2026-11-04 10:05:00', NULL),
+(4, 4, 2, 2, 'Leitura irregular do sensor', 'Foram identificadas variacoes incomuns nas leituras de temperatura.', 'resolvida', 'media', '2026-11-03 14:00:00', '2026-11-03 16:30:00'),
+(5, 5, NULL, NULL, 'Iluminacao fora do padrao', 'Leitura de iluminacao ficou abaixo do limite minimo do laboratorio.', 'aberta', 'alta', '2026-11-04 10:35:00', NULL);
+
+
+-- HISTORICO_OCORRENCIA
+
+INSERT INTO historico_ocorrencia
+(id_historico_ocorrencia, id_ocorrencia, id_usuario, data_historico_ocorrencia, observacao, status_anterior, status_posterior)
+VALUES
+(1, 1, 2, '2026-11-04 08:20:00', 'Responsavel iniciou a verificacao do sensor.', 'aberta', 'em_andamento'),
+(2, 2, NULL, '2026-11-04 08:10:00', 'Ocorrencia criada automaticamente pelo monitoramento.', NULL, 'aberta'),
+(3, 3, NULL, '2026-11-04 10:05:00', 'Alerta gerado automaticamente pelo monitoramento de energia.', NULL, 'aberta'),
+(4, 4, 2, '2026-11-03 16:30:00', 'Sensor reiniciado e leituras normalizadas.', 'em_andamento', 'resolvida'),
+(5, 5, NULL, '2026-11-04 10:35:00', 'Alerta automatico de iluminacao.', NULL, 'aberta');
+
+
+-- HISTORICO_DISPOSITIVO
+
+INSERT INTO historico_dispositivo
+(id_historico_dispositivo, id_dispositivo, status_dispositivo, data_historico_dispositivo, data_inicio_status, data_fim_status, motivo, consumo_estimado_kwh, custo_estimado, observacao)
+VALUES
+(1, 1, 'ativo', '2026-11-04 08:00:00', '2026-11-04 07:00:00', NULL, 'Operacao normal', 0.0120, 0.01, 'Sensor enviando leituras normalmente'),
+(2, 2, 'ativo', '2026-11-04 08:00:00', '2026-11-04 07:30:00', NULL, 'Operacao normal', 0.0080, 0.01, 'Sensor de iluminacao em funcionamento'),
+(3, 3, 'instavel', '2026-11-04 10:00:00', '2026-11-04 09:45:00', NULL, 'Oscilacao nas medicoes', 0.0150, 0.02, 'Necessaria verificacao tecnica'),
+(4, 4, 'instavel', '2026-11-03 14:00:00', '2026-11-03 14:00:00', '2026-11-03 16:30:00', 'Leituras inconsistentes', 0.0120, 0.01, 'Dispositivo apresentou leituras inconsistentes antes da manutencao'),
+(5, 5, 'ativo', '2026-11-04 10:30:00', '2026-11-04 08:00:00', NULL, 'Operacao normal', 0.0090, 0.01, 'Sensor ativo no laboratorio'),
+(6, 4, 'ativo', '2026-11-03 16:30:00', '2026-11-03 16:30:00', NULL, 'Retorno da manutencao', 0.0120, 0.01, 'Dispositivo voltou ao funcionamento normal');
+
+
+-- SERVICO
+
+INSERT INTO servico
+(nome_servico, descricao, valor_base)
+VALUES
+('monitoramento_temperatura', 'Monitoramento da temperatura dos ambientes e identificacao de alteracoes fora dos limites configurados.', 1500.00),
+('controle_iluminacao', 'Monitoramento dos niveis de iluminacao dos ambientes conforme os limites definidos.', 2000.00),
+('monitoramento_energia', 'Acompanhamento do consumo e da potencia eletrica, com estimativa de custos de energia.', 1800.00),
+('controle_acesso', 'Gerenciamento de credenciais, permissoes e registros de entrada e saida dos ambientes.', 2500.00),
+('monitoramento_dispositivos', 'Acompanhamento do funcionamento e do status dos dispositivos instalados no predio.', 1200.00);
+
+
+-- ORCAMENTO
+
+INSERT INTO orcamento (
+    id_usuario,
+    nome_responsavel,
+    nome_empresa,
+    email,
+    telefone,
+    quantidade_andares,
+    quantidade_ambientes,
+    quantidade_dispositivos,
+    descricao,
+    valor_subtotal,
+    valor_desconto,
+    valor_total,
+    prazo_estimado_dias,
+    data_validade,
+    status_orcamento
+) VALUES
+(NULL, 'Carlos Mendes', 'Edificio Central', 'carlos@edificiocentral.com.br', '(11) 98888-1001', 5, 20, 35, 'Instalacao de monitoramento de temperatura e energia.', 3300.00, 0.00, 3300.00, 20, '2026-12-10', 'enviado'),
+(NULL, 'Mariana Oliveira', 'Residencial Jardim', 'mariana@residencialjardim.com.br', '(11) 98888-1002', 8, 40, 60, 'Implantacao de controle de iluminacao e acesso.', 4500.00, 300.00, 4200.00, 30, '2026-12-15', 'aprovado'),
+(NULL, 'Roberto Almeida', 'Centro Empresarial Alfa', 'roberto@empresarialalfa.com.br', '(11) 98888-1003', 3, 15, 25, 'Monitoramento de temperatura e dispositivos.', 2700.00, 100.00, 2600.00, 15, '2026-12-20', 'em_analise'),
+(NULL, 'Fernanda Costa', 'Shopping Nova Era', 'fernanda@shoppingnovaera.com.br', '(11) 98888-1004', 6, 50, 80, 'Monitoramento de energia, controle de acesso e dispositivos.', 5500.00, 500.00, 5000.00, 40, '2026-12-25', 'aprovado'),
+(NULL, 'Lucas Ferreira', 'Hotel Bela Vista', 'lucas@hotelbelavista.com.br', '(11) 98888-1005', 4, 30, 45, 'Monitoramento de temperatura, iluminacao e energia.', 5300.00, 0.00, 5300.00, 25, '2026-12-30', 'solicitado');
+
+
+-- ORCAMENTO_SERVICO
+
+INSERT INTO orcamento_servico
+(id_orcamento, id_servico, valor_servico)
+VALUES
+(1, 1, 1500.00),
+(1, 3, 1800.00),
+(2, 2, 2000.00),
+(2, 4, 2500.00),
+(3, 1, 1500.00),
+(3, 5, 1200.00),
+(4, 3, 1800.00),
+(4, 4, 2500.00),
+(4, 5, 1200.00),
+(5, 1, 1500.00),
+(5, 2, 2000.00),
+(5, 3, 1800.00);
+
+
+-- PEDIDO
+
+INSERT INTO pedido
+(id_orcamento, valor_contratado, status_pedido, observacoes)
+VALUES
+(2, 4200.00, 'aguardando_pagamento', 'Orcamento aprovado. Aguardando confirmacao do pagamento.'),
+(4, 5000.00, 'confirmado', 'Pedido confirmado apos aprovacao do pagamento.');
+
+
+-- PAGAMENTO
+
+INSERT INTO pagamento (
+    id_pedido,
+    valor_pago,
+    metodo_pagamento,
+    status_pagamento,
+    codigo_transacao,
+    data_pagamento
+) VALUES
+(1, 4200.00, 'pix', 'pendente', NULL, NULL),
+(2, 5000.00, 'cartao_credito', 'aprovado', 'LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');

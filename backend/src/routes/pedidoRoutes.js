@@ -1,10 +1,13 @@
-import { Router } from "express";
 
-export function criarPedidoRoutes({ pedidoController }) {
-    const router = Router();
+import { Router } from 'express';
+import * as PedidoController from '../controllers/PedidoController.js';
 
-    router.post("/", pedidoController.criar);
-    router.get("/:id", pedidoController.buscarPorId);
+const router = Router();
 
-    return router;
-}
+router.get('/', PedidoController.listar);
+router.get('/:id', PedidoController.buscarPorOrcamento);
+router.post('/', PedidoController.criar);
+router.put('/:id', PedidoController.atualizar);
+router.delete('/:id', PedidoController.excluir);
+
+export default router;

@@ -1,36 +1,35 @@
+import * as AuthService from '../services/AuthService.js';
 
-import * as authService from '../services/AuthService';
+function responderErro(erro, res, next) {
+    if (erro instanceof TypeError) {
+        return res.status(422).json({
+            sucesso: false,
+            erro: erro.message
+        });
+    }
+    if (erro.status) {
+        return res.status(erro.status).json({
+            sucesso: false,
+            erro: erro.message
+        });
+    }
+    return next(erro);
+}
 
-export async function cadastrar(req, res) {
+export async function registrar(req, res, next) {
   try {
-    const usuario = await authService.cadastrar(req.body);
-
-    return res.status(201).json({
-      mensagem: 'Usuário cadastrado com sucesso',
-      usuario
-    });
-
+    const usuario = await AuthService.registrar(req.body);
+    return res.status(201).json({ sucesso: true, dados: usuario });
   } catch (erro) {
-    return res.status(400).json({
-      mensagem: erro.message
-    });
+    return responderErro(erro, res, next);
   }
 }
 
-export async function login(req, res) {
+export async function login(req, res, next) {
   try {
-    const { email, senha } = req.body;
-
-    const resultado = await authService.login(email, senha);
-
-    return res.status(200).json({
-      mensagem: 'Login realizado com sucesso',
-      ...resultado
-    });
-
+    const sessao = await AuthService.login(req.body);
+    return res.status(200).json({ sucesso: true, dados: sessao });
   } catch (erro) {
-    return res.status(401).json({
-      mensagem: erro.message
-    });
+    return responderErro(erro, res, next);
   }
 }

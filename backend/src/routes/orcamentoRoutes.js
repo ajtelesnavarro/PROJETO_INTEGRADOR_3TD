@@ -1,12 +1,13 @@
-import { Router } from "express";
 
-export function criarOrcamentoRoutes({ orcamentoController }) {
-    const router = Router();
+import { Router } from 'express';
+import * as PedidoController from '../controllers/PedidoController.js';
 
-    router.post("/", orcamentoController.criar);
-    router.get("/:id", orcamentoController.buscarPorId);
-    router.patch("/:id/aprovar", orcamentoController.aprovar);
-    router.patch("/:id/recusar", orcamentoController.recusar);
+const router = Router();
 
-    return router;
-}
+router.get('/', PedidoController.listar);
+router.get('/:id', PedidoController.buscarPorOrcamento);
+router.post('/', PedidoController.criar);
+router.put('/:id', PedidoController.atualizar);
+router.delete('/:id', PedidoController.excluir);
+
+export default router;

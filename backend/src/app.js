@@ -1,104 +1,77 @@
-import "dotenv/config";
-
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { resolve } from "node:path";
 
-// Rotas
+// Rotas existentes
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { autenticar, autorizarAdmin } from "./middlewares/AuthMiddleware.js";
+import healthRoutes from "./routes/healthRoutes.js";
 import { authRouter } from "./routes/AuthRoutes.js";
-// import { recursosRouter } from "./routes/RecursoRoutes.js";
-import { orcamentoRouter } from "./routes/orcamentoRoutes.js";
-import { pedidoRouter } from "./routes/pedidoRoutes.js";
-import { pagamentoRouter } from "./routes/pagamentoRoutes.js";
+import usuarioRoutes from "./routes/usuarioRoutes.js";
+import orcamentoRoutes from "./routes/orcamentoRoutes.js";
+import pedidoRoutes from "./routes/pedidoRoutes.js";
+import pagamentoRoutes from "./routes/pagamentoRoutes.js";
 
 const app = express();
 
-// ==========================================
-// MIDDLEWARES
-// ==========================================
+// 1. Defesas de borda: Helmet e CORS
 
 app.use(helmet());
 
 const origensPermitidas = (
-    process.env.CORS_ORIGENS ||
-    "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
+  process.env.CORS_ORIGENS || process.env.FRONTEND_URL || "http://localhost:3000"
 )
-    .split(",")
-    .map(origem => origem.trim())
-    .filter(Boolean);
+  .split(",")
+  .map((o) => o.trim());
 
-app.use(cors({
+app.use(
+  cors({
     origin(origem, callback) {
-        if (!origem || origensPermitidas.includes(origem)) {
-            return callback(null, true);
-        }
-
-        return callback(new Error("Origem não permitida pelo CORS."));
+      if (!origem || origensPermitidas.includes(origem)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origem não permitida pelo CORS."));
     },
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 app.use(express.json({ limit: "1mb" }));
 
-// ==========================================
-// ARQUIVOS ESTÁTICOS
-// ==========================================
+// 2. Rotas
 
 app.use("/uploads", express.static(resolve("uploads")));
 
-// ==========================================
-// VERIFICAÇÃO DA API
-// ==========================================
-
-app.get("/api/check", (_req, res) => {
-    return res.status(200).json({
-        sucesso: true,
-        status: "ok",
-        sistema: "Lumora SmartBuilding"
-    });
+app.get("/", (req, res) => {
+  res.json({
+    message: "API do projeto base",
+  });
 });
-
-// ==========================================
-// ROTAS DA API
-// ==========================================
 
 app.use("/api/auth", authRouter);
-// app.use("/api/v1", recursosRouter);
-app.use("/api/orcamentos", orcamentoRouter);
-app.use("/api/pedidos", pedidoRouter);
-app.use("/api/pagamentos", pagamentoRouter);
 
-// ==========================================
-// TRATAMENTO DE ERROS
-// ==========================================
+app.use("/api/health", healthRoutes);
 
-app.use((_req, res) => {
-    return res.status(404).json({
-        sucesso: false,
-        erro: "Rota não encontrada."
-    });
+app.use("/api/orcamentos", orcamentoRoutes);
+
+app.use("/api/pedidos", pedidoRoutes);
+
+app.use("/api/pagamentos", pagamentoRoutes);
+
+app.use("/api/usuarios", autenticar, autorizarAdmin, usuarioRoutes);
+
+// 3. Fallback 404 (rota que não existe)
+
+app.use((req, res) => {
+  res.status(404).json({
+    sucesso: false,
+    erro: `A rota ${req.method} ${req.originalUrl} não existe.`,
+  });
 });
 
-app.use((erro, _req, res, _next) => {
-    const status =
-        Number.isInteger(erro.status) &&
-        erro.status >= 400 &&
-        erro.status <= 599
-            ? erro.status
-            : 500;
-
-    if (status >= 500) {
-        console.error(erro);
-    }
-
-    return res.status(status).json({
-        sucesso: false,
-        erro: status === 500
-            ? "Erro interno do servidor."
-            : erro.message
-    });
-});
+// 4. Tratador global de erros
+app.use(errorHandler);
 
 export default app;

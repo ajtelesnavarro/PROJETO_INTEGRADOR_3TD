@@ -1,48 +1,96 @@
-export function criarPedidoModel({ pool }) {
 
-    async function criar(dados) {
-        const [resultado] = await pool.query(
-            `INSERT INTO pedido (
-                id_orcamento,
-                valor_contratado,
-                status_pedido,
-                observacoes
-            ) VALUES (?, ?, ?, ?)`,
-            [
-                dados.idOrcamento,
-                dados.valorContratado,
-                "aguardando_pagamento",
-                dados.observacoes || null
-            ]
-        );
+import { pool } from '../config/database.js';
 
-        return resultado.insertId;
-    }
+export const listar = async () => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM pedido ORDER BY data_pedido DESC'
+    );
 
-    async function buscarPorId(id) {
-        const [resultado] = await pool.query(
-            `SELECT p.*, o.nome_empresa, o.nome_responsavel,
-                    o.servicos_desejados, o.prazo_estimado_dias
-             FROM pedido p
-             INNER JOIN orcamento o
-             ON p.id_orcamento = o.id_orcamento
-             WHERE p.id_pedido = ?`,
-            [id]
-        );
+    return resultado;
+};
 
-        return resultado[0];
-    }
+export const buscarPorOrcamento = async (id_orcamento) => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM pedido WHERE id_orcamento = ?',
+        [id_orcamento]
+    );
 
-    async function atualizarStatus(id, status) {
-        await pool.query(
-            "UPDATE pedido SET status_pedido = ? WHERE id_pedido = ?",
-            [status, id]
-        );
-    }
+    return resultado[0];
+};
 
-    return {
-        criar,
-        buscarPorId,
-        atualizarStatus
-    };
-}
+export const buscarPorId = async (id) => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM pedido WHERE id_pedido = ?',
+        [id]
+    );
+
+    return resultado[0];
+};
+
+export const buscarOrcamento = async (id_orcamento) => {
+    const [resultado] = await pool.query(
+        'SELECT * FROM orcamento WHERE id_orcamento = ?',
+        [id_orcamento]
+    );
+
+    return resultado[0];
+};
+
+export const criar = async (dados) => {
+    const {
+        id_orcamento,
+        valor_contratado,
+        status_pedido,
+        observacoes
+    } = dados;
+
+    const [resultado] = await pool.query(
+        `INSERT INTO pedido (
+            id_orcamento,
+            valor_contratado,
+            status_pedido,
+            observacoes
+        ) VALUES (?, ?, ?, ?)`,
+        [
+            id_orcamento,
+            valor_contratado,
+            status_pedido ?? 'aguardando_pagamento',
+            observacoes ?? null
+        ]
+    );
+
+    return resultado.insertId;
+};
+
+export const atualizar = async (id, dados) => {
+    const {
+        valor_contratado,
+        status_pedido,
+        observacoes
+    } = dados;
+
+    const [resultado] = await pool.query(
+        `UPDATE pedido SET
+            valor_contratado = ?,
+            status_pedido = ?,
+            observacoes = ?
+        WHERE id_pedido = ?`,
+        [
+            valor_contratado,
+            status_pedido,
+            observacoes,
+            id
+        ]
+    );
+
+    return resultado.affectedRows;
+};
+
+export const excluir = async (id) => {
+    const [resultado] = await pool.query(
+        'DELETE FROM pedido WHERE id_pedido = ?',
+        [id]
+    );
+
+    return resultado.affectedRows;
+};
