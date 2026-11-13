@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import "../partials-css/Navbar.css";
+import "./navbar.css";
 
 export default function Navbar() {
   const pathname = usePathname();

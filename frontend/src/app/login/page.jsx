@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import "./login.css";
+
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", senha: "" });
@@ -28,9 +30,122 @@ export default function Login() {
     }
   }
 
+const canvasRef = useRef(null);
+
+// ANIMAÇÃO DA REDE INTELIGENTE LUMORA
+useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId;
+    let width = 0;
+    let height = 0;
+
+    const resizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+
+        width = rect.width;
+        height = rect.height;
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const particles = Array.from({ length: 55 }, (_, i) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: i % 8 === 0 ? 3 : Math.random() * 1.5 + 1,
+        speedX: (Math.random() - 0.5) * 0.25,
+        speedY: Math.random() * 0.35 + 0.12,
+        opacity: Math.random() * 0.5 + 0.2,
+        pulse: Math.random() * 0.02 + 0.005,
+    }));
+
+    const drawParticles = () => {
+        ctx.clearRect(0, 0, width, height);
+
+        // CONEXÕES ENTRE SENSORES E DISPOSITIVOS
+        particles.forEach((p, i) => {
+            particles.slice(i + 1).forEach((other) => {
+                const dx = p.x - other.x;
+                const dy = p.y - other.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 125) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(other.x, other.y);
+
+                    ctx.strokeStyle = `rgba(120, 145, 255, ${
+                        (1 - distance / 125) * 0.2
+                    })`;
+
+                    ctx.lineWidth = 0.7;
+                    ctx.stroke();
+                }
+            });
+        });
+
+        // PARTÍCULAS DE MONITORAMENTO
+        particles.forEach((p, i) => {
+            p.x += p.speedX;
+            p.y += p.speedY;
+
+            const opacity = Math.max(
+                0.1,
+                Math.min(0.8, p.opacity + Math.sin(Date.now() * p.pulse) * 0.15)
+            );
+
+            if (p.y > height + 10) {
+                p.y = -10;
+                p.x = Math.random() * width;
+            }
+
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+
+            ctx.fillStyle = i % 3 === 0
+                ? `rgba(167, 139, 250, ${opacity})`
+                : `rgba(96, 165, 250, ${opacity})`;
+
+            ctx.shadowBlur = p.size > 2 ? 16 : 9;
+            ctx.shadowColor = i % 3 === 0 ? "#A78BFA" : "#60A5FA";
+            ctx.fill();
+        });
+
+        ctx.shadowBlur = 0;
+
+        animationFrameId = requestAnimationFrame(drawParticles);
+    };
+
+    drawParticles();
+
+    return () => {
+        window.removeEventListener("resize", resizeCanvas);
+        cancelAnimationFrame(animationFrameId);
+    };
+}, []);
+
   return (
     <main className="auth">
       <div className="auth-left">
+        <canvas
+            ref={canvasRef}
+            className="auth-particles"
+            aria-hidden="true"
+        />
 
         <div className="auth-visual">
           <div className="auth-ring r1"></div>

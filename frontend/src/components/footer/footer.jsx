@@ -1,6 +1,6 @@
 'use client';
 import Link from "next/link";
-import "../partials-css/Footer.css"
+import "./footer.css"
 import Image from "next/image";
 
 export default function Navbar() {
