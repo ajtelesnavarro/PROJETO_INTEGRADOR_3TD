@@ -1,5 +1,6 @@
 import Link from "next/link";
 import "./solucoes.css";
+import Image from "next/image";
 
 const solutions = [
   { n: "01", icon: "◉", title: "Monitoramento inteligente", text: "Acompanhe em uma visão centralizada as condições dos ambientes, dispositivos e sistemas conectados.", tags: ["Sensores", "Status", "Histórico"] },
@@ -25,7 +26,14 @@ export default function Solucoes() {
   return <main>
     <section className="solutions-hero"><div className="container solutions-hero-grid">
       <div><div className="pill"><span className="pulse"/> ECOSSISTEMA LUMORA</div><h1>Seu edifício, conectado a uma <em>operação mais inteligente.</em></h1><p>Uma visão integrada para acompanhar ambientes, energia, acessos e ocorrências — com informações organizadas para apoiar decisões melhores.</p><div className="hero-buttons"><Link href="/orcamento" className="button primary">Planejar meu projeto <span>→</span></Link><a href="#catalogo" className="button secondary">Explorar soluções ↓</a></div></div>
-      <div className="solutions-visual"><div className="solution-orbit orbit-a"/><div className="solution-orbit orbit-b"/><div className="solution-core"><span>L</span><small>SMART BUILDING</small></div><div className="orbit-label label-a">ENERGIA <b>↗</b></div><div className="orbit-label label-b">AMBIENTES <b>◉</b></div><div className="orbit-label label-c">OPERAÇÃO <b>✓</b></div></div>
+      <div className="solutions-visual">
+        <div className="solution-orbit orbit-a"/>
+        <div className="solution-orbit orbit-b"/><div className="solution-core">
+          <span>L</span><small>SMART BUILDING</small></div>
+          <div className="orbit-label label-a">ENERGIA <b>↗</b></div>
+          <div className="orbit-label label-b">AMBIENTES <b>◉</b></div>
+          <div className="orbit-label label-c">OPERAÇÃO <b>✓</b></div>
+          </div>
     </div></section>
     <section className="solutions-intro section"><div className="container solutions-intro-grid"><div><div className="section-kicker">01 — UMA PLATAFORMA, VÁRIAS POSSIBILIDADES</div><h2>Menos informações isoladas. <span>Mais visão do todo.</span></h2></div><p>Uma operação predial envolve muitos sistemas e equipes. A Lumora propõe reunir essas informações em uma experiência centralizada, que ajuda a entender o cenário e agir com mais contexto.</p></div></section>
     <section className="solution-catalog" id="catalogo"><div className="container"><div className="section-heading"><div><div className="section-kicker">02 — NOSSAS SOLUÇÕES</div><h2>Inteligência em cada<br/>parte da operação.</h2></div><p>Recursos que podem ser combinados de acordo com a estrutura e as prioridades de cada edifício.</p></div><div className="solution-grid">{solutions.map(item=><article className="solution-card" key={item.n}><div className="solution-card-top"><span>{item.n} / 06</span><i>{item.icon}</i></div><h3>{item.title}</h3><p>{item.text}</p><div className="solution-tags">{item.tags.map(tag=><span key={tag}>{tag}</span>)}</div></article>)}</div></div></section>

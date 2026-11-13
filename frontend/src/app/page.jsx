@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Reveal from "@/components/animations/Reveal";
+import "./page.css";
 
 export default async function Home() {
   return (

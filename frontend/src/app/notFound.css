@@ -1,0 +1,77 @@
+
+/* PÁGINA 404 */
+
+.not-found {
+    min-height: 65vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 70px 20px;
+    background: linear-gradient(
+        180deg,
+        #F1F5FF 0%,
+        #F8F9FF 55%,
+        #FFFFFF 100%
+    );
+}
+
+/* IDENTIFICAÇÃO DO ERRO */
+
+.not-found .section-kicker {
+    font: 10px "DM Mono";
+    color: #7C3AED;
+    letter-spacing: 1.5px;
+}
+
+/* TÍTULO */
+
+.not-found h1 {
+    font: 800 clamp(34px, 5vw, 56px)/1.08 "Plus Jakarta Sans";
+    color: #172B5E;
+    letter-spacing: -2px;
+    margin: 20px auto;
+    max-width: 650px;
+}
+
+/* DESCRIÇÃO */
+
+.not-found p {
+    color: #64748B;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 0 auto 25px;
+    max-width: 440px;
+}
+
+/* BOTÃO */
+
+.not-found .button.primary {
+    background: linear-gradient(
+        110deg,
+        #2563EB,
+        #7C3AED
+    );
+    color: #FFFFFF;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.not-found .button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(37, 99, 235, .2);
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 560px) {
+    .not-found {
+        min-height: 65vh;
+        padding: 60px 20px;
+    }
+
+    .not-found h1 {
+        font-size: 36px;
+        letter-spacing: -1.5px;
+    }
+}
