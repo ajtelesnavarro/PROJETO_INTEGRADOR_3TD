@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import "./login.css";
-import Image from "next/image";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", senha: "" });
@@ -13,7 +12,7 @@ export default function Login() {
     e.preventDefault();
     setMessage("Autenticando...");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
       const r = await fetch(`${apiUrl}/api/v1/auth/gerarToken`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
