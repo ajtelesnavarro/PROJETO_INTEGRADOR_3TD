@@ -159,17 +159,14 @@ CREATE TABLE equipe_usuario (
     id_equipe_usuario INT AUTO_INCREMENT PRIMARY KEY,
     id_equipe INT NOT NULL,
     id_usuario INT NOT NULL,
-    id_predio INT NOT NULL,
     data_entrada DATE NOT NULL,
     data_saida DATE NULL,
 
-    CONSTRAINT fk_equipe_usuario_equipe
-        FOREIGN KEY (id_equipe, id_predio)
-        REFERENCES equipe(id_equipe, id_predio),
+
 
     CONSTRAINT fk_equipe_usuario_usuario
-        FOREIGN KEY (id_usuario, id_predio)
-        REFERENCES usuario(id_usuario, id_predio),
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario),
 
     UNIQUE (id_equipe, id_usuario),
 
@@ -978,10 +975,10 @@ VALUES
 (3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
 
 -- Perfil: Secretaria | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
-(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1004', 'secretaria', '12345678904', NULL, '1992-11-17', 'ativo'),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', '(11) 90000-1004', 'porteiro', '12345678904', NULL, '1992-11-17', 'ativo'),
 
 -- Perfil: Visitante | Senha teste: 12345678 | Hash: $2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r
-(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', NULL, 'visitante', '12345678905', NULL, '2000-06-25', 'ativo');
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$eImiTXuWVxfM37uY4JANjQ.5/A8S9.jU522c2A/0L2j1i2o3p4q5r', NULL, 'locador', '12345678905', NULL, '2000-06-25', 'ativo');
 
 
 -- SETOR
@@ -1020,11 +1017,11 @@ VALUES
 -- EQUIPE_USUARIO
 
 INSERT INTO equipe_usuario
-(id_equipe_usuario, id_equipe, id_usuario, id_predio, data_entrada, data_saida)
+(id_equipe_usuario, id_equipe, id_usuario, data_entrada, data_saida)
 VALUES
-(1, 1, 2, 1, '2024-02-01', NULL),
-(2, 2, 2, 1, '2024-02-01', NULL),
-(3, 2, 4, 1, '2024-02-10', NULL);
+(1, 1, 1, '2024-02-01', NULL),
+(2, 2, 1, '2024-02-01', NULL),
+(3, 2, 3, '2024-02-10', NULL);
 
 
 -- DISPOSITIVO
