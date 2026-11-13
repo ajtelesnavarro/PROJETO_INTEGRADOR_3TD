@@ -1,0 +1,19 @@
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-simbolo {
+  width: 70px;
+  height: 65px;
+  object-fit: contain;
+}
+
+.logo-nome {
+  width: 120px;
+  height: 85px;
+  object-fit: contain;
+}

@@ -1,0 +1,146 @@
+/* FOOTER */
+
+.footer {
+    padding: 62px 0 22px;
+    background: linear-gradient(120deg, #123047 0%, #202B55 55%, #4B267A 100%);
+    color: #F4F7FA;
+    border: 0;
+}
+
+.footer-main {
+    display: grid;
+    grid-template-columns: 1.35fr .7fr .9fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+}
+
+.footer .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #FFFFFF;
+}
+
+.footer .logo-simbolo {
+    width: 70px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.footer .logo-nome {
+    width: 140px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.footer-brand p,
+.footer-note p {
+    font-size: 12px;
+    line-height: 1.9;
+    color: #D0DCE8;
+    margin-top: 18px;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.footer-column b {
+    font-size: 11px;
+    color: #FFFFFF;
+    margin-bottom: 7px;
+}
+
+.footer-column a,
+.footer-note > a {
+    font-size: 11px;
+    color: #D0DCE8;
+    transition: color .2s;
+}
+
+.footer-column a:hover,
+.footer-note > a:hover {
+    color: #19B5A5;
+}
+
+.footer-status {
+    font: 9px "DM Mono";
+    letter-spacing: 1px;
+    color: #19B5A5;
+}
+
+.footer-status i {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #19B5A5;
+    margin-right: 7px;
+}
+
+.footer-note > a {
+    display: inline-block;
+    color: #FFFFFF;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(244, 247, 250, .2);
+    padding-top: 19px;
+    display: flex;
+    justify-content: space-between;
+    color: #C0CEDD;
+    font-size: 9px;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .footer-main {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px 20px;
+    }
+
+    .footer-bottom {
+        display: block;
+        line-height: 2;
+    }
+
+    .footer-bottom span {
+        display: block;
+    }
+}
+
+
+.footer-images {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #FFFFFF;
+    padding: 10px 18px;
+    border-radius: 12px;
+    width: fit-content;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.footer .logo-simbolo {
+    width: 55px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.footer .logo-nome {
+    width: 120px;
+    height: 50px;
+    object-fit: contain;
+}

@@ -1,6 +1,6 @@
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer"
+import Navbar from "@/components/partials/Navbar";
+import Footer from "@/components/partials/Footer"
 
 export const metadata = {
   title: "Lumora — Smart Buildings",

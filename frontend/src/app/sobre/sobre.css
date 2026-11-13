@@ -1,0 +1,598 @@
+/* PÁGINA SOBRE NÓS */
+
+/* HERO */
+.inner-hero {
+    background: linear-gradient(180deg, #0B132B, #111A3B);
+    padding: 125px 0 105px;
+}
+
+.inner-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr .6fr;
+    gap: 80px;
+    align-items: end;
+}
+
+.inner-hero h1 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 58px;
+    line-height: 1.04;
+    letter-spacing: -3px;
+    color: #F5F7FF;
+    margin: 25px 0 0;
+}
+
+.inner-hero p {
+    color: #AAB6D3;
+    font-size: 15px;
+    line-height: 1.9;
+    margin: 0;
+}
+
+/* HERO SOBRE */
+.about-hero {
+    padding: 115px 0 90px;
+    background: linear-gradient(135deg, #0B132B, #172B5E);
+}
+
+.about-hero .inner-hero-grid {
+    grid-template-columns: 1.1fr .7fr;
+    align-items: center;
+    gap: 95px;
+}
+
+.about-hero h1 {
+    max-width: 760px;
+    font-size: 64px;
+}
+
+.about-hero p {
+    font-size: 16px;
+    max-width: 440px;
+}
+
+/* IMAGEM INSTITUCIONAL */
+.about-image-section {
+    padding: 0 0 55px;
+    background: #0B132B;
+}
+
+.about-image {
+    height: 440px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2200&q=90') center 48%/cover;
+}
+
+.about-image-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(11,19,43,.92), rgba(23,43,94,.25)), linear-gradient(0deg, rgba(11,19,43,.55), transparent 65%);
+}
+
+.about-image-copy {
+    position: absolute;
+    left: 55px;
+    bottom: 65px;
+    max-width: 610px;
+    color: #F5F7FF;
+}
+
+.about-image-copy span,
+.mission-card > span {
+    font: 10px "DM Mono";
+    letter-spacing: 1.5px;
+    color: #A78BFA;
+}
+
+.about-image-copy h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 43px;
+    line-height: 1.08;
+    letter-spacing: -1.8px;
+    margin: 18px 0 0;
+}
+
+.about-image-note {
+    position: absolute;
+    right: 35px;
+    bottom: 30px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    color: #D7DDF0;
+    font: 9px "DM Mono";
+}
+
+.about-image-note b {
+    color: #A78BFA;
+}
+
+/* HISTÓRIA */
+.about-story {
+    padding-top: 105px;
+    padding-bottom: 115px;
+    background: #F5F7FF;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: 100px;
+}
+
+.about-story .about-grid {
+    gap: 120px;
+}
+
+.about-story h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 43px;
+    color: #0B132B;
+    letter-spacing: -2px;
+    margin: 20px 0;
+}
+
+.about-story h2 span {
+    color: #7C3AED;
+}
+
+.about-story .about-story h2 {
+    max-width: 480px;
+}
+
+.about-story p {
+    color: #64708D;
+    font-size: 16px;
+    line-height: 2;
+    margin: 0 0 25px;
+}
+
+/* MISSÃO, VISÃO E PROPÓSITO */
+.mission-section {
+    padding: 20px 0 120px;
+    background: #F5F7FF;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: 1.2fr .8fr .8fr;
+    gap: 16px;
+}
+
+.mission-card {
+    min-height: 340px;
+    padding: 32px;
+    border: 1px solid #DCE3F2;
+    border-radius: 13px;
+    background: #FFFFFF;
+}
+
+.mission-main {
+    background: linear-gradient(145deg, #172B5E, #35216B);
+    border-color: #35216B;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mission-main h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 34px;
+    line-height: 1.15;
+    letter-spacing: -1.4px;
+    color: #FFFFFF;
+    max-width: 470px;
+    margin: 40px 0 0;
+}
+
+.mission-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(167,139,250,.16);
+    color: #A78BFA;
+    display: grid;
+    place-items: center;
+    font-size: 27px;
+    margin-bottom: 35px;
+}
+
+.mission-card:not(.mission-main) > span {
+    color: #7C3AED;
+}
+
+.mission-card h3 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 23px;
+    color: #0B132B;
+    margin: 14px 0;
+}
+
+.mission-card p {
+    font-size: 12px;
+    line-height: 1.85;
+    color: #64708D;
+    margin: 0;
+}
+
+/* VALORES */
+.values-dark {
+    background: #0B132B;
+    padding: 115px 0 125px;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-top: 50px;
+}
+
+.values-heading {
+    font-family: "Plus Jakarta Sans";
+    font-size: 44px;
+    line-height: 1.08;
+    letter-spacing: -2px;
+    color: #F5F7FF;
+    margin: 25px 0 0;
+}
+
+.value {
+    border-top: 1px solid rgba(167,139,250,.28);
+    padding-top: 22px;
+    min-height: 225px;
+}
+
+.value span {
+    font: 10px "DM Mono";
+    color: #A78BFA;
+}
+
+.value h3 {
+    color: #F5F7FF;
+    font-family: "Plus Jakarta Sans";
+    font-size: 25px;
+    margin: 45px 0 10px;
+}
+
+.value p {
+    color: #AAB6D3;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* PLATAFORMA */
+.about-platform {
+    padding: 120px 0;
+    background: #F5F7FF;
+}
+
+.platform-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 50px;
+    margin: 25px 0 45px;
+}
+
+.platform-heading h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 43px;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    color: #0B132B;
+    max-width: 550px;
+    margin: 0;
+}
+
+.platform-heading p {
+    max-width: 360px;
+    color: #64708D;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 0;
+}
+
+.platform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.platform-card {
+    position: relative;
+    min-height: 270px;
+    padding: 28px;
+    border: 1px solid #DCE3F2;
+    border-radius: 12px;
+    background: #FFFFFF;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+
+.platform-card:hover {
+    transform: translateY(-5px);
+    border-color: #A78BFA;
+    box-shadow: 0 18px 45px rgba(23,43,94,.10);
+}
+
+.platform-number {
+    font: 10px "DM Mono";
+    color: #8995B0;
+}
+
+.platform-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #EEE9FF;
+    color: #7C3AED;
+    font-size: 27px;
+    margin: 30px 0 22px;
+}
+
+.platform-card h3 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 22px;
+    color: #0B132B;
+    margin: 0 0 10px;
+}
+
+.platform-card p {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #64708D;
+    margin: 0;
+    max-width: 300px;
+}
+
+/* PÚBLICO-ALVO */
+.audience-section {
+    background: #EEF1FC;
+    padding: 100px 0;
+}
+
+.audience {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+}
+
+.audience h2 {
+    font-size: 40px;
+    color: #0B132B;
+}
+
+.audience-copy {
+    max-width: 440px;
+    color: #64708D;
+    font-size: 13px;
+    line-height: 1.9;
+    margin-top: 25px;
+}
+
+.roles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.roles span {
+    padding: 18px;
+    border: 1px solid #DCE3F2;
+    font-size: 11px;
+    font-weight: 800;
+    color: #172B5E;
+    border-radius: 7px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.roles span small {
+    font-size: 9px;
+    font-weight: 500;
+    color: #8995B0;
+}
+
+/* CTA */
+.centered-cta {
+    text-align: center;
+    background: linear-gradient(135deg, #0B132B, #172B5E);
+    padding: 115px 0;
+}
+
+.centered-cta .section-kicker {
+    margin-bottom: 22px;
+    color: #A78BFA;
+}
+
+.centered-cta h2 {
+    font-family: "Plus Jakarta Sans";
+    font-size: 45px;
+    line-height: 1.08;
+    letter-spacing: -2px;
+    color: #F5F7FF;
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+.centered-cta p {
+    color: #AAB6D3;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 18px auto 28px;
+    max-width: 480px;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 900px) {
+    .inner-hero-grid,
+    .about-grid,
+    .audience {
+        grid-template-columns: 1fr;
+    }
+
+    .about-hero .inner-hero-grid {
+        grid-template-columns: 1fr;
+        gap: 35px;
+    }
+
+    .about-hero h1 {
+        font-size: 52px;
+    }
+
+    .mission-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mission-main {
+        grid-column: span 2;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .about-story .about-grid {
+        gap: 45px;
+    }
+
+    .platform-heading {
+        display: block;
+    }
+
+    .platform-heading p {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 560px) {
+    .inner-hero {
+        padding: 85px 0;
+    }
+
+    .about-hero {
+        padding: 80px 0 65px;
+    }
+
+    .about-hero h1 {
+        font-size: 40px;
+        letter-spacing: -2px;
+    }
+
+    .about-image-section {
+        padding-bottom: 25px;
+    }
+
+    .about-image {
+        height: 390px;
+        border-radius: 12px;
+    }
+
+    .about-image-copy {
+        left: 25px;
+        bottom: 65px;
+        right: 20px;
+    }
+
+    .about-image-copy h2 {
+        font-size: 31px;
+    }
+
+    .about-image-note {
+        left: 25px;
+        right: auto;
+        bottom: 23px;
+        display: block;
+    }
+
+    .about-story {
+        padding-top: 75px;
+        padding-bottom: 75px;
+    }
+
+    .about-story .about-grid {
+        gap: 25px;
+    }
+
+    .mission-section {
+        padding-bottom: 80px;
+    }
+
+    .mission-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mission-main {
+        grid-column: auto;
+        min-height: 300px;
+    }
+
+    .mission-card {
+        min-height: 260px;
+        padding: 25px;
+    }
+
+    .mission-main h2 {
+        font-size: 29px;
+    }
+
+    .values-dark {
+        padding: 85px 0;
+    }
+
+    .values-heading {
+        font-size: 35px;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .value {
+        min-height: 0;
+        padding-bottom: 15px;
+    }
+
+    .value h3 {
+        margin-top: 28px;
+    }
+
+    .about-platform {
+        padding: 85px 0;
+    }
+
+    .platform-heading h2 {
+        font-size: 34px;
+    }
+
+    .platform-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .platform-card {
+        min-height: 230px;
+    }
+
+    .audience {
+        gap: 40px;
+    }
+
+    .roles {
+        grid-template-columns: 1fr;
+    }
+
+    .centered-cta {
+        padding: 85px 0;
+    }
+
+    .centered-cta h2 {
+        font-size: 34px;
+    }
+}

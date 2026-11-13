@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import "../partials-css/Navbar.css";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,7 +19,23 @@ export default function Navbar() {
     <header className="nav">
       <div className="container nav-inner">
         <Link href="/" className="brand" onClick={() => setOpen(false)}>
-          <span className="logo-mark">L</span><span>lumora</span>
+          <Image
+            src="/images/logo.png"
+            alt="Símbolo Lumora"
+            width={70}
+            height={60}
+            className="logo-simbolo"
+            priority
+          />
+
+          <Image
+            src="/images/logotipo.png"
+            alt="Lumora"
+            width={140}
+            height={60}
+            className="logo-nome"
+            priority
+          />
         </Link>
         <nav className={open ? "nav-menu is-open" : "nav-menu"} aria-label="Navegação principal">
           {links.map(([label, href]) => <Link key={href} className={pathname === href ? "active" : ""} href={href} onClick={() => setOpen(false)}>{label}</Link>)}

@@ -23,7 +23,6 @@ export async function listar(req, res, next) {
     return res.status(200).json({
       sucesso: true,
       dados: resultado.usuarios,
-      paginacao: resultado.paginacao
     });
   } catch (erro) {
     return responderErro(erro, res, next);

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import "./sobre.css";
 
 export default function Sobre() {
   return (
