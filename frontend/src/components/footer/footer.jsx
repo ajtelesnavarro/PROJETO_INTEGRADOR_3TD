@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./footer.css"
 import Image from "next/image";
 
-export default function Navbar() {
+export default function Footer() {
 
   return (
     <footer className="footer">
