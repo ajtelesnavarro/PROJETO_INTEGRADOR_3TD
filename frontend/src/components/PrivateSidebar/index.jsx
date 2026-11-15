@@ -93,12 +93,14 @@ export default function Sidebar({ sidebar, setSidebar }) {
           <Logo />
 
           <button
-            className="lumora-mobile-close"
-            onClick={() => setSidebar(false)}
-            aria-label="Fechar menu"
-          >
-            <Icon name="close" />
-          </button>
+  type="button"
+  className="lumora-mobile-close"
+  onClick={() => setSidebar(false)}
+  aria-label="Fechar menu"
+  title="Fechar menu"
+>
+  <Icon name="close" />
+</button>
 
           <div className="lumora-api-status">
             <i />

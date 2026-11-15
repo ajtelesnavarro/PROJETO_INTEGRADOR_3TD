@@ -1,4 +1,33 @@
 .private-layout {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.private-main {
+  width: calc(100% - 280px);
+  min-height: 100vh;
+  margin-left: 280px;
+  transition: width 0.3s ease, margin-left 0.3s ease;
+}
+
+.private-layout.sidebar-closed .private-main {
+  width: 100%;
+  margin-left: 0;
+}
+
+.private-content {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .private-main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.private-layout {
     display: flex;
     min-height: 100vh;
     width: 100%;

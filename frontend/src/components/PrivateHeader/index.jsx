@@ -36,6 +36,7 @@ function HeaderIcon({ name, size = 18 }) {
 
 export default function Header({
   setSidebar,
+  sidebar,
   buildingName = "Edifício cadastrado",
   userName = "Usuário",
   userRole = "Administrador",
@@ -72,26 +73,17 @@ export default function Header({
   return (
     <header className="lumora-header">
       <div className="lumora-header-left">
-        <button
-          className="lumora-menu-btn"
-          onClick={() => setSidebar(true)}
-          aria-label="Abrir menu"
-        >
-          <HeaderIcon name="menu" />
-        </button>
-
-        <div className="lumora-global-search">
-          <HeaderIcon name="search" size={17} />
-
-          <input
-            ref={searchRef}
-            type="search"
-            placeholder="Buscar prédio, ambiente ou dispositivo..."
-            aria-label="Buscar no sistema"
-          />
-
-          <kbd>Ctrl K</kbd>
-        </div>
+        {!sidebar && (
+  <button
+    type="button"
+    className="lumora-open-sidebar"
+    onClick={() => setSidebar(true)}
+    aria-label="Abrir menu lateral"
+    title="Abrir menu"
+  >
+  <i className="bi bi-arrows-angle-expand"></i>
+  </button>
+)}
       </div>
 
       <div className="lumora-header-actions">
