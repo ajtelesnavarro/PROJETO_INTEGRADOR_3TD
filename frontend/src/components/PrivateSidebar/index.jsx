@@ -1,15 +1,20 @@
 
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import "./sidebar.css";
 
+// PÁGINAS DO SISTEMA
 const nav = [
-  { id: "dashboard", label: "Dashboard", meta: "Visão geral", icon: "grid" },
-  { id: "buildings", label: "Prédios & Andares", meta: "Prédio · andar · setor", icon: "building" },
-  { id: "rooms", label: "Ambientes & Climatização", meta: "Temperatura · energia", icon: "rooms" },
-  { id: "devices", label: "Dispositivos IoT", meta: "Dispositivo · histórico", icon: "cpu" },
-  { id: "access", label: "Controle de Acesso", meta: "Credenciais · eventos", icon: "shield" },
-  { id: "tickets", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket" },
-  { id: "finance", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet" },
-  { id: "teams", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users" },
+  { id: "dashboard", label: "Dashboard", meta: "Visão geral", icon: "grid", href: "/private/dashboard" },
+  { id: "buildings", label: "Prédios & Andares", meta: "Prédio · andar · setor", icon: "building", href: "/private/predios" },
+  { id: "rooms", label: "Ambientes & Climatização", meta: "Temperatura · energia", icon: "rooms", href: "/private/ambientes" },
+  { id: "devices", label: "Dispositivos IoT", meta: "Dispositivo · histórico", icon: "cpu", href: "/private/dispositivos" },
+  { id: "access", label: "Controle de Acesso", meta: "Credenciais · eventos", icon: "shield", href: "/private/acessos" },
+  { id: "tickets", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
+  { id: "finance", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
+  { id: "teams", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
 ];
 
 const icons = {
@@ -78,12 +83,9 @@ function Logo() {
   );
 }
 
-export default function Sidebar({
-  page,
-  navigate,
-  sidebar,
-  setSidebar,
-}) {
+export default function Sidebar({ sidebar, setSidebar }) {
+  const pathname = usePathname();
+
   return (
     <>
       <aside className={`lumora-sidebar ${sidebar ? "open" : ""}`}>
@@ -110,28 +112,34 @@ export default function Sidebar({
         <nav className="lumora-navigation">
           <span className="lumora-nav-label">PLATAFORMA</span>
 
-          {nav.map((item, index) => (
-            <button
-              key={item.id}
-              className={`lumora-nav-item ${page === item.id ? "active" : ""}`}
-              onClick={() => navigate(item.id)}
-            >
-              <span className="lumora-nav-icon">
-                <Icon name={item.icon} />
-              </span>
+          {nav.map((item, index) => {
+            const active = pathname === item.href ||
+              pathname.startsWith(`${item.href}/`);
 
-              <span className="lumora-nav-text">
-                <b>{item.label}</b>
-                <small>{item.meta}</small>
-              </span>
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`lumora-nav-item ${active ? "active" : ""}`}
+                onClick={() => setSidebar?.(false)}
+              >
+                <span className="lumora-nav-icon">
+                  <Icon name={item.icon} />
+                </span>
 
-              {page === item.id && <i className="lumora-nav-indicator" />}
+                <span className="lumora-nav-text">
+                  <b>{item.label}</b>
+                  <small>{item.meta}</small>
+                </span>
 
-              {index === 0 && (
-                <em className="lumora-live-tag">LIVE</em>
-              )}
-            </button>
-          ))}
+                {active && <i className="lumora-nav-indicator" />}
+
+                {index === 0 && (
+                  <em className="lumora-live-tag">LIVE</em>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="lumora-sidebar-footer">
