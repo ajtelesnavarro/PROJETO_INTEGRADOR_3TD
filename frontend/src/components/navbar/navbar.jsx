@@ -11,9 +11,9 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const links = [
     ["Início", "/"],
-    ["Sobre nós", "/sobre"],
-    ["Soluções", "/solucoes"],
-    ["Nossa tecnologia", "/tecnologia"],
+    ["Sobre nós", "/public/sobre"],
+    ["Soluções", "/public/solucoes"],
+    ["Nossa tecnologia", "/public/tecnologia"],
   ];
   return (
     <header className="nav">
