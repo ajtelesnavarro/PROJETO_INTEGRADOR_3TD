@@ -1,8 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import "./dashboard.css";
+import { useEffect, useState } from "react";
+
+const FORM_VAZIO = {
+  nome: "",
+  estado: "",
+  cidade: "",
+  bairro: "",
+  rua: "",
+  numero: "",
+  cep: "",
+  complemento: "",
+};
 
 function Icon({ name, size = 18 }) {
   const paths = {
@@ -37,34 +48,208 @@ function Icon({ name, size = 18 }) {
   );
 }
 
-function PageTitle() {
-  const [showModal, setShowModal] = useState(false);
+function PageTitle({ toast }) {
+  const [modalAberto, setModalAberto] = useState(false);
+  const [form, setForm] = useState(FORM_VAZIO);
+
+  useEffect(() => {
+    if (!modalAberto) return;
+    function onKey(e) {
+      if (e.key === "Escape") fechar();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalAberto]);
+
+  function atualizar(campo, valor) {
+    setForm((atual) => ({ ...atual, [campo]: valor }));
+  }
+
+  function fechar() {
+    setModalAberto(false);
+    setForm(FORM_VAZIO);
+  }
+
+  function cadastrar(e) {
+    e.preventDefault();
+    // Na integração: enviar `form` para a API aqui.
+    console.log("Novo prédio:", form);
+    fechar();
+    toast("Prédio cadastrado com sucesso!");
+  }
+
   return (
-    <div className="dash-title">
-      <div>
-        <span className="dash-eyebrow">CENTRAL DE OPERAÇÕES</span>
-        <h1>Dashboard</h1>
-        <p>Acompanhe os indicadores e a situação operacional do edifício.</p>
+    <>
+      <div className="dash-title">
+        <div>
+          <span className="dash-eyebrow">CENTRAL DE OPERAÇÕES</span>
+          <h1>Dashboard</h1>
+          <p>Acompanhe os indicadores e a situação operacional do edifício.</p>
+        </div>
+
+        <div className="dash-title-right">
+          <button
+            className="pa-primary-button"
+            onClick={() => setModalAberto(true)}
+          >
+            <span>＋</span>
+            Adicionar prédio
+          </button>
+
+          <span className="dash-demo">
+            <i />
+            Ambiente de demonstração
+          </span>
+          <span className="dash-date">
+            <Icon name="clock" size={15} />
+            Visão geral
+          </span>
+        </div>
       </div>
 
-      <div className="dash-title-right">
-      <button
-        className="pa-primary-button"
-        onClick={() => setModalAberto(true)}
-      >
-        <span>＋</span>
-        Adicionar prédio
-      </button>
-        <span className="dash-demo">
-          <i />
-          Ambiente de demonstração
-        </span>
-        <span className="dash-date">
-          <Icon name="clock" size={15} />
-          Visão geral
-        </span>
+      
+{modalAberto && (
+  <div className="dash-modal-backdrop" onMouseDown={fechar}>
+    <form
+      className="dash-modal"
+      onSubmit={cadastrar}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div className="dash-modal-heading">
+        <div>
+          <span className="dash-modal-eyebrow">
+            ESTRUTURA PREDIAL
+          </span>
+          <h2>Novo prédio</h2>
+          <p>Preencha os dados para cadastrar um edifício.</p>
+        </div>
+
+        <button
+          type="button"
+          className="dash-modal-close"
+          onClick={fechar}
+          aria-label="Fechar"
+        >
+          ×
+        </button>
       </div>
-    </div>
+
+      <div className="dash-modal-fields">
+        <label htmlFor="nome_predio">
+          Nome do prédio *
+          <input
+            id="nome_predio"
+            required
+            autoFocus
+            value={form.nome}
+            onChange={(e) => atualizar("nome", e.target.value)}
+            placeholder="Ex.: Edifício Empresarial Central"
+          />
+        </label>
+
+        <div className="dash-form-row">
+          <label htmlFor="estado">
+            Estado *
+            <input
+              id="estado"
+              required
+              value={form.estado}
+              onChange={(e) => atualizar("estado", e.target.value)}
+              placeholder="SP"
+            />
+          </label>
+
+          <label htmlFor="cidade">
+            Cidade *
+            <input
+              id="cidade"
+              required
+              value={form.cidade}
+              onChange={(e) => atualizar("cidade", e.target.value)}
+              placeholder="Santo André"
+            />
+          </label>
+        </div>
+
+        <div className="dash-form-row">
+          <label htmlFor="bairro">
+            Bairro
+            <input
+              id="bairro"
+              value={form.bairro}
+              onChange={(e) => atualizar("bairro", e.target.value)}
+              placeholder="Ex.: Centro"
+            />
+          </label>
+
+          <label htmlFor="cep">
+            CEP *
+            <input
+              id="cep"
+              required
+              inputMode="numeric"
+              maxLength={9}
+              value={form.cep}
+              onChange={(e) => atualizar("cep", e.target.value)}
+              placeholder="00000-000"
+            />
+          </label>
+        </div>
+
+        <div className="dash-form-row dash-form-row-street">
+          <label htmlFor="rua">
+            Rua *
+            <input
+              id="rua"
+              required
+              value={form.rua}
+              onChange={(e) => atualizar("rua", e.target.value)}
+              placeholder="Nome da rua"
+            />
+          </label>
+
+          <label htmlFor="numero">
+            Número
+            <input
+              id="numero"
+              type="number"
+              min={0}
+              value={form.numero}
+              onChange={(e) => atualizar("numero", e.target.value)}
+              placeholder="Nº"
+            />
+          </label>
+        </div>
+
+        <label htmlFor="complemento">
+          Complemento
+          <input
+            id="complemento"
+            value={form.complemento}
+            onChange={(e) => atualizar("complemento", e.target.value)}
+            placeholder="Bloco, torre, sala..."
+          />
+        </label>
+      </div>
+
+      <div className="dash-modal-actions">
+        <button
+          type="button"
+          className="dash-modal-cancel"
+          onClick={fechar}
+        >
+          Cancelar
+        </button>
+
+        <button type="submit" className="dash-primary-button">
+          Cadastrar prédio
+          <span>＋</span>
+        </button>
+      </div>
+    </form>
+  </div>
+      )}
+    </>
   );
 }
 
@@ -344,7 +529,7 @@ export default function DashboardPage() {
 
   return (
     <div className="lumora-dashboard">
-      <PageTitle />
+      <PageTitle toast={showToast} />
 
       <div className="dash-demo-notice">
         <span><Icon name="alert" size={17} /></span>
@@ -434,28 +619,6 @@ export default function DashboardPage() {
       </section>
 
       <Incidents toast={showToast} />
-
-      {/* <div className="">
-          <form action="">
-            <label htmlFor="nome_predio">Nome do prédio</label>
-            <input type="text" name="nome_predio" id="nome_predio" />
-            <label htmlFor="">Estado</label>
-            <input type="text" name="estado" id="estado" />
-            <label htmlFor="cidade">Cidade</label>
-            <input type="text" name="cidade" id="cidade" />
-            <label htmlFor="bairro">Bairro</label>
-            <input type="text" name="bairro" id="bairro" />
-            <label htmlFor="rua">Rua</label>
-            <input type="text" name="rua" id="rua" />
-            <label htmlFor="numero">Numero</label>
-            <input type="number" name="numero" id="numero" min={0} />
-            <label htmlFor="">CEP</label>
-            <input type="text" name="cep" id="cep" />
-            <label htmlFor="">Complemeto</label>
-            <input type="text" name="complemento" id="complemento" />
-            <button type="submit">Cadastrar</button>
-          </form>
-        </div> */}
 
       {toast && (
         <div className="dash-toast">

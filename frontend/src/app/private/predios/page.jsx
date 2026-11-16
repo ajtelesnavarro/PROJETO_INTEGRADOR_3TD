@@ -431,7 +431,7 @@ export default function PrediosAndares() {
         <div className="pa-building-number">
           <span>ESTRUTURA</span>
           <strong>
-            {String(edificio.andarCadastrados).padStart(2, "0")}
+            {String(edificio.andaresCadastrados).padStart(2, "0")}
           </strong>
           <small>andares cadastrados</small>
         </div>
@@ -443,7 +443,7 @@ export default function PrediosAndares() {
 
           <div>
             <small>Andares cadastrados</small>
-            <strong>{edificio.andarCadastrados}</strong>
+            <strong>{edificio.andaresCadastrados}</strong>
             <span>Na estrutura do edifício</span>
           </div>
         </div>

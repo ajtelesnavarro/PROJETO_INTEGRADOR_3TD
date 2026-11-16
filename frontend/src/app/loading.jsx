@@ -1,5 +1,5 @@
 import Image from "next/image";
-import "./Loading.css";
+import "./loading.css";
 
 export default function Loading() {
   return (

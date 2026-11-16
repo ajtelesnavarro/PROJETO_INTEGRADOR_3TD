@@ -559,3 +559,232 @@
     gap: 7px;
   }
 }
+
+
+/* ========================================
+   SELETOR DE EDIFÍCIOS
+======================================== */
+
+.lumora-building-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lumora-building-info {
+  gap: 11px;
+}
+
+.lumora-building-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #8794A9;
+
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.lumora-building-toggle:hover,
+.lumora-building-toggle.active {
+  color: #4268D5;
+  border-color: #DFE7F8;
+  background: #F0F4FF;
+}
+
+.lumora-building-toggle svg {
+  transition: transform .2s ease;
+}
+
+.lumora-building-toggle.active svg {
+  transform: rotate(180deg);
+}
+
+/* DROPDOWN */
+
+.lumora-building-dropdown {
+  position: absolute;
+  top: calc(100% + 19px);
+  right: 0;
+  z-index: 100;
+
+  width: 310px;
+  padding: 15px;
+
+  border: 1px solid #E5EAF3;
+  border-radius: 14px;
+
+  background: #FFFFFF;
+  box-shadow: 0 16px 45px rgba(19, 35, 69, .15);
+
+  animation: lumora-dropdown-in .2s ease;
+}
+
+.lumora-building-dropdown-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 2px 2px 14px;
+  border-bottom: 1px solid #EDF0F5;
+}
+
+.lumora-building-dropdown-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lumora-building-dropdown-heading b {
+  color: #203352;
+  font-size: 13px;
+}
+
+.lumora-building-dropdown-heading small {
+  color: #8996AA;
+  font-size: 10px;
+}
+
+.lumora-building-dropdown-heading > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 25px;
+  height: 25px;
+  padding: 0 6px;
+
+  border-radius: 7px;
+  color: #526CC5;
+  background: #F0F3FF;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* LISTA */
+
+.lumora-building-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  max-height: 290px;
+  overflow-y: auto;
+  padding-top: 10px;
+}
+
+.lumora-building-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+
+  border: 1px solid transparent;
+  border-radius: 9px;
+
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  transition: .2s ease;
+}
+
+.lumora-building-option:hover {
+  background: #F5F7FC;
+  border-color: #E8EDF7;
+}
+
+.lumora-building-option.selected {
+  background: #F0F4FF;
+  border-color: #DCE5FC;
+}
+
+.lumora-building-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 35px;
+  height: 35px;
+  flex-shrink: 0;
+
+  border-radius: 9px;
+  color: #5276C5;
+  background: #EDF2FF;
+}
+
+.lumora-building-option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  flex: 1;
+  min-width: 0;
+}
+
+.lumora-building-option-info b {
+  overflow: hidden;
+  color: #263957;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lumora-building-option-info small {
+  color: #8A97AB;
+  font-size: 9px;
+}
+
+.lumora-building-check {
+  color: #4770DB;
+  font-size: 17px;
+}
+
+/* ESTADO VAZIO */
+
+.lumora-building-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  padding: 25px 10px;
+  text-align: center;
+  color: #8794A9;
+}
+
+.lumora-building-empty b {
+  color: #344664;
+  font-size: 11px;
+}
+
+.lumora-building-empty span {
+  font-size: 10px;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 650px) {
+  .lumora-building-dropdown {
+    position: fixed;
+    top: 70px;
+    right: 10px;
+
+    width: min(310px, calc(100vw - 20px));
+    box-sizing: border-box;
+  }
+}

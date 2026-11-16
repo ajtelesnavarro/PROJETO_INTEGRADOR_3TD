@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import "./tecnologia.css";
 import Image from "next/image";
+import { useRef } from 'react';
 
 const layers = [
   { n: "01", title: "Dispositivos e sensores", text: "A base física do edifício: equipamentos, medidores e sensores que podem fornecer informações sobre os ambientes e a infraestrutura.", icon: "⌁", tags: ["Sensores", "Medidores", "Equipamentos"] },
