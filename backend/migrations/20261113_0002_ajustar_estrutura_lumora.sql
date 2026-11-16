@@ -38,54 +38,22 @@ MODIFY COLUMN tipo_empreendimento ENUM(
 ) NOT NULL;
 
 
--- 4. Permitir temporariamente os perfis antigos e novos
-
-ALTER TABLE usuario
-MODIFY COLUMN perfil ENUM(
-    'administrador',
-    'manutencao',
-    'porteiro',
-    'visitante',
-    'secretaria',
-    'funcionario'
-) NOT NULL;
-
-
--- 5. Corrigir os perfis dos usuários de exemplo
-
-UPDATE usuario
-SET perfil = 'porteiro'
-WHERE id_usuario = 4;
-
-UPDATE usuario
-SET perfil = 'funcionario'
-WHERE id_usuario = 5
-   OR perfil = 'visitante';
-
-
--- 6. Deixar somente os quatro perfis definitivos
-
-ALTER TABLE usuario
-MODIFY COLUMN perfil ENUM(
-    'administrador',
-    'manutencao',
-    'porteiro',
-    'funcionario'
-) NOT NULL;
-
-
--- 7. Remover Diego da equipe de suporte
+-- 4. Remover Diego da equipe de suporte
+-- Diego continua cadastrado como usuário.
 
 DELETE FROM equipe_usuario
 WHERE id_usuario = 4
   AND id_equipe = 2;
 
 
--- 8. Adicionar vínculo de quem abriu a ocorrência
+-- 5. Adicionar vínculo de quem abriu a ocorrência
 
 ALTER TABLE ocorrencia
 ADD COLUMN id_usuario_abertura INT NULL
 AFTER id_dispositivo;
+
+
+-- 6. Criar chave estrangeira para o usuário que abriu a ocorrência
 
 ALTER TABLE ocorrencia
 ADD CONSTRAINT fk_ocorrencia_usuario_abertura
