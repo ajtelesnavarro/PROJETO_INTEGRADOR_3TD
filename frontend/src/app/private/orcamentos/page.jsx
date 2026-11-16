@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { requisicaoAPI } from "@/services/api";
 import "./orcamentos.css";
 
 const services = [
@@ -11,78 +12,29 @@ const services = [
   { id: "monitoramento_dispositivos", name: "Monitoramento de dispositivos", description: "Acompanhamento da rede IoT", price: 540, icon: "⌘" },
 ];
 
-const initialQuotes = [
-  {
-    id: 1,
-    code: "LUM-ORC-2026-001",
-    company: "Grupo Horizonte",
-    contact: "Mariana Costa",
-    email: "mariana@horizonte.com",
-    date: "12/11/2026",
-    validity: "27/11/2026",
-    status: "Enviado",
-    floors: 8,
-    rooms: 24,
-    devices: 42,
-    services: ["monitoramento_energia", "controle_iluminacao", "monitoramento_dispositivos"],
-    description: "Implantação de monitoramento e automação predial.",
-    discount: 5,
-  },
-  {
-    id: 2,
-    code: "LUM-ORC-2026-002",
-    company: "Nova Estação Ltda.",
-    contact: "Ricardo Alves",
-    email: "ricardo@novaestacao.com",
-    date: "10/11/2026",
-    validity: "25/11/2026",
-    status: "Em análise",
-    floors: 5,
-    rooms: 16,
-    devices: 28,
-    services: ["monitoramento_temperatura", "controle_acesso"],
-    description: "Monitoramento térmico e controle de acesso.",
-    discount: 0,
-  },
-  {
-    id: 3,
-    code: "LUM-ORC-2026-003",
-    company: "Plena Office",
-    contact: "Camila Rocha",
-    email: "camila@plenaoffice.com",
-    date: "05/11/2026",
-    validity: "20/11/2026",
-    status: "Aprovado",
-    floors: 12,
-    rooms: 38,
-    devices: 65,
-    services: ["monitoramento_energia", "monitoramento_temperatura"],
-    description: "Solução integrada para edifício corporativo.",
-    discount: 8,
-  },
-  {
-    id: 4,
-    code: "LUM-ORC-2026-004",
-    company: "Atlas Empresarial",
-    contact: "Felipe Martins",
-    email: "felipe@atlas.com",
-    date: "02/11/2026",
-    validity: "17/11/2026",
-    status: "Solicitado",
-    floors: 4,
-    rooms: 12,
-    devices: 20,
-    services: ["controle_iluminacao"],
-    description: "Automação de iluminação dos ambientes.",
-    discount: 0,
-  },
-];
+const STATUS_DB_TO_UI = {
+  solicitado: "Solicitado",
+  em_analise: "Em análise",
+  enviado: "Enviado",
+  aprovado: "Aprovado",
+  recusado: "Recusado",
+  expirado: "Expirado",
+};
+
+const STATUS_UI_TO_DB = {
+  "Solicitado": "solicitado",
+  "Em análise": "em_analise",
+  "Enviado": "enviado",
+  "Aprovado": "aprovado",
+  "Recusado": "recusado",
+  "Expirado": "expirado",
+};
 
 const money = (value) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-  }).format(value);
+  }).format(Number(value) || 0);
 
 const emptyForm = {
   company: "",
@@ -121,17 +73,80 @@ function Status({ value }) {
 }
 
 export default function Orcamentos() {
-  const [quotes, setQuotes] = useState(initialQuotes);
-  const [selectedId, setSelectedId] = useState(initialQuotes[0].id);
+  const [quotes, setQuotes] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [toast, setToast] = useState("");
 
-  const selected = quotes.find((quote) => quote.id === selectedId) || quotes[0];
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2800);
+    return () => clearTimeout(t);
+  }, [toast]);
 
-  const calculate = (quote) => {
+  const carregarOrcamentos = useCallback(async () => {
+    try {
+      const res = await requisicaoAPI("/orcamentos");
+      const lista = (res.dados || []).map((orc) => {
+        const descBruta = String(orc.descricao || "");
+        const matchTag = descBruta.match(/\[servicos:([^\]]+)\]/);
+        const servicosTag = matchTag ? matchTag[1].split(",").filter(Boolean) : [];
+        const descLimpa = descBruta.replace(/\[servicos:[^\]]+\]/g, "").trim();
+
+        const servicosDb = Array.isArray(orc.servicos) && orc.servicos.length > 0
+          ? orc.servicos.map((s) => s.nome_servico).filter(Boolean)
+          : servicosTag;
+
+        const sub = Number(orc.valor_subtotal || 0);
+        const desc = Number(orc.valor_desconto || 0);
+        const tot = Number(orc.valor_total ?? sub - desc);
+        const discountPct = sub > 0 ? Math.round((desc / sub) * 100) : 0;
+
+        return {
+          id: orc.id_orcamento,
+          code: `LUM-ORC-${new Date(orc.data_solicitacao || Date.now()).getFullYear()}-${String(orc.id_orcamento).padStart(3, "0")}`,
+          company: orc.nome_empresa,
+          contact: orc.nome_responsavel,
+          email: orc.email,
+          phone: orc.telefone,
+          date: orc.data_solicitacao
+            ? new Date(orc.data_solicitacao).toLocaleDateString("pt-BR")
+            : "—",
+          validity: orc.data_validade
+            ? new Date(orc.data_validade).toLocaleDateString("pt-BR")
+            : "—",
+          status: STATUS_DB_TO_UI[orc.status_orcamento] || "Solicitado",
+          floors: Number(orc.quantidade_andares || 0),
+          rooms: Number(orc.quantidade_ambientes || 0),
+          devices: Number(orc.quantidade_dispositivos || 0),
+          services: servicosDb,
+          description: descLimpa,
+          subtotal: sub,
+          discountValue: desc,
+          total: tot,
+          discount: discountPct,
+        };
+      });
+
+      setQuotes(lista);
+      if (lista.length > 0) {
+        setSelectedId((prev) => (prev && lista.some((q) => q.id === prev) ? prev : lista[0].id));
+      }
+    } catch (erro) {
+      setToast(erro.message || "Erro ao carregar orçamentos.");
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarOrcamentos();
+  }, [carregarOrcamentos]);
+
+  const selected = quotes.find((quote) => quote.id === selectedId) || quotes[0] || null;
+
+  const calculateForm = (quote) => {
     const serviceTotal = quote.services.reduce((total, id) => {
       const service = services.find((item) => item.id === id);
       return total + (service?.price || 0);
@@ -152,7 +167,7 @@ export default function Orcamentos() {
     };
   };
 
-  const formValues = useMemo(() => calculate(form), [form]);
+  const formValues = useMemo(() => calculateForm(form), [form]);
 
   const visibleQuotes = quotes.filter((quote) => {
     const matchesSearch =
@@ -165,10 +180,9 @@ export default function Orcamentos() {
     return matchesSearch && matchesFilter;
   });
 
-  const totals = quotes.map((quote) => calculate(quote).total);
   const approvedTotal = quotes
     .filter((quote) => quote.status === "Aprovado")
-    .reduce((total, quote) => total + calculate(quote).total, 0);
+    .reduce((total, quote) => total + quote.total, 0);
 
   const pendingCount = quotes.filter((quote) =>
     ["Solicitado", "Em análise"].includes(quote.status)
@@ -187,7 +201,7 @@ export default function Orcamentos() {
     }));
   };
 
-  const createQuote = (event) => {
+  const createQuote = async (event) => {
     event.preventDefault();
 
     if (!form.company.trim() || !form.contact.trim() || !form.email.trim()) {
@@ -200,40 +214,47 @@ export default function Orcamentos() {
       return;
     }
 
-    const nextId = Math.max(0, ...quotes.map((quote) => quote.id)) + 1;
-    const today = new Date();
-    const validity = new Date(today);
-    validity.setDate(validity.getDate() + Number(form.deadline));
+    try {
+      const res = await requisicaoAPI("/orcamentos", {
+        method: "POST",
+        body: JSON.stringify({
+          nomeEmpresa: form.company.trim(),
+          nomeResponsavel: form.contact.trim(),
+          email: form.email.trim(),
+          telefone: form.phone.trim() || "(00) 00000-0000",
+          quantidadeAndares: Number(form.floors),
+          quantidadeAmbientes: Number(form.rooms),
+          quantidadeDispositivos: Number(form.devices),
+          servicosDesejados: form.services,
+          descontoPercentual: Number(form.discount || 0),
+          prazoEstimadoDias: Number(form.deadline || 15),
+          descricao: form.description.trim(),
+        }),
+      });
 
-    const formatDate = (date) =>
-      date.toLocaleDateString("pt-BR");
-
-    const newQuote = {
-      ...form,
-      id: nextId,
-      code: `LUM-ORC-2026-${String(nextId).padStart(3, "0")}`,
-      date: formatDate(today),
-      validity: formatDate(validity),
-      status: "Solicitado",
-    };
-
-    setQuotes((current) => [newQuote, ...current]);
-    setSelectedId(nextId);
-    setForm(emptyForm);
-    setShowForm(false);
-    setToast("Orçamento criado com sucesso.");
+      if (res.idOrcamento) setSelectedId(res.idOrcamento);
+      setForm(emptyForm);
+      setShowForm(false);
+      setToast("Orçamento salvo no banco com sucesso.");
+      carregarOrcamentos();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao criar orçamento.");
+    }
   };
 
-  const changeStatus = (id, status) => {
-    setQuotes((current) =>
-      current.map((quote) =>
-        quote.id === id ? { ...quote, status } : quote
-      )
-    );
-    setToast("Status do orçamento atualizado.");
+  const changeStatus = async (id, statusUi) => {
+    try {
+      const statusDb = STATUS_UI_TO_DB[statusUi] || "solicitado";
+      await requisicaoAPI(`/orcamentos/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status_orcamento: statusDb }),
+      });
+      setToast("Status do orçamento atualizado.");
+      carregarOrcamentos();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao atualizar status.");
+    }
   };
-
-  const selectedValues = selected ? calculate(selected) : null;
 
   return (
     <div className="orc-page">
@@ -249,6 +270,21 @@ export default function Orcamentos() {
           Novo orçamento
         </button>
       </div>
+
+      {toast && (
+        <div
+          style={{
+            background: "#16213e",
+            color: "#fff",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            fontSize: "14px",
+          }}
+        >
+          {toast}
+        </div>
+      )}
 
       <section className="orc-metrics">
         <div className="orc-metric">
@@ -284,7 +320,7 @@ export default function Orcamentos() {
             <span className="orc-metric-caption">VALOR EM PROPOSTAS</span>
           </div>
           <strong className="orc-metric-money">
-            {money(totals.reduce((sum, value) => sum + value, 0))}
+            {money(quotes.reduce((sum, q) => sum + q.total, 0))}
           </strong>
           <small>Valor total dos orçamentos</small>
         </div>
@@ -329,8 +365,7 @@ export default function Orcamentos() {
           <div className="orc-quote-list">
             {visibleQuotes.length ? (
               visibleQuotes.map((quote) => {
-                const value = calculate(quote).total;
-                const active = selectedId === quote.id;
+                const active = selected?.id === quote.id;
 
                 return (
                   <button
@@ -348,7 +383,7 @@ export default function Orcamentos() {
                     </span>
 
                     <span className="orc-quote-value">
-                      <strong>{money(value)}</strong>
+                      <strong>{money(quote.total)}</strong>
                       <Status value={quote.status} />
                     </span>
 
@@ -360,13 +395,13 @@ export default function Orcamentos() {
               <div className="orc-no-results">
                 <span>⌕</span>
                 <strong>Nenhum orçamento encontrado</strong>
-                <p>Tente alterar sua busca ou o filtro selecionado.</p>
+                <p>Cadastre uma nova proposta ou ajuste os filtros.</p>
               </div>
             )}
           </div>
 
           <div className="orc-list-footer">
-            <span>Os valores apresentados são estimativas demonstrativas.</span>
+            <span>Sincronizado com o banco de dados.</span>
             <button onClick={() => { setSearch(""); setFilter("Todos"); }}>
               Limpar filtros
             </button>
@@ -423,16 +458,20 @@ export default function Orcamentos() {
 
               <div className="orc-detail-subtitle">SERVIÇOS CONTRATADOS</div>
               <div className="orc-service-tags">
-                {selected.services.map((id) => {
-                  const service = services.find((item) => item.id === id);
-                  return service ? <span key={id}>{service.name}</span> : null;
-                })}
+                {selected.services.length > 0 ? (
+                  selected.services.map((id) => {
+                    const service = services.find((item) => item.id === id);
+                    return <span key={id}>{service ? service.name : id}</span>;
+                  })
+                ) : (
+                  <span>Pacote personalizado</span>
+                )}
               </div>
 
               <div className="orc-price-summary">
-                <div><span>Subtotal</span><strong>{money(selectedValues.subtotal)}</strong></div>
-                <div><span>Desconto ({selected.discount}%)</span><strong className="orc-discount">− {money(selectedValues.discount)}</strong></div>
-                <div className="orc-total-line"><span>Valor total</span><strong>{money(selectedValues.total)}</strong></div>
+                <div><span>Subtotal</span><strong>{money(selected.subtotal)}</strong></div>
+                <div><span>Desconto ({selected.discount}%)</span><strong className="orc-discount">− {money(selected.discountValue)}</strong></div>
+                <div className="orc-total-line"><span>Valor total</span><strong>{money(selected.total)}</strong></div>
               </div>
 
               <label className="orc-status-control">
@@ -515,7 +554,7 @@ export default function Orcamentos() {
                       <span>{label}</span>
                       <small>{description}</small>
                       <div>
-                        <button type="button" onClick={() => updateForm(key, Math.max(0, Number(form[key]) - 1))}>−</button>
+                        <button type="button" onClick={() => updateForm(key, Math.max(1, Number(form[key]) - 1))}>−</button>
                         <strong>{form[key]}</strong>
                         <button type="button" onClick={() => updateForm(key, Number(form[key]) + 1)}>＋</button>
                       </div>
@@ -525,21 +564,23 @@ export default function Orcamentos() {
               </section>
 
               <section className="orc-form-section">
-                <div className="orc-form-title"><span>03</span><div><strong>Serviços Lumora</strong><small>Selecione os módulos que farão parte da proposta</small></div></div>
-                <div className="orc-service-options">
+                <div className="orc-form-title"><span>03</span><div><strong>Serviços desejados</strong><small>Selecione as soluções da proposta</small></div></div>
+                <div className="orc-services-grid">
                   {services.map((service) => {
-                    const checked = form.services.includes(service.id);
+                    const active = form.services.includes(service.id);
                     return (
                       <button
                         type="button"
                         key={service.id}
-                        className={`orc-service-option ${checked ? "checked" : ""}`}
+                        className={`orc-service-option ${active ? "selected" : ""}`}
                         onClick={() => toggleService(service.id)}
                       >
-                        <span className="orc-service-icon">{service.icon}</span>
-                        <span className="orc-service-copy"><strong>{service.name}</strong><small>{service.description}</small></span>
-                        <span className="orc-service-price">{money(service.price)}</span>
-                        <i>{checked ? "✓" : "+"}</i>
+                        <span className="orc-service-symbol">{service.icon}</span>
+                        <div>
+                          <strong>{service.name}</strong>
+                          <small>{service.description}</small>
+                        </div>
+                        <b>{money(service.price)}</b>
                       </button>
                     );
                   })}
@@ -547,44 +588,35 @@ export default function Orcamentos() {
               </section>
 
               <section className="orc-form-section">
-                <div className="orc-form-title"><span>04</span><div><strong>Condições comerciais</strong><small>Defina o desconto e o prazo da proposta</small></div></div>
+                <div className="orc-form-title"><span>04</span><div><strong>Condições comerciais</strong><small>Desconto, prazo e observações</small></div></div>
                 <div className="orc-form-grid">
                   <label className="orc-field">
                     Desconto (%)
-                    <input type="number" min="0" max="50" value={form.discount} onChange={(e) => updateForm("discount", Math.min(50, Math.max(0, Number(e.target.value))))} />
+                    <input type="number" min="0" max="100" value={form.discount} onChange={(e) => updateForm("discount", e.target.value)} />
                   </label>
                   <label className="orc-field">
                     Validade (dias)
-                    <input type="number" min="1" max="90" value={form.deadline} onChange={(e) => updateForm("deadline", Math.max(1, Number(e.target.value)))} />
+                    <input type="number" min="1" value={form.deadline} onChange={(e) => updateForm("deadline", e.target.value)} />
                   </label>
                   <label className="orc-field wide">
-                    Descrição da proposta
-                    <textarea rows="3" value={form.description} onChange={(e) => updateForm("description", e.target.value)} placeholder="Descreva brevemente o objetivo do projeto..." />
+                    Observações
+                    <textarea rows="3" value={form.description} onChange={(e) => updateForm("description", e.target.value)} placeholder="Detalhes adicionais do projeto..." />
                   </label>
+                </div>
+
+                <div className="orc-price-summary" style={{ marginTop: "12px" }}>
+                  <div><span>Subtotal estimado</span><strong>{money(formValues.subtotal)}</strong></div>
+                  <div><span>Desconto ({form.discount}%)</span><strong className="orc-discount">− {money(formValues.discount)}</strong></div>
+                  <div className="orc-total-line"><span>Total estimado</span><strong>{money(formValues.total)}</strong></div>
                 </div>
               </section>
             </div>
 
             <div className="orc-modal-footer">
-              <div className="orc-modal-total">
-                <span>Valor estimado</span>
-                <strong>{money(formValues.total)}</strong>
-                <small>Subtotal: {money(formValues.subtotal)}</small>
-              </div>
-              <div>
-                <button type="button" className="orc-cancel-button" onClick={() => setShowForm(false)}>Cancelar</button>
-                <button type="submit" className="orc-primary-button">Criar orçamento <span>→</span></button>
-              </div>
+              <button type="button" className="orc-cancel-button" onClick={() => setShowForm(false)}>Cancelar</button>
+              <button type="submit" className="orc-primary-button">Salvar orçamento</button>
             </div>
           </form>
-        </div>
-      )}
-
-      {toast && (
-        <div className="orc-toast">
-          <span>✓</span>
-          {toast}
-          <button onClick={() => setToast("")}>×</button>
         </div>
       )}
     </div>

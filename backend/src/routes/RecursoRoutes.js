@@ -18,7 +18,7 @@ const consulta = autorizarPerfis(
     'administrador',
     'manutencao',
     'porteiro',
-    'visitante'
+    'funcionario'
 );
 
 const escritaPredios = autorizarPerfis('administrador');

@@ -1,203 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { requisicaoAPI } from "@/services/api";
 import "./predios.css";
-
-// ==================================================
-// DADOS DA API
-// Substituir este bloco pelas respostas reais do backend.
-//
-// EDIFÍCIO:
-// nome, codigo, tipo, endereco, andaresPrevistos,
-// andaresCadastrados, area, status e descricao.
-//
-// INDICADORES GERAIS:
-// setores, ambientes e dispositivos.
-//
-// ANDARES:
-// id, numero, nome, descricao, status e indicadores.
-//
-// SETORES:
-// id, nome, ambientes, dispositivos e responsavel.
-//
-// Todos esses dados são utilizados nos cards, indicadores,
-// pesquisas, listagens e painéis de detalhes.
-// ==================================================
-
-const DADOS_API = {
-  edificio: {
-    nome: "Edifício Empresarial Central",
-    codigo: "LUM-001",
-    tipo: "Comercial",
-    endereco: "Santo André, São Paulo",
-    andaresPrevistos: 12,
-    andaresCadastrados: 4,
-    area: "8.450 m²",
-    status: "Operacional",
-    descricao:
-      "Edifício corporativo monitorado pela plataforma Lumora, com controle centralizado de ambientes, dispositivos e infraestrutura.",
-  },
-
-  indicadores: {
-    setores: 9,
-    ambientes: 27,
-    dispositivos: 72,
-  },
-
-  andares: [
-    {
-      id: 1,
-      numero: 0,
-      nome: "Térreo",
-      descricao: "Área de recepção e circulação principal.",
-      status: "Ativo",
-
-      indicadores: {
-        setores: 3,
-        ambientes: 9,
-        dispositivos: 22,
-      },
-
-      setores: [
-        {
-          id: 1,
-          nome: "Recepção",
-          ambientes: 3,
-          dispositivos: 8,
-          responsavel: "Ana Souza",
-        },
-        {
-          id: 2,
-          nome: "Segurança",
-          ambientes: 2,
-          dispositivos: 5,
-          responsavel: "Bruno Lima",
-        },
-        {
-          id: 3,
-          nome: "Administrativo",
-          ambientes: 4,
-          dispositivos: 9,
-          responsavel: "Marina Costa",
-        },
-      ],
-    },
-
-    {
-      id: 2,
-      numero: 1,
-      nome: "1º Andar",
-      descricao: "Área administrativa e salas de atendimento.",
-      status: "Ativo",
-
-      indicadores: {
-        setores: 2,
-        ambientes: 5,
-        dispositivos: 12,
-      },
-
-      setores: [
-        {
-          id: 4,
-          nome: "Financeiro",
-          ambientes: 3,
-          dispositivos: 7,
-          responsavel: "Carlos Mendes",
-        },
-        {
-          id: 5,
-          nome: "Recursos Humanos",
-          ambientes: 2,
-          dispositivos: 5,
-          responsavel: "Ana Souza",
-        },
-      ],
-    },
-
-    {
-      id: 3,
-      numero: 2,
-      nome: "2º Andar",
-      descricao: "Ambientes corporativos e salas de reunião.",
-      status: "Ativo",
-
-      indicadores: {
-        setores: 2,
-        ambientes: 7,
-        dispositivos: 18,
-      },
-
-      setores: [
-        {
-          id: 6,
-          nome: "Comercial",
-          ambientes: 4,
-          dispositivos: 10,
-          responsavel: "Elisa Costa",
-        },
-        {
-          id: 7,
-          nome: "Reuniões",
-          ambientes: 3,
-          dispositivos: 8,
-          responsavel: "Bruno Lima",
-        },
-      ],
-    },
-
-    {
-      id: 4,
-      numero: 3,
-      nome: "3º Andar",
-      descricao: "Área de tecnologia e infraestrutura.",
-      status: "Manutenção",
-
-      indicadores: {
-        setores: 2,
-        ambientes: 6,
-        dispositivos: 20,
-      },
-
-      setores: [
-        {
-          id: 8,
-          nome: "Tecnologia",
-          ambientes: 4,
-          dispositivos: 12,
-          responsavel: "Rafael Nunes",
-        },
-        {
-          id: 9,
-          nome: "Servidores",
-          ambientes: 2,
-          dispositivos: 8,
-          responsavel: "Carlos Mendes",
-        },
-      ],
-    },
-  ],
-};
-
-// ==================================================
-// CONFIGURAÇÕES DA INTERFACE
-// Não precisam ser retornadas pela API.
-// ==================================================
-
-const CONFIGURACOES = {
-  filtrosAndares: ["Todos", "Ativo", "Manutenção"],
-
-  andarVazio: {
-    nome: "",
-    descricao: "",
-  },
-
-  statusPadraoAndar: "Ativo",
-  descricaoPadraoAndar: "Andar cadastrado na plataforma.",
-};
-
-// ==================================================
-// COMPONENTES AUXILIARES
-// ==================================================
 
 function Icon({ children }) {
   return (
@@ -223,126 +29,433 @@ function Status({ value }) {
   );
 }
 
-// ==================================================
-// PÁGINA: PRÉDIOS E ANDARES
-// ==================================================
+function formatarNomeAndar(numero) {
+  return Number(numero) === 0 ? "Térreo" : `${numero}º Andar`;
+}
+
+function formatarData(valor) {
+  if (!valor) return "Não informada";
+  const data = new Date(valor);
+  if (Number.isNaN(data.getTime())) return "Não informada";
+  return data.toLocaleDateString("pt-BR", { timeZone: "UTC" });
+}
+
+function deduplicarPor(lista, chave) {
+  const mapa = new Map();
+  for (const item of lista || []) {
+    if (item && item[chave] !== undefined && item[chave] !== null) {
+      mapa.set(item[chave], item);
+    }
+  }
+  return Array.from(mapa.values());
+}
 
 export default function PrediosAndares() {
-  // Dados recebidos da API.
-  const [edificio] = useState(DADOS_API.edificio);
-  const [andares, setAndares] = useState(DADOS_API.andares);
-  const [indicadores] = useState(DADOS_API.indicadores);
+  const router = useRouter();
 
-  // Estados utilizados somente pela interface.
+  const [predios, setPredios] = useState([]);
+  const [predioSelecionadoId, setPredioSelecionadoId] = useState(null);
+  const [andaresBrutos, setAndaresBrutos] = useState([]);
+  const [ambientesBrutos, setAmbientesBrutos] = useState([]);
+  const [dispositivosBrutos, setDispositivosBrutos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+
   const [pesquisa, setPesquisa] = useState("");
-  const [filtro, setFiltro] = useState("Todos");
   const [selecionado, setSelecionado] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
+  const [modalNovoAndar, setModalNovoAndar] = useState(false);
+  const [modalEditarAndar, setModalEditarAndar] = useState(null);
+  const [modalPredio, setModalPredio] = useState(null);
   const [mensagem, setMensagem] = useState("");
-  const [novoAndar, setNovoAndar] = useState(CONFIGURACOES.andarVazio);
 
-  // Pesquisa por nome, descrição ou setor.
-  const andaresFiltrados = useMemo(() => {
-    return andares.filter((andar) => {
-      const correspondePesquisa =
-        andar.nome.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        andar.descricao.toLowerCase().includes(pesquisa.toLowerCase()) ||
-        andar.setores.some((setor) =>
-          setor.nome.toLowerCase().includes(pesquisa.toLowerCase()),
+  const [novoAndar, setNovoAndar] = useState({
+    numero_andar: "",
+    descricao: "",
+  });
+
+  const mostrarMensagem = useCallback((texto) => {
+    setMensagem(texto);
+    window.clearTimeout(window.__lumoraPaToast);
+    window.__lumoraPaToast = window.setTimeout(() => setMensagem(""), 3200);
+  }, []);
+
+  const carregarDados = useCallback(async () => {
+    try {
+      setCarregando(true);
+      const [resPredios, resAndares, resAmbientes, resDispositivos] =
+        await Promise.all([
+          requisicaoAPI("/predios?limite=200"),
+          requisicaoAPI("/andares?limite=200"),
+          requisicaoAPI("/ambientes?limite=200"),
+          requisicaoAPI("/dispositivos?limite=200"),
+        ]);
+
+      const listaPredios = deduplicarPor(resPredios.dados, "id_predio").sort(
+        (a, b) => a.id_predio - b.id_predio
+      );
+      setPredios(listaPredios);
+      setAndaresBrutos(deduplicarPor(resAndares.dados, "id_andar"));
+      setAmbientesBrutos(deduplicarPor(resAmbientes.dados, "id_ambiente"));
+      setDispositivosBrutos(
+        deduplicarPor(resDispositivos.dados, "id_dispositivo")
+      );
+
+      setPredioSelecionadoId((atual) => {
+        if (atual && listaPredios.some((p) => p.id_predio === atual)) {
+          return atual;
+        }
+        return listaPredios[0]?.id_predio ?? null;
+      });
+    } catch (erro) {
+      mostrarMensagem(
+        erro.message || "Erro ao carregar dados do edifício."
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }, [mostrarMensagem]);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  const predioAtual = useMemo(() => {
+    return (
+      predios.find((p) => p.id_predio === predioSelecionadoId) ||
+      predios[0] ||
+      null
+    );
+  }, [predios, predioSelecionadoId]);
+
+  const andaresDoPredio = useMemo(() => {
+    if (!predioAtual) return [];
+
+    return andaresBrutos
+      .filter((a) => a.id_predio === predioAtual.id_predio)
+      .sort((a, b) => a.numero_andar - b.numero_andar)
+      .map((andar) => {
+        const ambientesDoAndar = ambientesBrutos.filter(
+          (amb) => amb.id_andar === andar.id_andar
+        );
+        const idsAmbientes = new Set(
+          ambientesDoAndar.map((amb) => amb.id_ambiente)
+        );
+        const dispositivosDoAndar = dispositivosBrutos.filter((disp) =>
+          idsAmbientes.has(disp.id_ambiente)
+        );
+        const setoresDistintos = new Set(
+          ambientesDoAndar
+            .map((amb) => amb.id_setor)
+            .filter((id) => id !== null && id !== undefined)
+        );
+        const capacidadeAndar = ambientesDoAndar.reduce(
+          (soma, amb) => soma + (Number(amb.capacidade_maxima) || 0),
+          0
         );
 
-      const correspondeFiltro =
-        filtro === "Todos" || andar.status === filtro;
+        return {
+          id: andar.id_andar,
+          id_andar: andar.id_andar,
+          id_predio: andar.id_predio,
+          numero: andar.numero_andar,
+          numero_andar: andar.numero_andar,
+          nome: formatarNomeAndar(andar.numero_andar),
+          descricao: andar.descricao || "Sem descrição cadastrada.",
+          descricaoBruta: andar.descricao || "",
+          data_cadastro: andar.data_cadastro,
+          status: "Ativo",
+          indicadores: {
+            setores: setoresDistintos.size,
+            ambientes: ambientesDoAndar.length,
+            dispositivos: dispositivosDoAndar.length,
+            capacidade: capacidadeAndar,
+          },
+          ambientesLista: ambientesDoAndar,
+        };
+      });
+  }, [predioAtual, andaresBrutos, ambientesBrutos, dispositivosBrutos]);
 
-      return correspondePesquisa && correspondeFiltro;
-    });
-  }, [andares, pesquisa, filtro]);
-
-  // Indicadores gerais recebidos da API.
-  const totalSetores = indicadores.setores;
-  const totalAmbientes = indicadores.ambientes;
-  const totalDispositivos = indicadores.dispositivos;
-
-  // Indicadores individuais de cada andar.
-  function obterIndicadoresAndar(andar) {
-    return andar.indicadores;
-  }
-
-  function mostrarMensagem(texto) {
-    setMensagem(texto);
-    window.clearTimeout(mostrarMensagem.timeout);
-    mostrarMensagem.timeout = window.setTimeout(
-      () => setMensagem(""),
-      2800,
+  const indicadoresGerais = useMemo(() => {
+    return andaresDoPredio.reduce(
+      (acc, andar) => ({
+        setores: acc.setores + andar.indicadores.setores,
+        ambientes: acc.ambientes + andar.indicadores.ambientes,
+        dispositivos: acc.dispositivos + andar.indicadores.dispositivos,
+        capacidade: acc.capacidade + andar.indicadores.capacidade,
+      }),
+      { setores: 0, ambientes: 0, dispositivos: 0, capacidade: 0 }
     );
+  }, [andaresDoPredio]);
+
+  const andaresFiltrados = useMemo(() => {
+    const termo = pesquisa.trim().toLowerCase();
+    if (!termo) return andaresDoPredio;
+
+    return andaresDoPredio.filter(
+      (andar) =>
+        andar.nome.toLowerCase().includes(termo) ||
+        andar.descricao.toLowerCase().includes(termo) ||
+        String(andar.numero_andar).includes(termo) ||
+        andar.ambientesLista.some((amb) =>
+          (amb.nome || "").toLowerCase().includes(termo)
+        )
+    );
+  }, [andaresDoPredio, pesquisa]);
+
+  const edificioFormatado = useMemo(() => {
+    if (!predioAtual) return null;
+
+    const logradouroDetalhado = [
+      predioAtual.rua,
+      predioAtual.numero,
+      predioAtual.complemento,
+      predioAtual.bairro,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return {
+      ...predioAtual,
+      codigo: `LUM-${String(predioAtual.id_predio).padStart(3, "0")}`,
+      nome: predioAtual.nome_predio,
+      tipo: predioAtual.tipo_empreendimento || "Corporativo",
+      logradouroDetalhado,
+      cidadeUf: `${predioAtual.cidade}, ${predioAtual.estado}`,
+      andaresCadastrados: andaresDoPredio.length,
+      status: "Operacional",
+      descricao:
+        "Unidade monitorada pela plataforma Lumora com gestão integrada de pavimentos, ambientes e dispositivos.",
+    };
+  }, [predioAtual, andaresDoPredio.length]);
+
+  function abrirModalNovoAndar() {
+    const proximoNumero =
+      andaresDoPredio.length > 0
+        ? Math.max(...andaresDoPredio.map((a) => a.numero_andar)) + 1
+        : 1;
+    setNovoAndar({ numero_andar: String(proximoNumero), descricao: "" });
+    setModalNovoAndar(true);
   }
 
-  function abrirDetalhesEdificio() {
-    setSelecionado({
-      tipo: "edificio",
-      dados: edificio,
+  function abrirModalNovoPredio() {
+    setModalPredio({
+      modo: "criar",
+      id_predio: null,
+      nome_predio: "",
+      tipo_empreendimento: "Corporativo",
+      cep: "",
+      rua: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "Santo André",
+      estado: "SP",
     });
   }
 
-  function abrirDetalhesAndar(andar) {
-    setSelecionado({
-      tipo: "andar",
-      dados: andar,
+  function abrirModalEditarPredio(predio) {
+    if (!predio) return;
+    setModalPredio({
+      modo: "editar",
+      id_predio: predio.id_predio,
+      nome_predio: predio.nome_predio || "",
+      tipo_empreendimento: predio.tipo_empreendimento || "Corporativo",
+      cep: predio.cep || "",
+      rua: predio.rua || "",
+      numero: predio.numero || "",
+      complemento: predio.complemento || "",
+      bairro: predio.bairro || "",
+      cidade: predio.cidade || "",
+      estado: predio.estado || "",
     });
   }
 
-  function abrirDetalhesSetor(setor, andar) {
-    setSelecionado({
-      tipo: "setor",
-      dados: {
-        ...setor,
-        nomeAndar: andar.nome,
-      },
-    });
-  }
-
-  // Cadastro demonstrativo de andar.
-  // Na integração, enviar os campos para a API e utilizar
-  // o registro retornado pelo backend para atualizar a lista.
-  function adicionarAndar(event) {
+  async function adicionarAndar(event) {
     event.preventDefault();
+    if (!predioAtual) return;
 
-    if (!novoAndar.nome.trim()) {
-      mostrarMensagem("Informe o nome do andar.");
+    const numero = Number(novoAndar.numero_andar);
+    if (!Number.isInteger(numero)) {
+      mostrarMensagem("Informe um número inteiro válido para o andar.");
       return;
     }
 
-    const proximoAndar = {
-      id: Date.now(),
-      numero: andares.length,
-      nome: novoAndar.nome,
-      descricao:
-        novoAndar.descricao ||
-        CONFIGURACOES.descricaoPadraoAndar,
-      status: CONFIGURACOES.statusPadraoAndar,
+    if (andaresDoPredio.some((a) => a.numero_andar === numero)) {
+      mostrarMensagem(
+        `O ${formatarNomeAndar(numero)} já está cadastrado neste edifício.`
+      );
+      return;
+    }
 
-      indicadores: {
-        setores: 0,
-        ambientes: 0,
-        dispositivos: 0,
-      },
+    try {
+      setSalvando(true);
+      await requisicaoAPI("/andares", {
+        method: "POST",
+        body: JSON.stringify({
+          id_predio: predioAtual.id_predio,
+          numero_andar: numero,
+          descricao: novoAndar.descricao.trim() || null,
+          data_cadastro: new Date().toISOString().slice(0, 10),
+        }),
+      });
 
-      setores: [],
-    };
-
-    setAndares((atuais) => [...atuais, proximoAndar]);
-    setNovoAndar(CONFIGURACOES.andarVazio);
-    setModalAberto(false);
-    mostrarMensagem("Andar cadastrado com sucesso!");
-
-    setSelecionado({
-      tipo: "andar",
-      dados: proximoAndar,
-    });
+      setModalNovoAndar(false);
+      setNovoAndar({ numero_andar: "", descricao: "" });
+      await carregarDados();
+      mostrarMensagem("Andar cadastrado com sucesso!");
+    } catch (erro) {
+      mostrarMensagem(erro.message || "Erro ao cadastrar andar.");
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  function fecharDetalhes() {
+  function iniciarEdicao(itemSelecionado) {
+    if (itemSelecionado.tipo === "andar") {
+      setModalEditarAndar({
+        id_andar: itemSelecionado.dados.id_andar,
+        numero_andar: String(itemSelecionado.dados.numero_andar),
+        descricao: itemSelecionado.dados.descricaoBruta || "",
+      });
+    } else if (itemSelecionado.tipo === "edificio" && predioAtual) {
+      abrirModalEditarPredio(predioAtual);
+    }
+  }
+
+  async function salvarEdicaoAndar(event) {
+    event.preventDefault();
+    if (!modalEditarAndar) return;
+
+    const numero = Number(modalEditarAndar.numero_andar);
+    if (!Number.isInteger(numero)) {
+      mostrarMensagem("Informe um número inteiro válido para o andar.");
+      return;
+    }
+
+    const conflito = andaresDoPredio.some(
+      (a) =>
+        a.numero_andar === numero && a.id_andar !== modalEditarAndar.id_andar
+    );
+    if (conflito) {
+      mostrarMensagem(
+        `Já existe outro registro para o ${formatarNomeAndar(numero)} neste edifício.`
+      );
+      return;
+    }
+
+    try {
+      setSalvando(true);
+      const res = await requisicaoAPI(
+        `/andares/${modalEditarAndar.id_andar}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            numero_andar: numero,
+            descricao: modalEditarAndar.descricao.trim() || null,
+          }),
+        }
+      );
+
+      const atualizado = res.dados;
+      setModalEditarAndar(null);
+      await carregarDados();
+
+      if (selecionado?.tipo === "andar" && atualizado) {
+        setSelecionado((atual) =>
+          atual
+            ? {
+                ...atual,
+                dados: {
+                  ...atual.dados,
+                  numero: atualizado.numero_andar,
+                  numero_andar: atualizado.numero_andar,
+                  nome: formatarNomeAndar(atualizado.numero_andar),
+                  descricao:
+                    atualizado.descricao || "Sem descrição cadastrada.",
+                  descricaoBruta: atualizado.descricao || "",
+                },
+              }
+            : null
+        );
+      }
+
+      mostrarMensagem("Informações do andar atualizadas!");
+    } catch (erro) {
+      mostrarMensagem(erro.message || "Erro ao atualizar andar.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function excluirAndar(andar) {
+    if (!window.confirm(`Deseja realmente excluir o ${andar.nome}?`)) return;
+
+    try {
+      setSalvando(true);
+      await requisicaoAPI(`/andares/${andar.id_andar}`, {
+        method: "DELETE",
+      });
+      setSelecionado(null);
+      await carregarDados();
+      mostrarMensagem("Andar removido com sucesso!");
+    } catch (erro) {
+      mostrarMensagem(
+        erro.message ||
+          "Não foi possível excluir este andar (verifique se há ambientes vinculados)."
+      );
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function salvarPredio(event) {
+    event.preventDefault();
+    if (!modalPredio) return;
+
+    const payload = {
+      nome_predio: modalPredio.nome_predio.trim(),
+      tipo_empreendimento: modalPredio.tipo_empreendimento.trim(),
+      cep: modalPredio.cep.trim(),
+      rua: modalPredio.rua.trim(),
+      numero: modalPredio.numero.trim(),
+      complemento: modalPredio.complemento.trim() || null,
+      bairro: modalPredio.bairro.trim(),
+      cidade: modalPredio.cidade.trim(),
+      estado: modalPredio.estado.trim().toUpperCase(),
+    };
+
+    try {
+      setSalvando(true);
+      if (modalPredio.modo === "criar") {
+        const criado = await requisicaoAPI("/predios", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        if (criado?.dados?.id_predio) {
+          setPredioSelecionadoId(criado.dados.id_predio);
+        }
+        mostrarMensagem("Novo edifício cadastrado!");
+      } else {
+        await requisicaoAPI(`/predios/${modalPredio.id_predio}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+        });
+        mostrarMensagem("Informações do edifício atualizadas!");
+      }
+
+      setModalPredio(null);
+      setSelecionado(null);
+      await carregarDados();
+    } catch (erro) {
+      mostrarMensagem(erro.message || "Erro ao salvar dados do edifício.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  function irParaPagina(caminho) {
     setSelecionado(null);
+    router.push(caminho);
   }
 
   return (
@@ -355,279 +468,395 @@ export default function PrediosAndares() {
           <span className="pa-eyebrow">ESTRUTURA PREDIAL</span>
           <h1>Prédios & Andares</h1>
           <p>
-            Gerencie a estrutura do edifício, seus andares e setores em um
-            único lugar.
+            Gerencie edifícios, pavimentos e navegue diretamente para os
+            ambientes, dispositivos e ocorrências vinculados.
           </p>
         </div>
 
-        <button
-          className="pa-primary-button"
-          onClick={() => setModalAberto(true)}
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
         >
-          <span>＋</span>
-          Adicionar andar
-        </button>
+          {predios.length > 0 && (
+            <select
+              aria-label="Selecionar edifício"
+              value={predioSelecionadoId ?? ""}
+              onChange={(e) => {
+                setPredioSelecionadoId(Number(e.target.value));
+                setSelecionado(null);
+              }}
+              style={{
+                minHeight: "42px",
+                padding: "0 14px",
+                borderRadius: "10px",
+                border: "1px solid #dce3f1",
+                background: "#fff",
+                color: "#182747",
+                fontWeight: 700,
+                fontSize: "12px",
+              }}
+            >
+              {predios.map((p) => (
+                <option key={p.id_predio} value={p.id_predio}>
+                  {p.nome_predio}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            type="button"
+            className="pa-detail-secondary"
+            onClick={abrirModalNovoPredio}
+          >
+            <span>＋</span>
+            Novo prédio
+          </button>
+
+          <button
+            type="button"
+            className="pa-primary-button"
+            onClick={abrirModalNovoAndar}
+            disabled={!predioAtual}
+          >
+            <span>＋</span>
+            Adicionar andar
+          </button>
+        </div>
       </header>
 
-      <section className="pa-building-card">
-        <div className="pa-building-art">
-          <div className="pa-building-orbit orbit-one" />
-          <div className="pa-building-orbit orbit-two" />
+      {carregando && !edificioFormatado ? (
+        <div className="pa-empty">
+          <h3>Carregando estrutura predial...</h3>
+          <p>Consultando prédios e andares cadastrados na API.</p>
+        </div>
+      ) : edificioFormatado ? (
+        <>
+          <section className="pa-building-card">
+            <div className="pa-building-art">
+              <div className="pa-building-orbit orbit-one" />
+              <div className="pa-building-orbit orbit-two" />
 
-          <div className="pa-building-illustration">
-            <div className="pa-building-roof" />
+              <div className="pa-building-illustration">
+                <div className="pa-building-roof" />
 
-            <div className="pa-building-body">
-              {Array.from({ length: 4 }).map((_, indice) => (
-                <div className="pa-building-row" key={indice}>
-                  {Array.from({ length: 4 }).map((__, indiceJanela) => (
-                    <i key={indiceJanela} />
+                <div className="pa-building-body">
+                  {Array.from({ length: 4 }).map((_, indice) => (
+                    <div className="pa-building-row" key={indice}>
+                      {Array.from({ length: 4 }).map((__, indiceJanela) => (
+                        <i key={indiceJanela} />
+                      ))}
+                    </div>
                   ))}
                 </div>
+
+                <div className="pa-building-base" />
+              </div>
+
+              <span className="pa-art-label">SMART BUILDING</span>
+            </div>
+
+            <div className="pa-building-info">
+              <div className="pa-building-topline">
+                <span className="pa-code">{edificioFormatado.codigo}</span>
+                <Status value={edificioFormatado.status} />
+              </div>
+
+              <h2>{edificioFormatado.nome}</h2>
+              <p>{edificioFormatado.descricao}</p>
+
+              <div className="pa-building-meta">
+                <span>
+                  <Icon>⌖</Icon>
+                  {edificioFormatado.cidadeUf}
+                </span>
+
+                <span>
+                  <Icon>▦</Icon>
+                  {edificioFormatado.tipo}
+                </span>
+
+                <span>
+                  <Icon>⌂</Icon>
+                  {edificioFormatado.rua}, {edificioFormatado.numero}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  marginTop: "22px",
+                }}
+              >
+                <button
+                  type="button"
+                  className="pa-text-button"
+                  style={{ marginTop: 0 }}
+                  onClick={() =>
+                    setSelecionado({
+                      tipo: "edificio",
+                      dados: edificioFormatado,
+                    })
+                  }
+                >
+                  Detalhes do edifício
+                  <span>↗</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="pa-text-button"
+                  style={{ marginTop: 0 }}
+                  onClick={() => abrirModalEditarPredio(predioAtual)}
+                >
+                  Editar edifício
+                  <span>✎</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="pa-building-number">
+              <span>ESTRUTURA</span>
+              <strong>
+                {String(edificioFormatado.andaresCadastrados).padStart(2, "0")}
+              </strong>
+              <small>andares cadastrados</small>
+            </div>
+          </section>
+
+          <section className="pa-metrics">
+            <div className="pa-metric">
+              <span className="pa-metric-icon blue">☺</span>
+              <div>
+                <small>Capacidade total</small>
+                <strong>{indicadoresGerais.capacidade}</strong>
+                <span>Pessoas nos ambientes</span>
+              </div>
+            </div>
+
+            <div className="pa-metric">
+              <span className="pa-metric-icon purple">⌘</span>
+              <div>
+                <small>Setores ativos</small>
+                <strong>{indicadoresGerais.setores}</strong>
+                <span>Mapeados nos andares</span>
+              </div>
+            </div>
+
+            <div
+              className="pa-metric"
+              style={{ cursor: "pointer" }}
+              onClick={() =>
+                irParaPagina(`/private/ambientes?predio=${predioAtual.id_predio}`)
+              }
+              title="Abrir página de Ambientes"
+            >
+              <span className="pa-metric-icon cyan">⌂</span>
+              <div>
+                <small>Ambientes vinculados</small>
+                <strong>{indicadoresGerais.ambientes}</strong>
+                <span>Ver todos em Ambientes ↗</span>
+              </div>
+            </div>
+
+            <div
+              className="pa-metric"
+              style={{ cursor: "pointer" }}
+              onClick={() =>
+                irParaPagina(
+                  `/private/dispositivos?predio=${predioAtual.id_predio}`
+                )
+              }
+              title="Abrir página de Dispositivos"
+            >
+              <span className="pa-metric-icon violet">◈</span>
+              <div>
+                <small>Dispositivos vinculados</small>
+                <strong>{indicadoresGerais.dispositivos}</strong>
+                <span>Ver todos em Dispositivos ↗</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="pa-floors-section">
+            <div className="pa-section-heading">
+              <div>
+                <span className="pa-eyebrow">ORGANIZAÇÃO INTERNA</span>
+                <h2>Andares do edifício</h2>
+                <p>
+                  Clique em um ambiente para ir direto à página de Ambientes ou
+                  abra o andar para editar suas informações.
+                </p>
+              </div>
+
+              <div className="pa-floor-count">
+                {andaresFiltrados.length} de {andaresDoPredio.length} andares
+              </div>
+            </div>
+
+            <div className="pa-toolbar">
+              <div className="pa-search">
+                <span>⌕</span>
+
+                <input
+                  type="search"
+                  placeholder="Buscar andar, número ou ambiente..."
+                  value={pesquisa}
+                  onChange={(event) => setPesquisa(event.target.value)}
+                />
+
+                {pesquisa && (
+                  <button
+                    type="button"
+                    onClick={() => setPesquisa("")}
+                    aria-label="Limpar pesquisa"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="pa-floor-grid">
+              {andaresFiltrados.map((andar) => (
+                <article className="pa-floor-card" key={andar.id_andar}>
+                  <div className="pa-floor-card-top">
+                    <div className="pa-floor-symbol">
+                      <span>⌂</span>
+                    </div>
+
+                    <Status value={andar.status} />
+                  </div>
+
+                  <div className="pa-floor-title">
+                    <span>
+                      PAVIMENTO {String(andar.numero_andar).padStart(2, "0")}
+                    </span>
+
+                    <h3>{andar.nome}</h3>
+                    <p>{andar.descricao}</p>
+                  </div>
+
+                  <div className="pa-floor-data">
+                    <div>
+                      <strong>{andar.indicadores.setores}</strong>
+                      <span>Setores</span>
+                    </div>
+
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/ambientes?predio=${predioAtual.id_predio}&andar=${andar.id_andar}`
+                        )
+                      }
+                      title="Abrir ambientes deste andar"
+                    >
+                      <strong>{andar.indicadores.ambientes}</strong>
+                      <span>Ambientes ↗</span>
+                    </div>
+
+                    <div
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/dispositivos?predio=${predioAtual.id_predio}&andar=${andar.id_andar}`
+                        )
+                      }
+                      title="Abrir dispositivos deste andar"
+                    >
+                      <strong>{andar.indicadores.dispositivos}</strong>
+                      <span>Dispositivos ↗</span>
+                    </div>
+                  </div>
+
+                  <div className="pa-sector-preview">
+                    <span>AMBIENTES VINCULADOS</span>
+
+                    <div>
+                      {andar.ambientesLista.length > 0 ? (
+                        andar.ambientesLista.slice(0, 3).map((amb) => (
+                          <button
+                            type="button"
+                            key={amb.id_ambiente}
+                            onClick={() =>
+                              irParaPagina(
+                                `/private/ambientes?predio=${predioAtual.id_predio}&andar=${andar.id_andar}&ambiente=${amb.id_ambiente}`
+                              )
+                            }
+                            title={`Abrir ${amb.nome} em Ambientes`}
+                          >
+                            {amb.nome}
+                            <span>↗</span>
+                          </button>
+                        ))
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            irParaPagina(
+                              `/private/ambientes?predio=${predioAtual.id_predio}&andar=${andar.id_andar}`
+                            )
+                          }
+                        >
+                          Cadastrar ambiente
+                          <span>＋</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="pa-floor-details"
+                    onClick={() =>
+                      setSelecionado({ tipo: "andar", dados: andar })
+                    }
+                  >
+                    Ver ou editar andar
+                    <span>→</span>
+                  </button>
+                </article>
               ))}
             </div>
 
-            <div className="pa-building-base" />
-          </div>
+            {andaresFiltrados.length === 0 && (
+              <div className="pa-empty">
+                <span>⌕</span>
+                <h3>Nenhum andar encontrado</h3>
+                <p>
+                  {andaresDoPredio.length === 0
+                    ? "Este edifício ainda não possui andares cadastrados."
+                    : "Tente alterar o termo pesquisado."}
+                </p>
 
-          <span className="pa-art-label">SMART BUILDING</span>
-        </div>
-
-        <div className="pa-building-info">
-          <div className="pa-building-topline">
-            <span className="pa-code">{edificio.codigo}</span>
-            <Status value={edificio.status} />
-          </div>
-
-          <h2>{edificio.nome}</h2>
-          <p>{edificio.descricao}</p>
-
-          <div className="pa-building-meta">
-            <span>
-              <Icon>⌖</Icon>
-              {edificio.endereco}
-            </span>
-
-            <span>
-              <Icon>▦</Icon>
-              {edificio.tipo}
-            </span>
-
-            <span>
-              <Icon>⌂</Icon>
-              {edificio.area}
-            </span>
-          </div>
-
-          <button
-            className="pa-text-button"
-            onClick={abrirDetalhesEdificio}
-          >
-            Visualizar detalhes do edifício
-            <span>↗</span>
-          </button>
-        </div>
-
-        <div className="pa-building-number">
-          <span>ESTRUTURA</span>
-          <strong>
-            {String(edificio.andarCadastrados).padStart(2, "0")}
-          </strong>
-          <small>andares cadastrados</small>
-        </div>
-      </section>
-
-      <section className="pa-metrics">
-        <div className="pa-metric">
-          <span className="pa-metric-icon blue">▦</span>
-
-          <div>
-            <small>Andares cadastrados</small>
-            <strong>{edificio.andarCadastrados}</strong>
-            <span>Na estrutura do edifício</span>
-          </div>
-        </div>
-
-        <div className="pa-metric">
-          <span className="pa-metric-icon purple">⌘</span>
-
-          <div>
-            <small>Setores cadastrados</small>
-            <strong>{totalSetores}</strong>
-            <span>Distribuídos por andar</span>
-          </div>
-        </div>
-
-        <div className="pa-metric">
-          <span className="pa-metric-icon cyan">⌂</span>
-
-          <div>
-            <small>Ambientes vinculados</small>
-            <strong>{totalAmbientes}</strong>
-            <span>Salas e espaços internos</span>
-          </div>
-        </div>
-
-        <div className="pa-metric">
-          <span className="pa-metric-icon violet">◈</span>
-
-          <div>
-            <small>Dispositivos vinculados</small>
-            <strong>{totalDispositivos}</strong>
-            <span>Equipamentos monitorados</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="pa-floors-section">
-        <div className="pa-section-heading">
-          <div>
-            <span className="pa-eyebrow">ORGANIZAÇÃO INTERNA</span>
-            <h2>Andares do edifício</h2>
-            <p>
-              Selecione um andar para consultar seus setores e informações.
-            </p>
-          </div>
-
-          <div className="pa-floor-count">
-            {andaresFiltrados.length} de {andares.length} andares
-          </div>
-        </div>
-
-        <div className="pa-toolbar">
-          <div className="pa-search">
-            <span>⌕</span>
-
-            <input
-              type="search"
-              placeholder="Buscar andar ou setor..."
-              value={pesquisa}
-              onChange={(event) => setPesquisa(event.target.value)}
-            />
-
-            {pesquisa && (
-              <button
-                onClick={() => setPesquisa("")}
-                aria-label="Limpar pesquisa"
-              >
-                ×
-              </button>
+                {pesquisa && (
+                  <button type="button" onClick={() => setPesquisa("")}>
+                    Limpar pesquisa
+                  </button>
+                )}
+              </div>
             )}
-          </div>
-
-          <div className="pa-filters">
-            {CONFIGURACOES.filtrosAndares.map((item) => (
-              <button
-                key={item}
-                className={filtro === item ? "active" : ""}
-                onClick={() => setFiltro(item)}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+          </section>
+        </>
+      ) : (
+        <div className="pa-empty">
+          <h3>Nenhum edifício encontrado</h3>
+          <p>Não há prédios cadastrados no banco de dados.</p>
         </div>
-
-        <div className="pa-floor-grid">
-          {andaresFiltrados.map((andar) => (
-            <article className="pa-floor-card" key={andar.id}>
-              <div className="pa-floor-card-top">
-                <div className="pa-floor-symbol">
-                  <span>⌂</span>
-                </div>
-
-                <Status value={andar.status} />
-              </div>
-
-              <div className="pa-floor-title">
-                <span>
-                  ANDAR {String(andar.numero).padStart(2, "0")}
-                </span>
-
-                <h3>{andar.nome}</h3>
-                <p>{andar.descricao}</p>
-              </div>
-
-              <div className="pa-floor-data">
-                <div>
-                  <strong>
-                    {obterIndicadoresAndar(andar).setores}
-                  </strong>
-                  <span>Setores</span>
-                </div>
-
-                <div>
-                  <strong>
-                    {obterIndicadoresAndar(andar).ambientes}
-                  </strong>
-                  <span>Ambientes</span>
-                </div>
-
-                <div>
-                  <strong>
-                    {obterIndicadoresAndar(andar).dispositivos}
-                  </strong>
-                  <span>Dispositivos</span>
-                </div>
-              </div>
-
-              <div className="pa-sector-preview">
-                <span>SETORES</span>
-
-                <div>
-                  {andar.setores.length > 0 ? (
-                    andar.setores.slice(0, 3).map((setor) => (
-                      <button
-                        key={setor.id}
-                        onClick={() => abrirDetalhesSetor(setor, andar)}
-                        title={`Ver detalhes de ${setor.nome}`}
-                      >
-                        {setor.nome}
-                        <span>↗</span>
-                      </button>
-                    ))
-                  ) : (
-                    <p>Nenhum setor cadastrado.</p>
-                  )}
-                </div>
-              </div>
-
-              <button
-                className="pa-floor-details"
-                onClick={() => abrirDetalhesAndar(andar)}
-              >
-                Ver detalhes do andar
-                <span>→</span>
-              </button>
-            </article>
-          ))}
-        </div>
-
-        {andaresFiltrados.length === 0 && (
-          <div className="pa-empty">
-            <span>⌕</span>
-            <h3>Nenhum andar encontrado</h3>
-            <p>
-              Tente alterar sua pesquisa ou os filtros selecionados.
-            </p>
-
-            <button
-              onClick={() => {
-                setPesquisa("");
-                setFiltro("Todos");
-              }}
-            >
-              Limpar filtros
-            </button>
-          </div>
-        )}
-      </section>
+      )}
 
       {/* Painel lateral de detalhes */}
       {selecionado && (
         <div
           className="pa-detail-layer"
-          onMouseDown={fecharDetalhes}
+          onMouseDown={() => setSelecionado(null)}
         >
           <div className="pa-detail-backdrop" />
 
@@ -646,23 +875,20 @@ export default function PrediosAndares() {
                 <span className="pa-eyebrow">
                   {selecionado.tipo === "edificio"
                     ? "INFORMAÇÕES DO EDIFÍCIO"
-                    : selecionado.tipo === "andar"
-                      ? "INFORMAÇÕES DO ANDAR"
-                      : "INFORMAÇÕES DO SETOR"}
+                    : "INFORMAÇÕES DO ANDAR"}
                 </span>
 
                 <h2>
                   {selecionado.tipo === "edificio"
                     ? "Detalhes do edifício"
-                    : selecionado.tipo === "andar"
-                      ? "Detalhes do andar"
-                      : "Detalhes do setor"}
+                    : "Detalhes do andar"}
                 </h2>
               </div>
 
               <button
+                type="button"
                 className="pa-close-button"
-                onClick={fecharDetalhes}
+                onClick={() => setSelecionado(null)}
                 aria-label="Fechar detalhes"
               >
                 ×
@@ -672,63 +898,122 @@ export default function PrediosAndares() {
             <div className="pa-detail-content">
               <div className="pa-detail-hero">
                 <div className="pa-detail-icon">
-                  {selecionado.tipo === "edificio"
-                    ? "⌂"
-                    : selecionado.tipo === "andar"
-                      ? "▤"
-                      : "▦"}
+                  {selecionado.tipo === "edificio" ? "⌂" : "▤"}
                 </div>
 
                 <div>
                   <span>
                     {selecionado.tipo === "edificio"
                       ? selecionado.dados.codigo
-                      : selecionado.tipo === "andar"
-                        ? `ANDAR ${selecionado.dados.numero}`
-                        : `SETOR · ${selecionado.dados.id}`}
+                      : `PAVIMENTO ${String(selecionado.dados.numero_andar).padStart(2, "0")}`}
                   </span>
 
                   <h3>{selecionado.dados.nome}</h3>
-
-                  {(selecionado.tipo === "andar" ||
-                    selecionado.tipo === "edificio") && (
-                    <Status value={selecionado.dados.status} />
-                  )}
+                  <Status value={selecionado.dados.status} />
                 </div>
               </div>
 
               {selecionado.tipo === "edificio" && (
                 <>
-                  <div className="pa-detail-description">
-                    <span>DESCRIÇÃO</span>
-                    <p>{selecionado.dados.descricao}</p>
-                  </div>
-
                   <div className="pa-detail-info-grid">
                     <div>
-                      <span>Tipo de edifício</span>
+                      <span>Tipo de empreendimento</span>
                       <strong>{selecionado.dados.tipo}</strong>
-                    </div>
-
-                    <div>
-                      <span>Área total</span>
-                      <strong>{selecionado.dados.area}</strong>
-                    </div>
-
-                    <div>
-                      <span>Andares previstos</span>
-                      <strong>{selecionado.dados.andaresPrevistos}</strong>
                     </div>
 
                     <div>
                       <span>Andares cadastrados</span>
                       <strong>{selecionado.dados.andaresCadastrados}</strong>
                     </div>
+
+                    <div>
+                      <span>CEP</span>
+                      <strong>{selecionado.dados.cep}</strong>
+                    </div>
+
+                    <div>
+                      <span>Cidade / UF</span>
+                      <strong>{selecionado.dados.cidadeUf}</strong>
+                    </div>
                   </div>
 
                   <div className="pa-detail-description">
-                    <span>LOCALIZAÇÃO</span>
-                    <p>{selecionado.dados.endereco}</p>
+                    <span>LOGRADOURO E BAIRRO</span>
+                    <p>{selecionado.dados.logradouroDetalhado}</p>
+                  </div>
+
+                  <div className="pa-detail-list">
+                    <div className="pa-detail-list-heading">
+                      <span>ACESSAR MÓDULOS DO EDIFÍCIO</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="pa-detail-sector"
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/ambientes?predio=${selecionado.dados.id_predio}`
+                        )
+                      }
+                    >
+                      <span className="pa-sector-icon">⌂</span>
+                      <span>
+                        <strong>Ambientes</strong>
+                        <small>Gerenciar salas, setores e lotação</small>
+                      </span>
+                      <b>↗</b>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="pa-detail-sector"
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/dispositivos?predio=${selecionado.dados.id_predio}`
+                        )
+                      }
+                    >
+                      <span className="pa-sector-icon">◈</span>
+                      <span>
+                        <strong>Dispositivos</strong>
+                        <small>Sensores, medidores e equipamentos</small>
+                      </span>
+                      <b>↗</b>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="pa-detail-sector"
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/ocorrencias?predio=${selecionado.dados.id_predio}`
+                        )
+                      }
+                    >
+                      <span className="pa-sector-icon">⚠</span>
+                      <span>
+                        <strong>Ocorrências</strong>
+                        <small>Chamados e manutenções prediais</small>
+                      </span>
+                      <b>↗</b>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="pa-detail-sector"
+                      onClick={() =>
+                        irParaPagina(
+                          `/private/acessos?predio=${selecionado.dados.id_predio}`
+                        )
+                      }
+                    >
+                      <span className="pa-sector-icon">⚿</span>
+                      <span>
+                        <strong>Controle de Acessos</strong>
+                        <small>Credenciais e registros de entrada</small>
+                      </span>
+                      <b>↗</b>
+                    </button>
                   </div>
                 </>
               )}
@@ -742,17 +1027,20 @@ export default function PrediosAndares() {
 
                   <div className="pa-detail-info-grid">
                     <div>
-                      <span>Setores</span>
+                      <span>Data de cadastro</span>
                       <strong>
-                        {selecionado.dados.indicadores.setores}
+                        {formatarData(selecionado.dados.data_cadastro)}
                       </strong>
                     </div>
 
                     <div>
+                      <span>Setores</span>
+                      <strong>{selecionado.dados.indicadores.setores}</strong>
+                    </div>
+
+                    <div>
                       <span>Ambientes</span>
-                      <strong>
-                        {selecionado.dados.indicadores.ambientes}
-                      </strong>
+                      <strong>{selecionado.dados.indicadores.ambientes}</strong>
                     </div>
 
                     <div>
@@ -761,111 +1049,110 @@ export default function PrediosAndares() {
                         {selecionado.dados.indicadores.dispositivos}
                       </strong>
                     </div>
-
-                    <div>
-                      <span>Identificação</span>
-                      <strong>{selecionado.dados.nome}</strong>
-                    </div>
                   </div>
 
                   <div className="pa-detail-list">
                     <div className="pa-detail-list-heading">
-                      <span>SETORES VINCULADOS</span>
-                      <b>{selecionado.dados.indicadores.setores}</b>
+                      <span>AMBIENTES NESTE ANDAR</span>
+                      <b>{selecionado.dados.ambientesLista.length}</b>
                     </div>
 
-                    {selecionado.dados.setores.length > 0 ? (
-                      selecionado.dados.setores.map((setor) => (
+                    {selecionado.dados.ambientesLista.length > 0 ? (
+                      selecionado.dados.ambientesLista.map((amb) => (
                         <button
+                          type="button"
                           className="pa-detail-sector"
-                          key={setor.id}
+                          key={amb.id_ambiente}
                           onClick={() =>
-                            abrirDetalhesSetor(setor, selecionado.dados)
+                            irParaPagina(
+                              `/private/ambientes?predio=${predioAtual.id_predio}&andar=${selecionado.dados.id_andar}&ambiente=${amb.id_ambiente}`
+                            )
                           }
                         >
                           <span className="pa-sector-icon">▦</span>
-
                           <span>
-                            <strong>{setor.nome}</strong>
+                            <strong>{amb.nome}</strong>
                             <small>
-                              {setor.ambientes} ambientes ·{" "}
-                              {setor.dispositivos} dispositivos
+                              {amb.localizacao ||
+                                "Localização não informada"}
+                              {amb.capacidade_maxima
+                                ? ` · Cap. ${amb.capacidade_maxima} pessoas`
+                                : ""}
                             </small>
                           </span>
-
                           <b>↗</b>
                         </button>
                       ))
                     ) : (
                       <p className="pa-no-sectors">
-                        Este andar ainda não possui setores cadastrados.
+                        Este andar ainda não possui ambientes vinculados.
                       </p>
                     )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        flexWrap: "wrap",
+                        marginTop: "12px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="pa-detail-secondary"
+                        style={{ flex: 1 }}
+                        onClick={() =>
+                          irParaPagina(
+                            `/private/ambientes?predio=${predioAtual.id_predio}&andar=${selecionado.dados.id_andar}`
+                          )
+                        }
+                      >
+                        Abrir em Ambientes ↗
+                      </button>
+
+                      <button
+                        type="button"
+                        className="pa-detail-secondary"
+                        style={{ flex: 1 }}
+                        onClick={() =>
+                          irParaPagina(
+                            `/private/dispositivos?predio=${predioAtual.id_predio}&andar=${selecionado.dados.id_andar}`
+                          )
+                        }
+                      >
+                        Ver Dispositivos ↗
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
-
-              {selecionado.tipo === "setor" && (
-                <>
-                  <div className="pa-detail-description">
-                    <span>LOCALIZAÇÃO</span>
-                    <p>{selecionado.dados.nomeAndar}</p>
-                  </div>
-
-                  <div className="pa-detail-info-grid">
-                    <div>
-                      <span>Ambientes</span>
-                      <strong>{selecionado.dados.ambientes}</strong>
-                    </div>
-
-                    <div>
-                      <span>Dispositivos</span>
-                      <strong>{selecionado.dados.dispositivos}</strong>
-                    </div>
-
-                    <div className="wide">
-                      <span>Responsável</span>
-                      <strong>{selecionado.dados.responsavel}</strong>
-                    </div>
-                  </div>
-
-                  <div className="pa-detail-description">
-                    <span>ESTRUTURA DO SETOR</span>
-
-                    <p>
-                      Este setor está vinculado ao{" "}
-                      {selecionado.dados.nomeAndar} e possui{" "}
-                      {selecionado.dados.ambientes} ambientes cadastrados.
-                    </p>
-                  </div>
-                </>
-              )}
-
-              <div className="pa-detail-note">
-                <span>✦</span>
-                <p>
-                  As informações exibidas são uma demonstração local da
-                  interface. A integração com o banco de dados poderá ser
-                  realizada posteriormente.
-                </p>
-              </div>
             </div>
 
             <div className="pa-detail-footer">
               <button
+                type="button"
                 className="pa-detail-secondary"
-                onClick={fecharDetalhes}
+                onClick={() => setSelecionado(null)}
               >
                 Fechar
               </button>
 
+              {selecionado.tipo === "andar" && (
+                <button
+                  type="button"
+                  className="pa-detail-secondary"
+                  style={{ color: "#dc2626", borderColor: "#fecaca" }}
+                  disabled={salvando}
+                  onClick={() => excluirAndar(selecionado.dados)}
+                >
+                  Excluir
+                </button>
+              )}
+
               <button
+                type="button"
                 className="pa-detail-primary"
-                onClick={() =>
-                  mostrarMensagem(
-                    "A edição poderá ser integrada ao banco de dados.",
-                  )
-                }
+                onClick={() => iniciarEdicao(selecionado)}
               >
                 Editar informações
                 <span>↗</span>
@@ -876,10 +1163,10 @@ export default function PrediosAndares() {
       )}
 
       {/* Modal para cadastrar um novo andar */}
-      {modalAberto && (
+      {modalNovoAndar && (
         <div
           className="pa-modal-layer"
-          onMouseDown={() => setModalAberto(false)}
+          onMouseDown={() => setModalNovoAndar(false)}
         >
           <form
             className="pa-modal"
@@ -890,38 +1177,37 @@ export default function PrediosAndares() {
               <div>
                 <span className="pa-eyebrow">ESTRUTURA PREDIAL</span>
                 <h2>Novo andar</h2>
-                <p>Adicione um andar à estrutura do edifício.</p>
+                <p>Adicione um andar a {predioAtual?.nome_predio}.</p>
               </div>
 
               <button
                 type="button"
                 className="pa-close-button"
-                onClick={() => setModalAberto(false)}
+                onClick={() => setModalNovoAndar(false)}
               >
                 ×
               </button>
             </div>
 
             <label>
-              Nome do andar
-
+              Número do andar (0 = Térreo)
               <input
+                type="number"
                 autoFocus
-                value={novoAndar.nome}
+                value={novoAndar.numero_andar}
                 onChange={(event) =>
                   setNovoAndar((atual) => ({
                     ...atual,
-                    nome: event.target.value,
+                    numero_andar: event.target.value,
                   }))
                 }
-                placeholder="Ex.: 4º Andar"
+                placeholder="Ex.: 6"
                 required
               />
             </label>
 
             <label>
               Descrição
-
               <textarea
                 value={novoAndar.descricao}
                 onChange={(event) =>
@@ -939,7 +1225,7 @@ export default function PrediosAndares() {
               <button
                 type="button"
                 className="pa-detail-secondary"
-                onClick={() => setModalAberto(false)}
+                onClick={() => setModalNovoAndar(false)}
               >
                 Cancelar
               </button>
@@ -947,9 +1233,300 @@ export default function PrediosAndares() {
               <button
                 type="submit"
                 className="pa-detail-primary"
+                disabled={salvando}
               >
-                Cadastrar andar
+                {salvando ? "Salvando..." : "Cadastrar andar"}
                 <span>＋</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Modal para editar andar */}
+      {modalEditarAndar && (
+        <div
+          className="pa-modal-layer"
+          onMouseDown={() => setModalEditarAndar(null)}
+        >
+          <form
+            className="pa-modal"
+            onSubmit={salvarEdicaoAndar}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="pa-modal-header">
+              <div>
+                <span className="pa-eyebrow">EDIÇÃO DE ANDAR</span>
+                <h2>Editar informações</h2>
+                <p>Atualize o número ou a descrição deste andar.</p>
+              </div>
+
+              <button
+                type="button"
+                className="pa-close-button"
+                onClick={() => setModalEditarAndar(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <label>
+              Número do andar (0 = Térreo)
+              <input
+                type="number"
+                autoFocus
+                value={modalEditarAndar.numero_andar}
+                onChange={(event) =>
+                  setModalEditarAndar((atual) => ({
+                    ...atual,
+                    numero_andar: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+
+            <label>
+              Descrição
+              <textarea
+                value={modalEditarAndar.descricao}
+                onChange={(event) =>
+                  setModalEditarAndar((atual) => ({
+                    ...atual,
+                    descricao: event.target.value,
+                  }))
+                }
+                placeholder="Descreva a finalidade deste andar..."
+                rows={3}
+              />
+            </label>
+
+            <div className="pa-modal-actions">
+              <button
+                type="button"
+                className="pa-detail-secondary"
+                onClick={() => setModalEditarAndar(null)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                className="pa-detail-primary"
+                disabled={salvando}
+              >
+                {salvando ? "Salvando..." : "Salvar alterações"}
+                <span>✓</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Modal para criar ou editar edifício */}
+      {modalPredio && (
+        <div
+          className="pa-modal-layer"
+          onMouseDown={() => setModalPredio(null)}
+        >
+          <form
+            className="pa-modal"
+            style={{
+              width: "min(100%, 540px)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+            onSubmit={salvarPredio}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="pa-modal-header">
+              <div>
+                <span className="pa-eyebrow">
+                  {modalPredio.modo === "criar"
+                    ? "CADASTRO DE EDIFÍCIO"
+                    : "EDIÇÃO DE EDIFÍCIO"}
+                </span>
+                <h2>
+                  {modalPredio.modo === "criar"
+                    ? "Novo edifício"
+                    : "Editar edifício"}
+                </h2>
+                <p>
+                  {modalPredio.modo === "criar"
+                    ? "Cadastre uma nova unidade predial na plataforma."
+                    : "Atualize os dados cadastrais do prédio."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="pa-close-button"
+                onClick={() => setModalPredio(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <label>
+              Nome do edifício
+              <input
+                autoFocus
+                value={modalPredio.nome_predio}
+                onChange={(e) =>
+                  setModalPredio((a) => ({ ...a, nome_predio: e.target.value }))
+                }
+                placeholder="Ex.: Torre Norte Lumora"
+                required
+              />
+            </label>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <label>
+                Tipo de empreendimento
+                <input
+                  value={modalPredio.tipo_empreendimento}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({
+                      ...a,
+                      tipo_empreendimento: e.target.value,
+                    }))
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                CEP
+                <input
+                  value={modalPredio.cep}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, cep: e.target.value }))
+                  }
+                  placeholder="09000-000"
+                  required
+                />
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <label>
+                Rua / Avenida
+                <input
+                  value={modalPredio.rua}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, rua: e.target.value }))
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                Número
+                <input
+                  value={modalPredio.numero}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, numero: e.target.value }))
+                  }
+                  required
+                />
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <label>
+                Bairro
+                <input
+                  value={modalPredio.bairro}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, bairro: e.target.value }))
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                Complemento
+                <input
+                  value={modalPredio.complemento}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({
+                      ...a,
+                      complemento: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2fr 1fr",
+                gap: "10px",
+              }}
+            >
+              <label>
+                Cidade
+                <input
+                  value={modalPredio.cidade}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, cidade: e.target.value }))
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                Estado (UF)
+                <input
+                  maxLength={2}
+                  value={modalPredio.estado}
+                  onChange={(e) =>
+                    setModalPredio((a) => ({ ...a, estado: e.target.value }))
+                  }
+                  required
+                />
+              </label>
+            </div>
+
+            <div className="pa-modal-actions">
+              <button
+                type="button"
+                className="pa-detail-secondary"
+                onClick={() => setModalPredio(null)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                className="pa-detail-primary"
+                disabled={salvando}
+              >
+                {salvando
+                  ? "Salvando..."
+                  : modalPredio.modo === "criar"
+                    ? "Cadastrar edifício"
+                    : "Salvar alterações"}
+                <span>✓</span>
               </button>
             </div>
           </form>

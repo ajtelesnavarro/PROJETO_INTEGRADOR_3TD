@@ -329,19 +329,19 @@
 
 .dv-metric-dot.green,
 .dv-network-legend i.green {
-  background: #44dba1;
+  background: #22c55e;
   box-shadow: 0 0 10px rgba(68, 219, 161, .45);
 }
 
 .dv-metric-dot.yellow,
 .dv-network-legend i.yellow {
-  background: #f2bd5e;
+  background: #f59e0b;
   box-shadow: 0 0 10px rgba(242, 189, 94, .35);
 }
 
 .dv-metric-dot.red,
 .dv-network-legend i.red {
-  background: #ff6c83;
+  background: #ef4444;
   box-shadow: 0 0 10px rgba(255, 108, 131, .35);
 }
 
@@ -399,7 +399,7 @@
   height: 105px;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(#4d8bff 0 75%, #44dba1 75% 90%, #f0bd62 90% 95%, rgba(119, 140, 180, .15) 95% 100%);
+  background: conic-gradient(#22c55e 0% 100%);
   box-shadow: 0 0 28px rgba(76, 129, 255, .15);
   animation: dv-ring-glow 4s ease-in-out infinite;
 }

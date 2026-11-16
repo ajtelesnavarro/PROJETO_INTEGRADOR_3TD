@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", senha: "" });
   const [message, setMessage] = useState("");
 
@@ -11,17 +13,19 @@ export default function Login() {
     e.preventDefault();
     setMessage("Autenticando...");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-      const r = await fetch(`${apiUrl}/api/v1/auth/gerarToken`, {
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "");
+      const r = await fetch(`${apiUrl}/auth/gerarToken`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
       });
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.message || "Credenciais inválidas ou serviço indisponível.");
+      if (!r.ok) throw new Error(data.erro || data.message || "Credenciais inválidas ou serviço indisponível.");
       if (!data.token) throw new Error("A API respondeu, mas não retornou um token de acesso.");
       localStorage.setItem("lumora_token", data.token);
+      if (data.usuario) localStorage.setItem("lumora_usuario", JSON.stringify(data.usuario));
       setMessage("Login realizado com sucesso. A autenticação foi concluída.");
+      setTimeout(() => router.push("/private/dashboard"), 800);
     } catch (error) {
       setMessage(error.message || "Não foi possível conectar à API. Confira se o back-end está ativo.");
     }

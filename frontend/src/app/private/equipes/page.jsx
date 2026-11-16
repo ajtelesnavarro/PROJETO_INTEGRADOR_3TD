@@ -1,127 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { requisicaoAPI } from "@/services/api";
 import "./equipes.css";
 
-const teamSeed = [
-  {
-    id: 1,
-    name: "Equipe de Manutenção",
-    abbreviation: "MAN",
-    color: "#4775D1",
-    description: "Responsável pela conservação e pelo funcionamento da estrutura predial.",
-    members: [
-      {
-        id: 1,
-        name: "Carlos Mendes",
-        role: "Coordenador",
-        email: "carlos.mendes@lumora.com",
-        phone: "(11) 98765-4321",
-        status: "Ativo",
-        since: "12/03/2024",
-      },
-      {
-        id: 2,
-        name: "Rafael Nunes",
-        role: "Técnico de manutenção",
-        email: "rafael.nunes@lumora.com",
-        phone: "(11) 98765-4322",
-        status: "Ativo",
-        since: "18/04/2024",
-      },
-      {
-        id: 3,
-        name: "Lucas Ferreira",
-        role: "Eletricista",
-        email: "lucas.ferreira@lumora.com",
-        phone: "(11) 98765-4323",
-        status: "Ausente",
-        since: "05/06/2024",
-      },
-      {
-        id: 4,
-        name: "Marcos Oliveira",
-        role: "Técnico hidráulico",
-        email: "marcos.oliveira@lumora.com",
-        phone: "(11) 98765-4324",
-        status: "Ativo",
-        since: "21/08/2024",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Equipe de Tecnologia",
-    abbreviation: "TEC",
-    color: "#8060C8",
-    description: "Responsável pelo monitoramento dos dispositivos, sistemas e recursos tecnológicos.",
-    members: [
-      {
-        id: 5,
-        name: "Ana Souza",
-        role: "Coordenadora",
-        email: "ana.souza@lumora.com",
-        phone: "(11) 98765-4325",
-        status: "Ativo",
-        since: "10/02/2024",
-      },
-      {
-        id: 6,
-        name: "Pedro Almeida",
-        role: "Analista de sistemas",
-        email: "pedro.almeida@lumora.com",
-        phone: "(11) 98765-4326",
-        status: "Ativo",
-        since: "15/05/2024",
-      },
-      {
-        id: 7,
-        name: "Juliana Costa",
-        role: "Técnica de automação",
-        email: "juliana.costa@lumora.com",
-        phone: "(11) 98765-4327",
-        status: "Ausente",
-        since: "09/07/2024",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Equipe de Segurança",
-    abbreviation: "SEG",
-    color: "#C18A45",
-    description: "Responsável pelo controle de acesso e pela segurança do edifício.",
-    members: [
-      {
-        id: 8,
-        name: "Roberto Lima",
-        role: "Coordenador",
-        email: "roberto.lima@lumora.com",
-        phone: "(11) 98765-4328",
-        status: "Ativo",
-        since: "08/01/2024",
-      },
-      {
-        id: 9,
-        name: "Fernanda Alves",
-        role: "Agente de segurança",
-        email: "fernanda.alves@lumora.com",
-        phone: "(11) 98765-4329",
-        status: "Ativo",
-        since: "11/03/2024",
-      },
-      {
-        id: 10,
-        name: "Diego Santos",
-        role: "Agente de segurança",
-        email: "diego.santos@lumora.com",
-        phone: "(11) 98765-4330",
-        status: "Ausente",
-        since: "19/09/2024",
-      },
-    ],
-  },
-];
+const CORES_EQUIPE = ["#4775D1", "#8060C8", "#C18A45", "#2B9E78", "#D1586E"];
+
+const PERFIL_LABEL = {
+  administrador: "Administrador",
+  manutencao: "Manutenção",
+  porteiro: "Portaria / Segurança",
+  funcionario: "Funcionário",
+};
 
 const icons = {
   users: (
@@ -206,7 +96,7 @@ function Icon({ name, size = 18 }) {
 }
 
 function getInitials(name) {
-  return name
+  return String(name || "")
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -217,7 +107,7 @@ function getInitials(name) {
 
 const emptyForm = {
   name: "",
-  role: "",
+  role: "manutencao",
   email: "",
   phone: "",
   status: "Ativo",
@@ -225,15 +115,64 @@ const emptyForm = {
 };
 
 export default function Page() {
-  const [teams, setTeams] = useState(teamSeed);
-  const [activeTeam, setActiveTeam] = useState(1);
-  const [selectedMember, setSelectedMember] = useState(1);
+  const [teams, setTeams] = useState([]);
+  const [activeTeam, setActiveTeam] = useState(null);
+  const [selectedMember, setSelectedMember] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState("");
+
+  const carregarEquipes = useCallback(async () => {
+    try {
+      const res = await requisicaoAPI("/equipes");
+      const lista = (res.dados || []).map((eq, idx) => ({
+        id: eq.id_equipe,
+        name: eq.nome_equipe,
+        abbreviation: String(eq.nome_equipe || "EQ")
+          .replace(/^equipe\s+(de|da|do)\s+/i, "")
+          .slice(0, 3)
+          .toUpperCase(),
+        color: CORES_EQUIPE[idx % CORES_EQUIPE.length],
+        description: eq.descricao || "Equipe operacional vinculada ao edifício.",
+        members: (eq.membros || []).map((m) => ({
+          id: m.id_usuario,
+          name: m.nome,
+          role: PERFIL_LABEL[m.perfil] || m.perfil,
+          perfilRaw: m.perfil,
+          email: m.email,
+          phone: m.telefone || "Não informado",
+          status: m.data_saida ? "Ausente" : "Ativo",
+          since: m.data_entrada
+            ? new Date(m.data_entrada).toLocaleDateString("pt-BR")
+            : "—",
+        })),
+      }));
+
+      setTeams(lista);
+
+      if (lista.length > 0) {
+        setActiveTeam((prev) => {
+          const teamId = prev && lista.some((t) => t.id === prev) ? prev : lista[0].id;
+          const currentTeam = lista.find((t) => t.id === teamId);
+          setSelectedMember((prevMem) =>
+            prevMem && currentTeam?.members.some((m) => m.id === prevMem)
+              ? prevMem
+              : currentTeam?.members[0]?.id ?? null
+          );
+          return teamId;
+        });
+      }
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao carregar equipes.");
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarEquipes();
+  }, [carregarEquipes]);
 
   const team = teams.find((item) => item.id === activeTeam);
 
@@ -274,7 +213,6 @@ export default function Page() {
 
   function changeTeam(id) {
     const nextTeam = teams.find((item) => item.id === id);
-
     if (!nextTeam) return;
 
     setActiveTeam(id);
@@ -293,9 +231,9 @@ export default function Page() {
     setEditingMember(member.id);
     setForm({
       name: member.name,
-      role: member.role,
+      role: member.perfilRaw || "funcionario",
       email: member.email,
-      phone: member.phone,
+      phone: member.phone === "Não informado" ? "" : member.phone,
       status: member.status,
       since: member.since,
     });
@@ -307,99 +245,84 @@ export default function Page() {
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  function saveMember(event) {
+  async function saveMember(event) {
     event.preventDefault();
-
     if (!team) return;
 
-    if (editingMember) {
-      setTeams((current) =>
-        current.map((item) =>
-          item.id === activeTeam
-            ? {
-                ...item,
-                members: item.members.map((member) =>
-                  member.id === editingMember
-                    ? { ...member, ...form }
-                    : member
-                ),
-              }
-            : item
-        )
-      );
+    try {
+      if (editingMember) {
+        await requisicaoAPI(`/equipes/${activeTeam}/integrantes/${editingMember}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            nome: form.name,
+            perfil: form.role,
+            email: form.email,
+            telefone: form.phone,
+            status: form.status,
+            since: form.since,
+          }),
+        });
+        setFeedback("Integrante atualizado com sucesso.");
+      } else {
+        const res = await requisicaoAPI(`/equipes/${activeTeam}/integrantes`, {
+          method: "POST",
+          body: JSON.stringify({
+            nome: form.name,
+            perfil: form.role,
+            email: form.email,
+            telefone: form.phone,
+            status: form.status,
+            since: form.since,
+          }),
+        });
+        if (res.id_usuario) setSelectedMember(res.id_usuario);
+        setFeedback("Integrante cadastrado e vinculado à equipe.");
+      }
 
-      setFeedback("Integrante atualizado com sucesso.");
-      setSelectedMember(editingMember);
-    } else {
-      const newMember = {
-        id: Date.now(),
-        ...form,
-      };
-
-      setTeams((current) =>
-        current.map((item) =>
-          item.id === activeTeam
-            ? { ...item, members: [...item.members, newMember] }
-            : item
-        )
-      );
-
-      setSelectedMember(newMember.id);
-      setFeedback("Integrante cadastrado com sucesso.");
+      setModalOpen(false);
+      setSearch("");
+      setFilter("Todos");
+      carregarEquipes();
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao salvar integrante.");
     }
-
-    setModalOpen(false);
-    setSearch("");
-    setFilter("Todos");
   }
 
-  function deleteMember(memberId) {
+  async function deleteMember(memberId) {
     const member = team?.members.find((item) => item.id === memberId);
-
     if (!member) return;
 
-    if (!window.confirm(`Deseja realmente excluir ${member.name}?`)) {
+    if (!window.confirm(`Deseja realmente desvincular ${member.name} da equipe?`)) {
       return;
     }
 
-    setTeams((current) =>
-      current.map((item) =>
-        item.id === activeTeam
-          ? {
-              ...item,
-              members: item.members.filter(
-                (person) => person.id !== memberId
-              ),
-            }
-          : item
-      )
-    );
-
-    setSelectedMember(
-      team.members.find((person) => person.id !== memberId)?.id ?? null
-    );
-    setFeedback("Integrante removido da equipe.");
+    try {
+      await requisicaoAPI(`/equipes/${activeTeam}/integrantes/${memberId}`, {
+        method: "DELETE",
+      });
+      setFeedback("Integrante removido da equipe.");
+      carregarEquipes();
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao remover integrante.");
+    }
   }
 
-  function toggleMemberStatus(memberId) {
-    setTeams((current) =>
-      current.map((item) =>
-        item.id === activeTeam
-          ? {
-              ...item,
-              members: item.members.map((member) =>
-                member.id === memberId
-                  ? {
-                      ...member,
-                      status:
-                        member.status === "Ativo" ? "Ausente" : "Ativo",
-                    }
-                  : member
-              ),
-            }
-          : item
-      )
-    );
+  async function toggleMemberStatus(memberId) {
+    const member = team?.members.find((item) => item.id === memberId);
+    if (!member) return;
+
+    const novoStatus = member.status === "Ativo" ? "Ausente" : "Ativo";
+
+    try {
+      await requisicaoAPI(`/equipes/${activeTeam}/integrantes/${memberId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: novoStatus }),
+      });
+      setFeedback(`Status de ${member.name} alterado para ${novoStatus}.`);
+      carregarEquipes();
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao atualizar situação.");
+    }
   }
 
   return (
@@ -411,7 +334,7 @@ export default function Page() {
           <p>Gerencie as equipes e os funcionários vinculados ao edifício.</p>
         </div>
 
-        <button className="tm-primary-button" onClick={openNewMember}>
+        <button className="tm-primary-button" onClick={openNewMember} disabled={!team}>
           <Icon name="plus" size={17} />
           Adicionar integrante
         </button>
@@ -510,13 +433,13 @@ export default function Page() {
             <Icon name="shield" size={18} />
             <div>
               <strong>Estrutura do edifício</strong>
-              <span>Organização interna</span>
+              <span>Banco de dados conectado</span>
             </div>
           </div>
         </aside>
 
         <main className="tm-members-area">
-          {team && (
+          {team ? (
             <>
               <div className="tm-team-header">
                 <div>
@@ -581,7 +504,7 @@ export default function Page() {
                   <thead>
                     <tr>
                       <th>Funcionário</th>
-                      <th>Função</th>
+                      <th>Perfil</th>
                       <th>Contato</th>
                       <th>Situação</th>
                       <th>Ações</th>
@@ -637,8 +560,8 @@ export default function Page() {
                             </button>
                             <button
                               className="tm-delete-action"
-                              title="Excluir integrante"
-                              aria-label={`Excluir ${member.name}`}
+                              title="Remover integrante"
+                              aria-label={`Remover ${member.name}`}
                               onClick={(event) => {
                                 event.stopPropagation();
                                 deleteMember(member.id);
@@ -657,15 +580,7 @@ export default function Page() {
                   <div className="tm-empty">
                     <Icon name="search" size={25} />
                     <strong>Nenhum integrante encontrado</strong>
-                    <p>Altere os filtros ou tente buscar por outro termo.</p>
-                    <button
-                      onClick={() => {
-                        setSearch("");
-                        setFilter("Todos");
-                      }}
-                    >
-                      Limpar filtros
-                    </button>
+                    <p>Altere os filtros ou adicione um novo integrante.</p>
                   </div>
                 )}
               </div>
@@ -675,9 +590,14 @@ export default function Page() {
                   Exibindo {visibleMembers.length} de {team.members.length}{" "}
                   integrantes
                 </span>
-                <span>Dados da equipe selecionada</span>
+                <span>Dados sincronizados com MySQL</span>
               </div>
             </>
+          ) : (
+            <div className="tm-empty">
+              <strong>Nenhuma equipe cadastrada no banco</strong>
+              <p>Cadastre equipes na tabela equipe para gerenciar os integrantes.</p>
+            </div>
           )}
         </main>
 
@@ -690,7 +610,7 @@ export default function Page() {
             <Icon name="user" size={19} />
           </div>
 
-          {selected ? (
+          {selected && team ? (
             <>
               <div className="tm-profile">
                 <div
@@ -816,14 +736,17 @@ export default function Page() {
                 </label>
 
                 <label>
-                  Função
-                  <input
+                  Perfil / Função
+                  <select
                     name="role"
                     value={form.role}
                     onChange={handleFormChange}
-                    placeholder="Ex.: Técnico"
-                    required
-                  />
+                  >
+                    <option value="administrador">Administrador</option>
+                    <option value="manutencao">Manutenção</option>
+                    <option value="porteiro">Portaria / Segurança</option>
+                    <option value="funcionario">Funcionário</option>
+                  </select>
                 </label>
 
                 <label>
@@ -833,7 +756,6 @@ export default function Page() {
                     value={form.phone}
                     onChange={handleFormChange}
                     placeholder="(11) 99999-9999"
-                    required
                   />
                 </label>
 

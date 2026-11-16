@@ -40,8 +40,10 @@ export default function Header({
   buildingName = "Edifício cadastrado",
   userName = "Usuário",
   userRole = "Administrador",
+  onLogout,
 }) {
   const [alerts, setAlerts] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function Header({
     aria-label="Abrir menu lateral"
     title="Abrir menu"
   >
-  <i className="bi bi-arrows-angle-expand"></i>
+  <HeaderIcon name="menu" />
   </button>
 )}
       </div>
@@ -176,7 +178,13 @@ export default function Header({
           )}
         </div>
 
-        <div className="lumora-profile">
+        <div style={{ position: "relative" }}>
+          <button
+            type="button"
+            className="lumora-profile"
+            onClick={() => setProfileOpen(!profileOpen)}
+            style={{ background: "transparent", border: "none", cursor: "pointer" }}
+          >
           <span className="lumora-profile-avatar">
             {initials || "U"}
             <i />
@@ -188,6 +196,45 @@ export default function Header({
           </span>
 
           <HeaderIcon name="chevron" size={15} />
+        </button>
+          {profileOpen && (
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "calc(100% + 8px)",
+                background: "#fff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "10px",
+                padding: "6px",
+                minWidth: "160px",
+                boxShadow: "0 10px 25px rgba(15, 23, 42, 0.12)",
+                zIndex: 50,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false);
+                  onLogout?.();
+                }}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "8px 12px",
+                  border: "none",
+                  background: "transparent",
+                  color: "#dc2626",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Sair da conta
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

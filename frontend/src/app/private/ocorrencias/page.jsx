@@ -1,65 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { requisicaoAPI } from "@/services/api";
 import "./ocorrencias.css";
-
-const initialOccurrences = [
-  {
-    id: "OC-1842",
-    title: "Temperatura acima do limite",
-    priority: "Alta",
-    category: "Climatização",
-    requester: "Marina Costa",
-    responsible: "Carlos Mendes",
-    status: "Em andamento",
-    opened: "Hoje, 09:42",
-    description: "Temperatura acima do limite definido para o ambiente.",
-    location: "Sala de Servidores",
-  },
-  {
-    id: "OC-1841",
-    title: "Falha na iluminação",
-    priority: "Média",
-    category: "Iluminação",
-    requester: "Ana Souza",
-    responsible: "Equipe Elétrica",
-    status: "Aberta",
-    opened: "Hoje, 08:18",
-    description: "Algumas luminárias apresentam funcionamento irregular.",
-    location: "Recepção",
-  },
-  {
-    id: "OC-1839",
-    title: "Tentativa de acesso negada",
-    priority: "Alta",
-    category: "Acesso",
-    requester: "Bruno Lima",
-    responsible: "Rafael Nunes",
-    status: "Aberta",
-    opened: "Ontem, 17:31",
-    description: "Registro de tentativa de acesso com credencial inválida.",
-    location: "Entrada principal",
-  },
-  {
-    id: "OC-1835",
-    title: "Consumo de energia elevado",
-    priority: "Baixa",
-    category: "Energia",
-    requester: "Elisa Costa",
-    responsible: "Equipe Predial",
-    status: "Em andamento",
-    opened: "Ontem, 14:05",
-    description: "Consumo acima da média registrada para o ambiente.",
-    location: "Auditório",
-  },
-];
-
-const responsibleOptions = [
-  "Carlos Mendes",
-  "Rafael Nunes",
-  "Equipe Elétrica",
-  "Equipe Predial",
-];
 
 function Icon({ name, size = 18 }) {
   const paths = {
@@ -104,40 +47,164 @@ function Status({ value }) {
 }
 
 function Priority({ value }) {
+  const slug = value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
   return (
-    <span className={`oc-priority ${value.toLowerCase()}`}>
+    <span className={`oc-priority ${slug}`}>
       <i />
       {value}
     </span>
   );
 }
 
+const STATUS_DB_TO_UI = {
+  aberta: "Aberta",
+  em_andamento: "Em andamento",
+  resolvida: "Resolvida",
+  cancelada: "Cancelada",
+};
+
+const STATUS_UI_TO_DB = {
+  "Aberta": "aberta",
+  "Em andamento": "em_andamento",
+  "Resolvida": "resolvida",
+};
+
+const PRIO_DB_TO_UI = {
+  baixa: "Baixa",
+  media: "Média",
+  alta: "Alta",
+};
+
+const TIPO_LABEL = {
+  temperatura: "Climatização",
+  iluminacao: "Iluminação",
+  energia: "Energia",
+};
+
 export default function Ocorrencias() {
-  const [occurrences, setOccurrences] = useState(initialOccurrences);
+  const [rawOccurrences, setRawOccurrences] = useState([]);
+  const [dispositivos, setDispositivos] = useState([]);
+  const [ambientes, setAmbientes] = useState([]);
+  const [equipes, setEquipes] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+
   const [view, setView] = useState("table");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [priorityFilter, setPriorityFilter] = useState("Todas");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const [toast, setToast] = useState("");
 
   const [form, setForm] = useState({
     title: "",
-    category: "Climatização",
-    priority: "Média",
-    requester: "",
-    responsible: "Equipe Predial",
-    location: "",
+    id_dispositivo: "",
+    priority: "media",
+    responsibleKey: "",
     description: "",
   });
 
   useEffect(() => {
     if (!toast) return;
-
     const timer = setTimeout(() => setToast(""), 2800);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  const carregarDados = useCallback(async () => {
+    try {
+      const [resOc, resDisp, resAmb, resEq] = await Promise.all([
+        requisicaoAPI("/ocorrencias?limite=200"),
+        requisicaoAPI("/dispositivos?limite=200"),
+        requisicaoAPI("/ambientes?limite=200"),
+        requisicaoAPI("/equipes"),
+      ]);
+
+      const listaOc = resOc.dados || [];
+      const listaDisp = resDisp.dados || [];
+      const listaEq = resEq.dados || [];
+
+      setRawOccurrences(listaOc);
+      setDispositivos(listaDisp);
+      setAmbientes(resAmb.dados || []);
+      setEquipes(listaEq);
+      setUsuarios(resEq.usuarios || []);
+
+      setForm((prev) => ({
+        ...prev,
+        id_dispositivo: prev.id_dispositivo || (listaDisp[0]?.id_dispositivo ? String(listaDisp[0].id_dispositivo) : ""),
+        responsibleKey: prev.responsibleKey || (listaEq[0]?.id_equipe ? `eq:${listaEq[0].id_equipe}` : ""),
+      }));
+    } catch (erro) {
+      setToast(erro.message || "Erro ao carregar ocorrências.");
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  const responsibleOptions = useMemo(() => {
+    const opts = [{ key: "", label: "Não atribuído" }];
+    equipes.forEach((eq) => {
+      opts.push({ key: `eq:${eq.id_equipe}`, label: eq.nome_equipe });
+    });
+    usuarios.forEach((u) => {
+      opts.push({ key: `tec:${u.id_usuario}`, label: `${u.nome} (Técnico)` });
+    });
+    return opts;
+  }, [equipes, usuarios]);
+
+  const occurrences = useMemo(() => {
+    return rawOccurrences.map((oc) => {
+      const disp = dispositivos.find((d) => d.id_dispositivo === oc.id_dispositivo);
+      const amb = ambientes.find((a) => a.id_ambiente === disp?.id_ambiente);
+      const eq = equipes.find((e) => e.id_equipe === oc.id_equipe_responsavel);
+      const tec = usuarios.find((u) => u.id_usuario === oc.id_tecnico_responsavel);
+
+      let responsibleKey = "";
+      let responsibleLabel = "Não atribuído";
+      if (tec) {
+        responsibleKey = `tec:${tec.id_usuario}`;
+        responsibleLabel = `${tec.nome} (Técnico)`;
+      } else if (eq) {
+        responsibleKey = `eq:${eq.id_equipe}`;
+        responsibleLabel = eq.nome_equipe;
+      }
+
+      const opened = oc.data_ocorrencia
+        ? new Date(oc.data_ocorrencia).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "—";
+
+      return {
+        rawId: oc.id_ocorrencia,
+        id: `OC-${String(oc.id_ocorrencia).padStart(4, "0")}`,
+        title: oc.titulo,
+        priority: PRIO_DB_TO_UI[oc.prioridade] || "Média",
+        category: TIPO_LABEL[disp?.tipo_dispositivo] || "Dispositivos",
+        requester: disp?.nome || `Dispositivo #${oc.id_dispositivo}`,
+        responsibleKey,
+        responsible: responsibleLabel,
+        status: STATUS_DB_TO_UI[oc.status_ocorrencia] || "Aberta",
+        opened,
+        description: oc.descricao,
+        location: amb?.nome || "Ambiente não informado",
+      };
+    });
+  }, [rawOccurrences, dispositivos, ambientes, equipes, usuarios]);
+
+  const selected = useMemo(
+    () => occurrences.find((o) => o.rawId === selectedId) || null,
+    [occurrences, selectedId]
+  );
 
   const filteredOccurrences = useMemo(() => {
     return occurrences.filter((item) => {
@@ -147,7 +214,8 @@ export default function Ocorrencias() {
         item.id.toLowerCase().includes(term) ||
         item.title.toLowerCase().includes(term) ||
         item.requester.toLowerCase().includes(term) ||
-        item.category.toLowerCase().includes(term);
+        item.category.toLowerCase().includes(term) ||
+        item.location.toLowerCase().includes(term);
 
       const matchesStatus =
         statusFilter === "Todos" || item.status === statusFilter;
@@ -159,76 +227,94 @@ export default function Ocorrencias() {
     });
   }, [occurrences, search, statusFilter, priorityFilter]);
 
-  const openCount = occurrences.filter(
-    (item) => item.status === "Aberta"
-  ).length;
-
-  const progressCount = occurrences.filter(
-    (item) => item.status === "Em andamento"
-  ).length;
-
-  const resolvedCount = occurrences.filter(
-    (item) => item.status === "Resolvida"
-  ).length;
-
+  const openCount = occurrences.filter((item) => item.status === "Aberta").length;
+  const progressCount = occurrences.filter((item) => item.status === "Em andamento").length;
+  const resolvedCount = occurrences.filter((item) => item.status === "Resolvida").length;
   const highPriorityCount = occurrences.filter(
     (item) => item.priority === "Alta" && item.status !== "Resolvida"
   ).length;
 
-  function updateStatus(id, newStatus) {
-    setOccurrences((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, status: newStatus } : item
-      )
-    );
+  async function updateStatus(item, newStatus) {
+    try {
+      const statusDb = STATUS_UI_TO_DB[newStatus] || "aberta";
+      const payload = {
+        status_ocorrencia: statusDb,
+        resolvida_em:
+          statusDb === "resolvida"
+            ? new Date().toISOString().slice(0, 19).replace("T", " ")
+            : null,
+      };
 
-    setSelected((current) =>
-      current?.id === id ? { ...current, status: newStatus } : current
-    );
+      await requisicaoAPI(`/ocorrencias/${item.rawId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
 
-    setToast(`${id} atualizado com sucesso.`);
+      setToast(`${item.id} atualizado com sucesso.`);
+      carregarDados();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao atualizar status.");
+    }
   }
 
-  function updateResponsible(id, responsible) {
-    setOccurrences((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, responsible } : item
-      )
-    );
+  async function updateResponsible(item, key) {
+    try {
+      const payload = {
+        id_equipe_responsavel: key.startsWith("eq:") ? Number(key.slice(3)) : null,
+        id_tecnico_responsavel: key.startsWith("tec:") ? Number(key.slice(4)) : null,
+      };
 
-    setToast("Responsável atualizado.");
+      await requisicaoAPI(`/ocorrencias/${item.rawId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+
+      setToast("Responsável atualizado.");
+      carregarDados();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao atualizar responsável.");
+    }
   }
 
-  function createOccurrence(e) {
+  async function createOccurrence(e) {
     e.preventDefault();
 
-    const nextNumber =
-      Math.max(
-        1842,
-        ...occurrences.map((item) => Number(item.id.replace("OC-", "")) || 0)
-      ) + 1;
+    if (!form.id_dispositivo) {
+      setToast("Cadastre ou selecione um dispositivo primeiro.");
+      return;
+    }
 
-    const newOccurrence = {
-      ...form,
-      id: `OC-${nextNumber}`,
-      status: "Aberta",
-      opened: "Agora",
-    };
+    try {
+      const payload = {
+        id_dispositivo: Number(form.id_dispositivo),
+        titulo: form.title.trim(),
+        descricao: form.description.trim() || "Ocorrência registrada via painel operacional.",
+        prioridade: form.priority,
+        status_ocorrencia: "aberta",
+        id_equipe_responsavel: form.responsibleKey.startsWith("eq:")
+          ? Number(form.responsibleKey.slice(3))
+          : null,
+        id_tecnico_responsavel: form.responsibleKey.startsWith("tec:")
+          ? Number(form.responsibleKey.slice(4))
+          : null,
+      };
 
-    setOccurrences((current) => [newOccurrence, ...current]);
+      await requisicaoAPI("/ocorrencias", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-    setForm({
-      title: "",
-      category: "Climatização",
-      priority: "Média",
-      requester: "",
-      responsible: "Equipe Predial",
-      location: "",
-      description: "",
-    });
-
-    setModalOpen(false);
-    setToast("Nova ocorrência cadastrada.");
+      setForm((prev) => ({
+        ...prev,
+        title: "",
+        description: "",
+      }));
+      setModalOpen(false);
+      setToast("Nova ocorrência cadastrada no banco.");
+      carregarDados();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao cadastrar ocorrência.");
+    }
   }
 
   return (
@@ -339,7 +425,7 @@ export default function Ocorrencias() {
             <Icon name="search" size={17} />
             <input
               type="text"
-              placeholder="Buscar por ID, título ou solicitante..."
+              placeholder="Buscar por ID, título, dispositivo ou ambiente..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -382,7 +468,7 @@ export default function Ocorrencias() {
                 <tr>
                   <th>OCORRÊNCIA</th>
                   <th>PRIORIDADE</th>
-                  <th>SOLICITANTE</th>
+                  <th>DISPOSITIVO</th>
                   <th>RESPONSÁVEL</th>
                   <th>STATUS</th>
                   <th>ABERTURA</th>
@@ -392,14 +478,14 @@ export default function Ocorrencias() {
 
               <tbody>
                 {filteredOccurrences.map((item) => (
-                  <tr key={item.id}>
+                  <tr key={item.rawId}>
                     <td>
                       <button
                         className="oc-occurrence-link"
-                        onClick={() => setSelected(item)}
+                        onClick={() => setSelectedId(item.rawId)}
                       >
                         <strong>{item.title}</strong>
-                        <small>{item.id} · {item.category}</small>
+                        <small>{item.id} · {item.location}</small>
                       </button>
                     </td>
 
@@ -410,13 +496,11 @@ export default function Ocorrencias() {
                     <td>
                       <select
                         className="oc-responsible-select"
-                        value={item.responsible}
-                        onChange={(e) =>
-                          updateResponsible(item.id, e.target.value)
-                        }
+                        value={item.responsibleKey}
+                        onChange={(e) => updateResponsible(item, e.target.value)}
                       >
-                        {responsibleOptions.map((name) => (
-                          <option key={name} value={name}>{name}</option>
+                        {responsibleOptions.map((opt) => (
+                          <option key={opt.key} value={opt.key}>{opt.label}</option>
                         ))}
                       </select>
                     </td>
@@ -428,7 +512,7 @@ export default function Ocorrencias() {
                     <td>
                       <button
                         className="oc-action-button"
-                        onClick={() => setSelected(item)}
+                        onClick={() => setSelectedId(item.rawId)}
                       >
                         Detalhes
                         <Icon name="arrow" size={14} />
@@ -443,7 +527,7 @@ export default function Ocorrencias() {
               <div className="oc-empty">
                 <Icon name="search" size={25} />
                 <strong>Nenhuma ocorrência encontrada</strong>
-                <p>Tente alterar os filtros ou o termo da busca.</p>
+                <p>Tente alterar os filtros ou cadastre uma nova ocorrência.</p>
               </div>
             )}
           </div>
@@ -465,7 +549,7 @@ export default function Ocorrencias() {
                   </div>
 
                   {items.map((item) => (
-                    <article className="oc-kanban-card" key={item.id}>
+                    <article className="oc-kanban-card" key={item.rawId}>
                       <div className="oc-kanban-card-top">
                         <span>{item.id}</span>
                         <Priority value={item.priority} />
@@ -476,7 +560,7 @@ export default function Ocorrencias() {
 
                       <div className="oc-kanban-card-footer">
                         <span>{item.requester}</span>
-                        <button onClick={() => setSelected(item)}>
+                        <button onClick={() => setSelectedId(item.rawId)}>
                           Detalhes <Icon name="arrow" size={13} />
                         </button>
                       </div>
@@ -486,7 +570,7 @@ export default function Ocorrencias() {
                           className="oc-kanban-resolve"
                           onClick={() =>
                             updateStatus(
-                              item.id,
+                              item,
                               status === "Aberta" ? "Em andamento" : "Resolvida"
                             )
                           }
@@ -538,23 +622,27 @@ export default function Ocorrencias() {
                   required
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Ex.: Falha no sistema de iluminação"
+                  placeholder="Ex.: Falha no sensor de iluminação"
                 />
               </label>
 
               <div className="oc-form-grid">
                 <label>
-                  Categoria
+                  Dispositivo vinculado
                   <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    required
+                    value={form.id_dispositivo}
+                    onChange={(e) => setForm({ ...form, id_dispositivo: e.target.value })}
                   >
-                    <option>Climatização</option>
-                    <option>Iluminação</option>
-                    <option>Acesso</option>
-                    <option>Energia</option>
-                    <option>Dispositivos</option>
-                    <option>Outros</option>
+                    <option value="">Selecione um dispositivo...</option>
+                    {dispositivos.map((d) => {
+                      const amb = ambientes.find((a) => a.id_ambiente === d.id_ambiente);
+                      return (
+                        <option key={d.id_dispositivo} value={d.id_dispositivo}>
+                          {d.nome} {amb ? `(${amb.nome})` : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                 </label>
 
@@ -564,49 +652,29 @@ export default function Ocorrencias() {
                     value={form.priority}
                     onChange={(e) => setForm({ ...form, priority: e.target.value })}
                   >
-                    <option>Baixa</option>
-                    <option>Média</option>
-                    <option>Alta</option>
-                  </select>
-                </label>
-              </div>
-
-              <div className="oc-form-grid">
-                <label>
-                  Solicitante
-                  <input
-                    required
-                    value={form.requester}
-                    onChange={(e) => setForm({ ...form, requester: e.target.value })}
-                    placeholder="Nome do solicitante"
-                  />
-                </label>
-
-                <label>
-                  Responsável
-                  <select
-                    value={form.responsible}
-                    onChange={(e) => setForm({ ...form, responsible: e.target.value })}
-                  >
-                    {responsibleOptions.map((name) => (
-                      <option key={name}>{name}</option>
-                    ))}
+                    <option value="baixa">Baixa</option>
+                    <option value="media">Média</option>
+                    <option value="alta">Alta</option>
                   </select>
                 </label>
               </div>
 
               <label>
-                Ambiente
-                <input
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  placeholder="Ex.: Sala de reuniões"
-                />
+                Responsável pelo atendimento
+                <select
+                  value={form.responsibleKey}
+                  onChange={(e) => setForm({ ...form, responsibleKey: e.target.value })}
+                >
+                  {responsibleOptions.map((opt) => (
+                    <option key={opt.key} value={opt.key}>{opt.label}</option>
+                  ))}
+                </select>
               </label>
 
               <label>
                 Descrição
                 <textarea
+                  required
                   rows="4"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -634,7 +702,7 @@ export default function Ocorrencias() {
       )}
 
       {selected && (
-        <div className="oc-modal-overlay" onMouseDown={() => setSelected(null)}>
+        <div className="oc-modal-overlay" onMouseDown={() => setSelectedId(null)}>
           <section
             className="oc-modal oc-details-modal"
             onMouseDown={(e) => e.stopPropagation()}
@@ -643,12 +711,12 @@ export default function Ocorrencias() {
               <div>
                 <span className="oc-section-label">{selected.id}</span>
                 <h2>{selected.title}</h2>
-                <p>{selected.category} · {selected.location || "Ambiente não informado"}</p>
+                <p>{selected.category} · {selected.location}</p>
               </div>
 
               <button
                 className="oc-modal-close"
-                onClick={() => setSelected(null)}
+                onClick={() => setSelectedId(null)}
                 aria-label="Fechar"
               >
                 <Icon name="close" />
@@ -662,7 +730,7 @@ export default function Ocorrencias() {
 
             <div className="oc-detail-grid">
               <div>
-                <span>Solicitante</span>
+                <span>Dispositivo</span>
                 <strong>{selected.requester}</strong>
               </div>
               <div>
@@ -674,14 +742,11 @@ export default function Ocorrencias() {
             <label className="oc-detail-responsible">
               Responsável pelo atendimento
               <select
-                value={selected.responsible}
-                onChange={(e) => {
-                  updateResponsible(selected.id, e.target.value);
-                  setSelected({ ...selected, responsible: e.target.value });
-                }}
+                value={selected.responsibleKey}
+                onChange={(e) => updateResponsible(selected, e.target.value)}
               >
-                {responsibleOptions.map((name) => (
-                  <option key={name}>{name}</option>
+                {responsibleOptions.map((opt) => (
+                  <option key={opt.key} value={opt.key}>{opt.label}</option>
                 ))}
               </select>
             </label>
@@ -695,7 +760,7 @@ export default function Ocorrencias() {
               {selected.status === "Aberta" && (
                 <button
                   className="oc-primary-button"
-                  onClick={() => updateStatus(selected.id, "Em andamento")}
+                  onClick={() => updateStatus(selected, "Em andamento")}
                 >
                   Iniciar atendimento
                 </button>
@@ -704,7 +769,7 @@ export default function Ocorrencias() {
               {selected.status === "Em andamento" && (
                 <button
                   className="oc-primary-button"
-                  onClick={() => updateStatus(selected.id, "Resolvida")}
+                  onClick={() => updateStatus(selected, "Resolvida")}
                 >
                   <Icon name="check" size={16} />
                   Marcar como resolvida
@@ -714,7 +779,7 @@ export default function Ocorrencias() {
               {selected.status === "Resolvida" && (
                 <button
                   className="oc-cancel-button"
-                  onClick={() => updateStatus(selected.id, "Em andamento")}
+                  onClick={() => updateStatus(selected, "Em andamento")}
                 >
                   Reabrir ocorrência
                 </button>

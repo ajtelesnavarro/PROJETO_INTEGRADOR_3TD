@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { requisicaoAPI } from "@/services/api";
 import "./dashboard.css";
 
 function Icon({ name, size = 18 }) {
@@ -37,36 +38,6 @@ function Icon({ name, size = 18 }) {
   );
 }
 
-function PageTitle() {
-  return (
-    <div className="dash-title">
-      <div>
-        <span className="dash-eyebrow">CENTRAL DE OPERAÇÕES</span>
-        <h1>Dashboard</h1>
-        <p>Acompanhe os indicadores e a situação operacional do edifício.</p>
-      </div>
-
-      <div className="dash-title-right">
-      <button
-        className="pa-primary-button"
-        onClick={() => setModalAberto(true)}
-      >
-        <span>＋</span>
-        Adicionar andar
-      </button>
-        <span className="dash-demo">
-          <i />
-          Ambiente de demonstração
-        </span>
-        <span className="dash-date">
-          <Icon name="clock" size={15} />
-          Visão geral
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function MetricCard({ icon, label, value, description, color, footer }) {
   return (
     <article className="dash-metric">
@@ -93,6 +64,7 @@ function Status({ value }) {
     "Aberta": "open",
     "Em andamento": "progress",
     "Resolvida": "success",
+    "Cancelada": "normal",
     "Alta": "danger",
     "Média": "warning",
     "Baixa": "normal",
@@ -106,26 +78,81 @@ function Status({ value }) {
   );
 }
 
-function EnergyChart({ range }) {
+function buildSmoothPath(values, maxVal) {
+  const safeMax = Math.max(maxVal, 1);
+  const points = values.map((v, idx) => {
+    const x = values.length === 1 ? 350 : (idx / (values.length - 1)) * 700;
+    const clamped = Math.max(0, Math.min(safeMax, Number(v) || 0));
+    const y = 180 - (clamped / safeMax) * 155;
+    return [Number(x.toFixed(1)), Number(y.toFixed(1))];
+  });
+
+  if (points.length === 0) return "M0 175 L700 175";
+  if (points.length === 1) return `M0 ${points[0][1]} L700 ${points[0][1]}`;
+
+  return points.reduce((acc, [x, y], i, arr) => {
+    if (i === 0) return `M${x} ${y}`;
+    const [px, py] = arr[i - 1];
+    const cx = Number(((px + x) / 2).toFixed(1));
+    return `${acc} C${cx} ${py} ${cx} ${y} ${x} ${y}`;
+  }, "");
+}
+
+function EnergyChart({ range, leituras }) {
   const labels = {
     Hoje: ["06h", "08h", "10h", "12h", "14h", "16h", "18h"],
-    "7 dias": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+    "7 dias": ["D-6", "D-5", "D-4", "D-3", "D-2", "Ontem", "Hoje"],
     "30 dias": ["01", "05", "10", "15", "20", "25", "30"],
   };
 
-  const paths = {
-    Hoje: "M0 140 C45 125 65 100 110 112 S180 145 225 95 S300 75 350 90 S410 45 465 60 S540 80 590 35 S650 45 700 20",
-    "7 dias": "M0 130 C45 110 65 80 110 95 S180 120 225 70 S300 85 350 55 S410 75 465 45 S540 70 590 35 S650 55 700 25",
-    "30 dias": "M0 150 C45 125 65 135 110 95 S180 110 225 80 S300 100 350 65 S410 80 465 55 S540 70 590 45 S650 40 700 25",
-  };
+  const { energySeries, tempSeries, scaleMax } = useMemo(() => {
+    const now = new Date();
+    const days = range === "Hoje" ? 1 : range === "7 dias" ? 7 : 30;
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+    const recent = leituras.filter((l) => new Date(l.data_hora) >= cutoff);
+    const energia = recent.filter((l) => l.tipo === "energia").reverse();
+    const temp = recent.filter((l) => l.tipo === "temperatura").reverse();
+
+    const buckets = 7;
+    const eVals = Array.from({ length: buckets }, (_, i) => {
+      if (!energia.length) return 0;
+      const start = Math.floor((i * energia.length) / buckets);
+      const end = Math.max(start + 1, Math.floor(((i + 1) * energia.length) / buckets));
+      const slice = energia.slice(start, end);
+      return slice.length ? slice.reduce((s, item) => s + Number(item.valor || 0), 0) : 0;
+    });
+
+    const tVals = Array.from({ length: buckets }, (_, i) => {
+      if (!temp.length) return 0;
+      const start = Math.floor((i * temp.length) / buckets);
+      const end = Math.max(start + 1, Math.floor(((i + 1) * temp.length) / buckets));
+      const slice = temp.slice(start, end);
+      return slice.length
+        ? slice.reduce((s, item) => s + Number(item.valor || 0), 0) / slice.length
+        : 0;
+    });
+
+    const maxEnergy = Math.max(...eVals, 100);
+    const roundedMax = Math.ceil(maxEnergy / 100) * 100;
+
+    return {
+      energySeries: eVals,
+      tempSeries: tVals,
+      scaleMax: roundedMax,
+    };
+  }, [leituras, range]);
+
+  const energyPath = buildSmoothPath(energySeries, scaleMax);
+  const tempPath = buildSmoothPath(tempSeries, 50);
 
   return (
     <div className="dash-chart">
       <div className="dash-chart-y">
-        <span>1000</span>
-        <span>750</span>
-        <span>500</span>
-        <span>250</span>
+        <span>{scaleMax}</span>
+        <span>{Math.round(scaleMax * 0.75)}</span>
+        <span>{Math.round(scaleMax * 0.5)}</span>
+        <span>{Math.round(scaleMax * 0.25)}</span>
         <span>0</span>
       </div>
 
@@ -143,17 +170,17 @@ function EnergyChart({ range }) {
           ))}
 
           <path
-            d={`${paths[range]} L700 190 L0 190 Z`}
+            d={`${energyPath} L700 190 L0 190 Z`}
             fill="url(#dashArea)"
           />
 
           <path
-            d={paths[range]}
+            d={energyPath}
             className="dash-energy-line"
           />
 
           <path
-            d="M0 105 C50 90 90 115 140 95 S220 110 280 92 S360 100 420 85 S500 95 560 80 S640 85 700 70"
+            d={tempPath}
             className="dash-temp-line"
           />
         </svg>
@@ -168,12 +195,21 @@ function EnergyChart({ range }) {
   );
 }
 
-function DeviceHealth() {
-  const devices = [
-    { label: "Ativos", value: "126", color: "green" },
-    { label: "Instáveis", value: "02", color: "yellow" },
-    { label: "Manutenção", value: "01", color: "blue" },
-    { label: "Offline", value: "01", color: "red" },
+function DeviceHealth({ dispositivos }) {
+  const counts = useMemo(() => {
+    return {
+      ativos: dispositivos.filter((d) => d.status_dispositivo === "ativo").length,
+      instaveis: dispositivos.filter((d) => d.status_dispositivo === "instavel").length,
+      manutencao: dispositivos.filter((d) => d.status_dispositivo === "manutencao").length,
+      offline: dispositivos.filter((d) => d.status_dispositivo === "offline").length,
+    };
+  }, [dispositivos]);
+
+  const rows = [
+    { label: "Ativos", value: String(counts.ativos).padStart(2, "0"), color: "green" },
+    { label: "Instáveis", value: String(counts.instaveis).padStart(2, "0"), color: "yellow" },
+    { label: "Manutenção", value: String(counts.manutencao).padStart(2, "0"), color: "blue" },
+    { label: "Offline", value: String(counts.offline).padStart(2, "0"), color: "red" },
   ];
 
   return (
@@ -198,13 +234,13 @@ function DeviceHealth() {
             <circle className="dash-ring-offline" cx="60" cy="60" r="47" pathLength="100" />
           </svg>
           <div className="dash-ring-center">
-            <strong>130</strong>
+            <strong>{dispositivos.length}</strong>
             <span>Dispositivos</span>
           </div>
         </div>
 
         <div className="dash-health-legend">
-          {devices.map((item) => (
+          {rows.map((item) => (
             <div key={item.label}>
               <span className={`dash-legend-dot ${item.color}`} />
               <span>{item.label}</span>
@@ -216,53 +252,13 @@ function DeviceHealth() {
 
       <div className="dash-health-note">
         <Icon name="activity" size={16} />
-        <span>Indicadores ilustrativos para demonstração</span>
+        <span>Dados sincronizados com o banco de dados</span>
       </div>
     </section>
   );
 }
 
-function Incidents({ toast }) {
-  const [items, setItems] = useState([
-    {
-      id: "OC-1842",
-      category: "Climatização",
-      requester: "Marina Costa",
-      owner: "Carlos Mendes",
-      status: "Em andamento",
-      priority: "Alta",
-      opened: "15/11/2026 · 09:42",
-    },
-    {
-      id: "OC-1841",
-      category: "Iluminação",
-      requester: "Ana Souza",
-      owner: "Equipe Elétrica",
-      status: "Aberta",
-      priority: "Média",
-      opened: "15/11/2026 · 08:18",
-    },
-    {
-      id: "OC-1839",
-      category: "Controle de acesso",
-      requester: "Bruno Lima",
-      owner: "Rafael Nunes",
-      status: "Aberta",
-      priority: "Alta",
-      opened: "14/11/2026 · 17:31",
-    },
-  ]);
-
-  function resolve(id) {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, status: "Resolvida" } : item
-      )
-    );
-
-    toast(`${id} marcado como resolvido.`);
-  }
-
+function Incidents({ items, onResolve }) {
   const active = items.filter((item) => item.status !== "Resolvida").length;
 
   return (
@@ -277,7 +273,7 @@ function Incidents({ toast }) {
           <p>Registros que precisam de acompanhamento da equipe.</p>
         </div>
 
-        <Link href="/tickets" className="dash-link">
+        <Link href="/private/ocorrencias" className="dash-link">
           Ver todas <Icon name="arrow" size={15} />
         </Link>
       </div>
@@ -288,7 +284,7 @@ function Incidents({ toast }) {
             <tr>
               <th>IDENTIFICAÇÃO</th>
               <th>OCORRÊNCIA</th>
-              <th>SOLICITANTE</th>
+              <th>DISPOSITIVO / LOCAL</th>
               <th>RESPONSÁVEL</th>
               <th>PRIORIDADE</th>
               <th>STATUS</th>
@@ -297,33 +293,41 @@ function Incidents({ toast }) {
           </thead>
 
           <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className={item.status === "Resolvida" ? "is-resolved" : ""}>
-                <td>
-                  <strong>{item.id}</strong>
-                  <small>{item.opened}</small>
-                </td>
-                <td>
-                  <strong>{item.category}</strong>
-                  <small>Registro de demonstração</small>
-                </td>
-                <td>{item.requester}</td>
-                <td>{item.owner}</td>
-                <td><Status value={item.priority} /></td>
-                <td><Status value={item.status} /></td>
-                <td>
-                  <button
-                    className="dash-resolve"
-                    disabled={item.status === "Resolvida"}
-                    onClick={() => resolve(item.id)}
-                  >
-                    {item.status === "Resolvida" ? (
-                      <><Icon name="check" size={14} /> Resolvida</>
-                    ) : "Resolver"}
-                  </button>
+            {items.length > 0 ? (
+              items.map((item) => (
+                <tr key={item.rawId} className={item.status === "Resolvida" ? "is-resolved" : ""}>
+                  <td>
+                    <strong>{item.id}</strong>
+                    <small>{item.opened}</small>
+                  </td>
+                  <td>
+                    <strong>{item.title}</strong>
+                    <small>{item.category}</small>
+                  </td>
+                  <td>{item.location}</td>
+                  <td>{item.owner}</td>
+                  <td><Status value={item.priority} /></td>
+                  <td><Status value={item.status} /></td>
+                  <td>
+                    <button
+                      className="dash-resolve"
+                      disabled={item.status === "Resolvida"}
+                      onClick={() => onResolve(item)}
+                    >
+                      {item.status === "Resolvida" ? (
+                        <><Icon name="check" size={14} /> Resolvida</>
+                      ) : "Resolver"}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} style={{ textAlign: "center", padding: "24px", opacity: 0.7 }}>
+                  Nenhuma ocorrência registrada no banco de dados.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -334,6 +338,13 @@ function Incidents({ toast }) {
 export default function DashboardPage() {
   const [range, setRange] = useState("7 dias");
   const [toast, setToast] = useState("");
+  const [predios, setPredios] = useState([]);
+  const [ambientes, setAmbientes] = useState([]);
+  const [dispositivos, setDispositivos] = useState([]);
+  const [ocorrencias, setOcorrencias] = useState([]);
+  const [equipes, setEquipes] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [leituras, setLeituras] = useState([]);
 
   function showToast(message) {
     setToast(message);
@@ -341,33 +352,151 @@ export default function DashboardPage() {
     window.__lumoraToast = window.setTimeout(() => setToast(""), 2800);
   }
 
+  const carregarDados = useCallback(async () => {
+    try {
+      const [resPredios, resAmbientes, resDispositivos, resOcorrencias, resEquipes, resLeituras] =
+        await Promise.all([
+          requisicaoAPI("/predios?limite=200"),
+          requisicaoAPI("/ambientes?limite=200"),
+          requisicaoAPI("/dispositivos?limite=200"),
+          requisicaoAPI("/ocorrencias?limite=50"),
+          requisicaoAPI("/equipes"),
+          requisicaoAPI("/leituras?limite=200"),
+        ]);
+
+      setPredios(resPredios.dados || []);
+      setAmbientes(resAmbientes.dados || []);
+      setDispositivos(resDispositivos.dados || []);
+      setOcorrencias(resOcorrencias.dados || []);
+      setEquipes(resEquipes.dados || []);
+      setUsuarios(resEquipes.usuarios || []);
+      setLeituras(resLeituras.dados || []);
+    } catch (erro) {
+      showToast(erro.message || "Erro ao carregar indicadores.");
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  const resumoIndicadores = useMemo(() => {
+    const ativos = dispositivos.filter((d) => d.status_dispositivo === "ativo").length;
+    const atencao = dispositivos.length - ativos;
+
+    const leiturasEnergia = leituras.filter((l) => l.tipo === "energia");
+    const totalEnergia = leiturasEnergia.reduce((acc, l) => acc + Number(l.valor || 0), 0);
+
+    const leiturasTemp = leituras.filter((l) => l.tipo === "temperatura");
+    const mediaTemp = leiturasTemp.length
+      ? leiturasTemp.reduce((acc, l) => acc + Number(l.valor || 0), 0) / leiturasTemp.length
+      : 0;
+
+    return {
+      ativos,
+      atencao,
+      totalEnergia: totalEnergia.toFixed(1).replace(".", ","),
+      mediaTemp: mediaTemp.toFixed(1).replace(".", ","),
+    };
+  }, [dispositivos, leituras]);
+
+  const ocorrenciasFormatadas = useMemo(() => {
+    const statusMap = {
+      aberta: "Aberta",
+      em_andamento: "Em andamento",
+      resolvida: "Resolvida",
+      cancelada: "Cancelada",
+    };
+    const prioMap = {
+      alta: "Alta",
+      media: "Média",
+      baixa: "Baixa",
+    };
+
+    return ocorrencias.slice(0, 6).map((oc) => {
+      const disp = dispositivos.find((d) => d.id_dispositivo === oc.id_dispositivo);
+      const amb = ambientes.find((a) => a.id_ambiente === disp?.id_ambiente);
+      const eq = equipes.find((e) => e.id_equipe === oc.id_equipe_responsavel);
+      const tec = usuarios.find((u) => u.id_usuario === oc.id_tecnico_responsavel);
+
+      const data = oc.data_ocorrencia
+        ? new Date(oc.data_ocorrencia).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "—";
+
+      return {
+        rawId: oc.id_ocorrencia,
+        id: `OC-${String(oc.id_ocorrencia).padStart(4, "0")}`,
+        title: oc.titulo,
+        category: disp?.nome || "Sensor IoT",
+        location: amb?.nome || "Ambiente não vinculado",
+        owner: tec?.nome || eq?.nome_equipe || "Não atribuído",
+        priority: prioMap[oc.prioridade] || "Média",
+        status: statusMap[oc.status_ocorrencia] || "Aberta",
+        opened: data,
+      };
+    });
+  }, [ocorrencias, dispositivos, ambientes, equipes, usuarios]);
+
+  async function resolverOcorrencia(item) {
+    try {
+      const agoraSQL = new Date().toISOString().slice(0, 19).replace("T", " ");
+      await requisicaoAPI(`/ocorrencias/${item.rawId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status_ocorrencia: "resolvida",
+          resolvida_em: agoraSQL,
+        }),
+      });
+      showToast(`${item.id} marcado como resolvido.`);
+      carregarDados();
+    } catch (erro) {
+      showToast(erro.message || "Erro ao resolver ocorrência.");
+    }
+  }
+
   return (
     <div className="lumora-dashboard">
-      <PageTitle />
+      <div className="dash-title">
+        <div>
+          <span className="dash-eyebrow">CENTRAL DE OPERAÇÕES</span>
+          <h1>Dashboard</h1>
+          <p>Acompanhe os indicadores e a situação operacional do edifício.</p>
+        </div>
 
-      <div className="dash-demo-notice">
-        <span><Icon name="alert" size={17} /></span>
-        <p>
-          <strong>Dados demonstrativos.</strong> Os indicadores abaixo são exemplos visuais
-          e ainda não representam informações consultadas no banco de dados.
-        </p>
+        <div className="dash-title-right">
+          <span className="dash-date">
+            <Icon name="clock" size={15} />
+            Dados em tempo real
+          </span>
+        </div>
       </div>
 
       <section className="dash-metrics">
         <MetricCard
           icon="building"
-          label="Edifício"
-          value="01"
-          description="Unidade cadastrada"
+          label="Edifícios"
+          value={String(predios.length).padStart(2, "0")}
+          description="Unidades cadastradas"
           color="blue"
-          footer={<span><Icon name="pin" size={13} /> Estrutura principal</span>}
+          footer={
+            <span>
+              <Icon name="pin" size={13} />{" "}
+              {predios[0]?.nome_predio || "Nenhum prédio cadastrado"}
+            </span>
+          }
         />
 
         <MetricCard
           icon="rooms"
           label="Ambientes"
-          value="38"
-          description="Ambientes cadastrados"
+          value={String(ambientes.length).padStart(2, "0")}
+          description="Ambientes monitorados"
           color="purple"
           footer={<span>Distribuídos pelos andares</span>}
         />
@@ -375,19 +504,23 @@ export default function DashboardPage() {
         <MetricCard
           icon="cpu"
           label="Dispositivos IoT"
-          value="130"
-          description="Dispositivos demonstrativos"
+          value={String(dispositivos.length).padStart(2, "0")}
+          description="Sensores e atuadores"
           color="cyan"
-          footer={<span>126 ativos · 4 em atenção</span>}
+          footer={
+            <span>
+              {resumoIndicadores.ativos} ativos · {resumoIndicadores.atencao} em atenção
+            </span>
+          }
         />
 
         <MetricCard
           icon="bolt"
           label="Consumo de energia"
-          value="842"
-          description="kWh · valor ilustrativo"
+          value={resumoIndicadores.totalEnergia}
+          description="kWh · acumulado registrado"
           color="orange"
-          footer={<span>Período de referência: 7 dias</span>}
+          footer={<span>Temperatura média: {resumoIndicadores.mediaTemp} °C</span>}
         />
       </section>
 
@@ -397,7 +530,7 @@ export default function DashboardPage() {
             <div>
               <span className="dash-section-label">DESEMPENHO ENERGÉTICO</span>
               <h2>Consumo e temperatura</h2>
-              <p>Acompanhamento ilustrativo dos indicadores do edifício.</p>
+              <p>Histórico consolidado das leituras dos sensores do edifício.</p>
             </div>
 
             <div className="dash-range">
@@ -417,44 +550,22 @@ export default function DashboardPage() {
             <div>
               <i className="energy" />
               <span>Consumo de energia</span>
-              <strong>842 kWh</strong>
+              <strong>{resumoIndicadores.totalEnergia} kWh</strong>
             </div>
             <div>
               <i className="temperature" />
               <span>Temperatura média</span>
-              <strong>23,5 °C</strong>
+              <strong>{resumoIndicadores.mediaTemp} °C</strong>
             </div>
           </div>
 
-          <EnergyChart range={range} />
+          <EnergyChart range={range} leituras={leituras} />
         </div>
 
-        <DeviceHealth />
+        <DeviceHealth dispositivos={dispositivos} />
       </section>
 
-      <Incidents toast={showToast} />
-
-      {/* <div className="">
-          <form action="">
-            <label htmlFor="nome_predio">Nome do prédio</label>
-            <input type="text" name="nome_predio" id="nome_predio" />
-            <label htmlFor="">Estado</label>
-            <input type="text" name="estado" id="estado" />
-            <label htmlFor="cidade">Cidade</label>
-            <input type="text" name="cidade" id="cidade" />
-            <label htmlFor="bairro">Bairro</label>
-            <input type="text" name="bairro" id="bairro" />
-            <label htmlFor="rua">Rua</label>
-            <input type="text" name="rua" id="rua" />
-            <label htmlFor="numero">Numero</label>
-            <input type="number" name="numero" id="numero" min={0} />
-            <label htmlFor="">CEP</label>
-            <input type="text" name="cep" id="cep" />
-            <label htmlFor="">Complemeto</label>
-            <input type="text" name="complemento" id="complemento" />
-            <button type="submit">Cadastrar</button>
-          </form>
-        </div> */}
+      <Incidents items={ocorrenciasFormatadas} onResolve={resolverOcorrencia} />
 
       {toast && (
         <div className="dash-toast">

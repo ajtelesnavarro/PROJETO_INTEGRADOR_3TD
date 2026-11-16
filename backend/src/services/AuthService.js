@@ -21,7 +21,7 @@ export async function gerarToken({ email, senha } = {}) {
 
     const usuario = await UsuarioModel.buscarPorEmail(emailLimpo);
 
-    if (!usuario || !usuario.senha_hash || usuario.ativo !== 1) {
+    if (!usuario || !usuario.senha_hash || (usuario.ativo !== "ativo" && usuario.ativo !== 1)) {
         const erro = new Error("Credenciais inválidas.");
         erro.status = 401;
         throw erro;

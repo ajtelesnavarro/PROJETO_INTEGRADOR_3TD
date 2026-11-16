@@ -6,17 +6,18 @@ export const recursos = {
         campos: [
             'nome_predio',
             'cep',
-            'logradouro',
+            'rua',
             'numero',
             'complemento',
             'bairro',
             'cidade',
-            'estado'
+            'estado',
+            'tipo_empreendimento'
         ],
         obrigatorios: [
             'nome_predio',
             'cep',
-            'logradouro',
+            'rua',
             'numero',
             'bairro',
             'cidade',

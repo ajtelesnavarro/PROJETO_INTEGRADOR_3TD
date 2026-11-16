@@ -1,143 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { requisicaoAPI } from "@/services/api";
 import "./acessos.css";
-
-const eventsSeed = [
-  {
-    id: 1,
-    time: "10:42:18",
-    person: "Ana Souza",
-    initials: "AS",
-    action: "Entrada",
-    method: "RFID",
-    result: "Permitido",
-    place: "Recepção",
-    device: "Catraca 01",
-    date: "Hoje",
-    detail: "Credencial reconhecida e permissão válida.",
-    category: "Funcionário",
-  },
-  {
-    id: 2,
-    time: "10:40:03",
-    person: "Visitante #1092",
-    initials: "V",
-    action: "Entrada",
-    method: "QR Code",
-    result: "Negado",
-    place: "Recepção",
-    device: "Catraca 01",
-    date: "Hoje",
-    detail: "A credencial utilizada estava expirada.",
-    category: "Visitante",
-  },
-  {
-    id: 3,
-    time: "10:37:51",
-    person: "Bruno Lima",
-    initials: "BL",
-    action: "Saída",
-    method: "NFC",
-    result: "Permitido",
-    place: "Garagem",
-    device: "Portão B",
-    date: "Hoje",
-    detail: "Saída registrada normalmente.",
-    category: "Funcionário",
-  },
-  {
-    id: 4,
-    time: "10:31:22",
-    person: "Token desconhecido",
-    initials: "?",
-    action: "Entrada",
-    method: "RFID",
-    result: "Negado",
-    place: "Recepção",
-    device: "Catraca 02",
-    date: "Hoje",
-    detail: "A credencial não está cadastrada no sistema.",
-    category: "Não identificado",
-  },
-  {
-    id: 5,
-    time: "10:28:10",
-    person: "Elisa Costa",
-    initials: "EC",
-    action: "Entrada",
-    method: "RFID",
-    result: "Permitido",
-    place: "Recepção",
-    device: "Catraca 02",
-    date: "Hoje",
-    detail: "Credencial reconhecida e acesso autorizado.",
-    category: "Visitante",
-  },
-  {
-    id: 6,
-    time: "09:54:42",
-    person: "Carlos Mendes",
-    initials: "CM",
-    action: "Entrada",
-    method: "QR Code",
-    result: "Permitido",
-    place: "Laboratório",
-    device: "Leitor L-03",
-    date: "Hoje",
-    detail: "Acesso autorizado para atividade de manutenção.",
-    category: "Manutenção",
-  },
-  {
-    id: 7,
-    time: "09:21:15",
-    person: "Bruno Lima",
-    initials: "BL",
-    action: "Entrada",
-    method: "NFC",
-    result: "Permitido",
-    place: "Garagem",
-    device: "Portão B",
-    date: "Hoje",
-    detail: "Entrada registrada normalmente.",
-    category: "Funcionário",
-  },
-];
-
-const tokensSeed = [
-  {
-    id: 1,
-    name: "Ana Souza",
-    role: "Administradora",
-    hash: "RFID •••• 8A42",
-    expires: "28/08/2027",
-    active: true,
-  },
-  {
-    id: 2,
-    name: "Bruno Lima",
-    role: "Funcionário",
-    hash: "NFC •••• D109",
-    expires: "14/03/2027",
-    active: true,
-  },
-  {
-    id: 3,
-    name: "Elisa Costa",
-    role: "Visitante",
-    hash: "RFID •••• 4C77",
-    expires: "05/11/2025",
-    active: false,
-  },
-  {
-    id: 4,
-    name: "Carlos Mendes",
-    role: "Manutenção",
-    hash: "QR •••• B291",
-    expires: "20/12/2026",
-    active: true,
-  },
-];
 
 function AccessIcon({ name, size = 18 }) {
   const icons = {
@@ -212,14 +77,126 @@ function AccessIcon({ name, size = 18 }) {
   );
 }
 
-export default function Acessos({ toast = () => {} }) {
+const METODO_LABEL = {
+  cartao_rfid: "RFID",
+  tag_nfc: "NFC",
+  qr_code: "QR Code",
+};
+
+const PERFIL_LABEL = {
+  administrador: "Administrador",
+  manutencao: "Manutenção",
+  porteiro: "Portaria",
+  funcionario: "Funcionário",
+};
+
+const MOTIVO_LABEL = {
+  acesso_autorizado: "Credencial reconhecida e permissão válida.",
+  acesso_de_manutencao: "Acesso autorizado para atividade de manutenção.",
+  saida_registrada: "Saída registrada normalmente.",
+  credencial_bloqueada: "A credencial está bloqueada no sistema.",
+  credencial_expirada: "A credencial utilizada estava expirada.",
+  token_nao_reconhecido: "A credencial não está cadastrada no sistema.",
+  sem_permissao: "Usuário sem permissão para este ambiente.",
+  fora_do_horario_permitido: "Tentativa fora do horário permitido.",
+  ambiente_restrito: "Acesso restrito a perfis autorizados.",
+  falha_na_validacao: "Falha na validação da credencial.",
+  falha_de_comunicacao: "Falha de comunicação com o leitor.",
+};
+
+function iniciais(nome) {
+  return String(nome || "?")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+}
+
+export default function Acessos() {
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(1);
+  const [selected, setSelected] = useState(null);
   const [showCredentials, setShowCredentials] = useState(true);
-  const [tokens, setTokens] = useState(tokensSeed);
+  const [rawEvents, setRawEvents] = useState([]);
+  const [rawTokens, setRawTokens] = useState([]);
+  const [toast, setToast] = useState("");
 
-  const events = eventsSeed;
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const carregarDados = useCallback(async () => {
+    try {
+      const [resEventos, resCredenciais] = await Promise.all([
+        requisicaoAPI("/acessos-detalhados"),
+        requisicaoAPI("/credenciais"),
+      ]);
+
+      const listaEv = resEventos.dados || [];
+      setRawEvents(listaEv);
+      setRawTokens(resCredenciais.dados || []);
+
+      if (listaEv.length > 0) {
+        setSelected((prev) => prev ?? listaEv[0].id_evento);
+      }
+    } catch (erro) {
+      setToast(erro.message || "Erro ao carregar dados de acesso.");
+    }
+  }, []);
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
+
+  const events = useMemo(() => {
+    return rawEvents.map((ev) => {
+      const dt = ev.data_utilizacao ? new Date(ev.data_utilizacao) : null;
+      const time = dt
+        ? dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+        : "--:--:--";
+      const date = dt ? dt.toLocaleDateString("pt-BR") : "—";
+
+      const person = ev.nome_usuario || (ev.token_tentado ? `Token ${ev.token_tentado.slice(0, 6)}...` : "Token desconhecido");
+
+      return {
+        id: ev.id_evento,
+        time,
+        person,
+        initials: ev.nome_usuario ? iniciais(ev.nome_usuario) : "?",
+        action: ev.tipo_acesso === "saida" ? "Saída" : "Entrada",
+        method: METODO_LABEL[ev.tipo_credencial] || "RFID",
+        result: ev.decisao_acesso === "permitido" ? "Permitido" : "Negado",
+        place: ev.nome_ambiente || `Ambiente #${ev.id_ambiente}`,
+        device: `Leitor #${ev.id_ambiente}`,
+        date,
+        detail: MOTIVO_LABEL[ev.motivo] || "Evento registrado pelo controlador de acesso.",
+        category: PERFIL_LABEL[ev.perfil_usuario] || "Não identificado",
+      };
+    });
+  }, [rawEvents]);
+
+  const tokens = useMemo(() => {
+    return rawTokens.map((t) => {
+      const tipo = METODO_LABEL[t.tipo_credencial] || "RFID";
+      const sufixo = String(t.token_hash || "").slice(-4).toUpperCase();
+      return {
+        id: t.id_credencial,
+        name: t.nome_usuario || `Usuário #${t.id_usuario}`,
+        role: PERFIL_LABEL[t.perfil] || "Funcionário",
+        hash: `${tipo} •••• ${sufixo || "0000"}`,
+        expires: t.bloqueado_ate
+          ? new Date(t.bloqueado_ate).toLocaleDateString("pt-BR")
+          : t.data_cadastro
+            ? new Date(t.data_cadastro).toLocaleDateString("pt-BR")
+            : "—",
+        active: t.status === "ativa",
+      };
+    });
+  }, [rawTokens]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -248,21 +225,27 @@ export default function Acessos({ toast = () => {} }) {
   const denied = events.filter((event) => event.result === "Negado").length;
   const activeTokens = tokens.filter((token) => token.active).length;
 
-  const toggleToken = (id) => {
+  const toggleToken = async (id) => {
     const token = tokens.find((item) => item.id === id);
     if (!token) return;
 
-    setTokens((current) =>
-      current.map((item) =>
-        item.id === id ? { ...item, active: !item.active } : item
-      )
-    );
+    const novoStatus = token.active ? "bloqueada" : "ativa";
 
-    toast(
-      `Credencial de ${token.name} ${
-        token.active ? "bloqueada" : "desbloqueada"
-      }`
-    );
+    try {
+      await requisicaoAPI(`/credenciais/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: novoStatus }),
+      });
+
+      setToast(
+        `Credencial de ${token.name} ${
+          token.active ? "bloqueada" : "desbloqueada"
+        }.`
+      );
+      carregarDados();
+    } catch (erro) {
+      setToast(erro.message || "Erro ao alterar credencial.");
+    }
   };
 
   return (
@@ -282,6 +265,21 @@ export default function Acessos({ toast = () => {} }) {
         </div>
       </div>
 
+      {toast && (
+        <div
+          style={{
+            background: "#16213e",
+            color: "#fff",
+            padding: "10px 16px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            fontSize: "14px",
+          }}
+        >
+          {toast}
+        </div>
+      )}
+
       <section className="ac-overview">
         <div className="ac-welcome">
           <div className="ac-welcome-icon">
@@ -289,7 +287,7 @@ export default function Acessos({ toast = () => {} }) {
           </div>
 
           <div>
-            <span>RESUMO DE HOJE</span>
+            <span>RESUMO DE ACESSOS</span>
             <h2>Segurança sob controle.</h2>
             <p>
               Confira a movimentação e identifique rapidamente qualquer
@@ -435,7 +433,7 @@ export default function Acessos({ toast = () => {} }) {
                 <AccessIcon name="search" size={25} />
                 <b>Nenhum evento encontrado</b>
                 <span>
-                  Tente alterar os filtros ou o termo pesquisado.
+                  Nenhum registro de acesso corresponde ao filtro atual.
                 </span>
                 <button
                   onClick={() => {
@@ -453,7 +451,7 @@ export default function Acessos({ toast = () => {} }) {
             <span>
               Exibindo {filteredEvents.length} de {events.length} eventos
             </span>
-            <span>Dados demonstrativos</span>
+            <span>Banco de dados conectado</span>
           </div>
         </section>
 
@@ -579,106 +577,59 @@ export default function Acessos({ toast = () => {} }) {
 
         {showCredentials && (
           <div className="ac-token-list">
-            {tokens.map((token) => (
-              <div className="ac-token" key={token.id}>
-                <span className="ac-token-avatar">
-                  {token.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")
-                    .slice(0, 2)}
-                </span>
+            {tokens.length > 0 ? (
+              tokens.map((token) => (
+                <div className="ac-token" key={token.id}>
+                  <span className="ac-token-avatar">
+                    {iniciais(token.name)}
+                  </span>
 
-                <div className="ac-token-person">
-                  <b>{token.name}</b>
-                  <small>{token.role}</small>
+                  <div className="ac-token-person">
+                    <b>{token.name}</b>
+                    <small>{token.role}</small>
+                  </div>
+
+                  <div className="ac-token-code">
+                    <span>CREDENCIAL</span>
+                    <b>{token.hash}</b>
+                  </div>
+
+                  <div className="ac-token-expiry">
+                    <span>CADASTRO</span>
+                    <b>{token.expires}</b>
+                  </div>
+
+                  <span
+                    className={`ac-token-status ${
+                      token.active ? "active" : "inactive"
+                    }`}
+                  >
+                    <i />
+                    {token.active ? "Ativa" : "Bloqueada"}
+                  </span>
+
+                  <button
+                    className={`ac-token-button ${
+                      token.active ? "block" : "unblock"
+                    }`}
+                    onClick={() => toggleToken(token.id)}
+                  >
+                    <AccessIcon
+                      name={token.active ? "lock" : "unlock"}
+                      size={14}
+                    />
+                    {token.active ? "Bloquear" : "Liberar"}
+                  </button>
                 </div>
-
-                <div className="ac-token-code">
-                  <span>CREDENCIAL</span>
-                  <b>{token.hash}</b>
-                </div>
-
-                <div className="ac-token-expiry">
-                  <span>VALIDADE</span>
-                  <b>{token.expires}</b>
-                </div>
-
-                <span
-                  className={`ac-token-status ${
-                    token.active ? "active" : "inactive"
-                  }`}
-                >
-                  <i />
-                  {token.active ? "Ativa" : "Bloqueada"}
-                </span>
-
-                <button
-                  className={`ac-token-button ${
-                    token.active ? "block" : "unblock"
-                  }`}
-                  onClick={() => toggleToken(token.id)}
-                >
-                  <AccessIcon
-                    name={token.active ? "lock" : "unlock"}
-                    size={14}
-                  />
-                  {token.active ? "Bloquear" : "Liberar"}
-                </button>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ padding: "16px", opacity: 0.7 }}>
+                Nenhuma credencial cadastrada no banco de dados.
+              </p>
+            )}
           </div>
         )}
       </section>
-      {/* <div className="">
-        <form action="">
-          <label htmlFor="tipo_acesso">Tipo de acesso</label>
-          <select name="tipo_acesso" id="tipo_acesso">
-            <option selected="" disabled="" />
-            <option value="entrada">Entrada</option>
-            <option value="saida">Saida</option>
-          </select>
-          <label htmlFor="decisao_acesso">Decisão de acesso</label>
-          <select name="decisao_acesso" id="decisao_acesso">
-            <option selected="" disabled="" />
-            <option value="permitido">Permitido</option>
-            <option value="negado">Negado</option>
-          </select>
-          <label htmlFor="token_tentado">Token</label>
-          <input type="text" name="token_tentado" id="token_tentado" />
-          <label htmlFor="status_evento">Status</label>
-          <select name="status_evento" id="status_evento">
-            <option selected="" disabled="" />
-            <option value="processando">Processando</option>
-            <option value="concluido">Concluído</option>
-            <option value="pendente">Pendente</option>
-            <option value="falha">Falha</option>
-            <option value="bloqueado">Bloqueado</option>
-          </select>
-          <label htmlFor="data_expiracao">data de expiração</label>
-          <input type="date" name="data_expiracao" id="data_expiracao" />
-          <label htmlFor="data_utilizacao">Data de ultilização</label>
-          <input type="date" name="data_utilizacao" id="data_utilizacao" />
-          <label htmlFor="motivo">Motivo</label>
-          <select name="motivo" id="motivo">
-            <option selected="" disabled="" />
-            <option value="acesso_autorizado">Acesso autorizado</option>
-            <option value="acesso_de_manutencao">Acesso de manutenção</option>
-            <option value="saida_registrada">Saída registrada</option>
-            <option value="credencial_bloqueada">Credencial bloqueada</option>
-            <option value="credencial_expirada">Credencial expirada</option>
-            <option value="token_nao_reconhecido">Token não reconhecido</option>
-            <option value="sem_permissao">Sem permição</option>
-            <option value="fora_do_horario_permitido">
-              Fora do horário permitido
-            </option>
-            <option value="ambiente_restrito">Ambiente restrito</option>
-            <option value="falha_na_validacao">Falha na validação</option>
-            <option value="falha_de_comunicacao">falha de conunicação</option>
-          </select>
-          <button type="submit">Cadastrar</button>
-        </form>
-      </div> */}
     </div>
   );
 }
