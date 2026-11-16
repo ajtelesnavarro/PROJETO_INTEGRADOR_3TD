@@ -48,6 +48,13 @@ function PageTitle() {
       </div>
 
       <div className="dash-title-right">
+      <button
+        className="pa-primary-button"
+        onClick={() => setModalAberto(true)}
+      >
+        <span>＋</span>
+        Adicionar andar
+      </button>
         <span className="dash-demo">
           <i />
           Ambiente de demonstração

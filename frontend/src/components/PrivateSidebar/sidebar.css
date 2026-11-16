@@ -58,15 +58,13 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: linear-gradient(145deg, #254C9A, #7050C9);
-  box-shadow: 0 5px 18px rgba(66, 91, 190, .25);
+  background: linear-gradient(145deg, #1E2A55, #2A2263);
+border: 1px solid rgba(112, 80, 201, 0.5);
+box-shadow: 0 0 16px rgba(112, 80, 201, 0.35);
 }
 
-.lumora-logo-symbol i {
-  display: block;
-  width: 5px;
-  border-radius: 5px;
-  background: #FFFFFF;
+.lumora-logo-symbol img {
+  width: 25px;
 }
 
 .lumora-logo-symbol i:nth-child(1) {
