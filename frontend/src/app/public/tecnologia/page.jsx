@@ -17,7 +17,58 @@ const pillars = [
 const flow = ["Captar", "Conectar", "Organizar", "Visualizar", "Agir"];
 
 export default function Tecnologia() {
-  return <main className="technology-page">
+  const visualRef = useRef(null);
+  
+  const handleVisualMove = (e) => {
+    const visual = visualRef.current;
+
+    if (!visual) return;
+
+    const rect = visual.getBoundingClientRect();
+
+    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+
+    visual.style.setProperty("--orbit-x", `${x * 12}px`);
+    visual.style.setProperty("--orbit-y", `${y * 12}px`);
+
+    visual.style.setProperty("--core-x", `${x * -8}px`);
+    visual.style.setProperty("--core-y", `${y * -8}px`);
+
+    visual.style.setProperty("--label-a-x", `${x * 17}px`);
+    visual.style.setProperty("--label-a-y", `${y * 17}px`);
+
+    visual.style.setProperty("--label-b-x", `${x * -15}px`);
+    visual.style.setProperty("--label-b-y", `${y * 12}px`);
+
+    visual.style.setProperty("--label-c-x", `${x * 13}px`);
+    visual.style.setProperty("--label-c-y", `${y * -16}px`);
+  };
+
+  const handleVisualLeave = () => {
+    const visual = visualRef.current;
+
+    if (!visual) return;
+
+    const properties = [
+      "--orbit-x",
+      "--orbit-y",
+      "--core-x",
+      "--core-y",
+      "--label-a-x",
+      "--label-a-y",
+      "--label-b-x",
+      "--label-b-y",
+      "--label-c-x",
+      "--label-c-y",
+    ];
+
+    properties.forEach((property) => {
+      visual.style.setProperty(property, "0px");
+    });
+  };
+  return (
+    <main className="technology-page">
     <section className="technology-hero">
       <div className="tech-hero-glow" />
       <div className="container tech-hero-grid">
@@ -32,14 +83,12 @@ export default function Tecnologia() {
           <div className="network-ring ring-one"/><div className="network-ring ring-two"/><div className="network-ring ring-three"/>
           <div className="network-line line-one"/><div className="network-line line-two"/><div className="network-line line-three"/>
           <div className="network-node node-center">
-            <Image
-              src="/images/logo.png"
-              alt="Símbolo Lumora"
-              width={70}
-              height={60}
-              className="logo-simbolo"
-              priority
-              />
+            <div
+            className="image"
+            ref={visualRef}
+            onPointerMove={handleVisualMove}
+            onPointerLeave={handleVisualLeave}
+            />
             <small>LUMORA CORE</small>
             </div>
           <div className="network-node node-top"><b>⌁</b><small>SENSORES</small></div>
@@ -63,5 +112,6 @@ export default function Tecnologia() {
     <section className="tech-security"><div className="container security-grid"><div className="security-visual"><div className="security-orbit orbit-1"/><div className="security-orbit orbit-2"/><div className="security-shield">◇<small>DATA CARE</small></div><span className="security-chip chip-a">ACESSO</span><span className="security-chip chip-b">CONTEXTO</span><span className="security-chip chip-c">GESTÃO</span></div><div className="security-copy"><div className="section-kicker">04 — CONFIANÇA E GOVERNANÇA</div><h2>Informação organizada. <em>Gestão responsável.</em></h2><p>Uma operação conectada também precisa de critérios claros para lidar com informações e acessos. Por isso, cada projeto deve considerar responsabilidades, permissões e boas práticas adequadas ao ambiente.</p><ul><li><span>✓</span> Definição de perfis e responsabilidades</li><li><span>✓</span> Organização dos acessos à plataforma</li><li><span>✓</span> Integrações avaliadas conforme cada infraestrutura</li><li><span>✓</span> Transparência sobre dados e funcionalidades disponíveis</li></ul><small className="security-disclaimer">Os recursos efetivos de segurança e governança dependem do escopo, das integrações e da configuração contratada para cada projeto.</small></div></div></section>
 
     <section className="tech-cta section"><div className="container"><div className="section-kicker">05 — TECNOLOGIA APLICADA À SUA REALIDADE</div><h2>Seu edifício tem uma estrutura única.<br/><em>A tecnologia também pode ser.</em></h2><p>Vamos entender sua infraestrutura, seus desafios e as possibilidades de integração.</p><Link href="/orcamento" className="button primary">Converse com a Lumora <span>→</span></Link></div></section>
-  </main>;
+  </main>
+  )
 }
