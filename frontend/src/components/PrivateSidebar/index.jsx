@@ -70,9 +70,7 @@ function Logo() {
   return (
     <div className="lumora-logo">
       <div className="lumora-logo-symbol">
-        <i />
-        <i />
-        <i />
+        <img src="/images/logo.png" alt="" />
       </div>
 
       <div className="lumora-logo-text">
@@ -158,16 +156,6 @@ export default function Sidebar({ sidebar, setSidebar }) {
             <small>1.014 de 1.300 dispositivos</small>
           </div>
 
-          <button className="lumora-support">
-            <span className="lumora-support-icon">?</span>
-
-            <span className="lumora-support-text">
-              <b>Central de suporte</b>
-              <small>Fale com um especialista</small>
-            </span>
-
-            <Icon name="arrow" size={16} />
-          </button>
         </div>
       </aside>
 
