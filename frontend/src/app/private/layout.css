@@ -1,0 +1,106 @@
+.private-layout {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.private-main {
+  width: calc(100% - 280px);
+  min-height: 100vh;
+  margin-left: 280px;
+  transition: width 0.3s ease, margin-left 0.3s ease;
+}
+
+.private-layout.sidebar-closed .private-main {
+  width: 100%;
+  margin-left: 0;
+}
+
+.private-content {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .private-main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.private-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: #F5F7FC;
+    color: #172B4D;
+}
+
+.private-main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100vh;
+    margin-left: 270px;
+}
+
+.private-content {
+    flex: 1;
+    width: 100%;
+    padding: 30px 34px;
+    box-sizing: border-box;
+}
+
+/* Responsividade */
+
+@media (max-width: 900px) {
+    .private-main {
+        margin-left: 0;
+    }
+
+    .private-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .private-content {
+        padding: 18px 14px;
+    }
+}
+
+.pa-primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 45px;
+  padding: 0 19px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(115deg, #315bd6, #7555d5);
+  box-shadow: 0 8px 22px rgba(67, 86, 194, 0.2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.pa-primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(67, 86, 194, 0.3);
+}
+
+.pa-primary-button span {
+  font-size: 19px;
+  font-weight: 400;
+}
+
+/* Responsivo (estava dentro do @media max-width: 720px) */
+@media (max-width: 720px) {
+  .pa-primary-button {
+    width: 100%;
+  }
+}
