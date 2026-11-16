@@ -33,3 +33,20 @@ export async function login(req, res, next) {
     return responderErro(erro, res, next);
   }
 }
+
+export async function perfilAtual(req, res, next) {
+  try {
+    const usuario = await AuthService.buscarPorId(req.usuario.id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        sucesso: false,
+        erro: 'Usuário não encontrado.'
+      });
+    }
+
+    return res.status(200).json({ sucesso: true, dados: usuario });
+  } catch (erro) {
+    return responderErro(erro, res, next);
+  }
+}

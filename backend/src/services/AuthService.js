@@ -132,3 +132,7 @@ export async function login({ email, senha } = {}) {
         }
     };
 }
+
+export async function buscarPorId(id) {
+    return await AuthModel.buscarPorId(id);
+}

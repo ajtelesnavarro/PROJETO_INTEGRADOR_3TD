@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import "./solucoes.css";
 
 const solutions = [
@@ -87,57 +87,6 @@ const faqs = [
 ];
 
 export default function Solucoes() {
-  const visualRef = useRef(null);
-
-  const handleVisualMove = (e) => {
-    const visual = visualRef.current;
-
-    if (!visual) return;
-
-    const rect = visual.getBoundingClientRect();
-
-    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
-
-    visual.style.setProperty("--orbit-x", `${x * 12}px`);
-    visual.style.setProperty("--orbit-y", `${y * 12}px`);
-
-    visual.style.setProperty("--core-x", `${x * -8}px`);
-    visual.style.setProperty("--core-y", `${y * -8}px`);
-
-    visual.style.setProperty("--label-a-x", `${x * 17}px`);
-    visual.style.setProperty("--label-a-y", `${y * 17}px`);
-
-    visual.style.setProperty("--label-b-x", `${x * -15}px`);
-    visual.style.setProperty("--label-b-y", `${y * 12}px`);
-
-    visual.style.setProperty("--label-c-x", `${x * 13}px`);
-    visual.style.setProperty("--label-c-y", `${y * -16}px`);
-  };
-
-  const handleVisualLeave = () => {
-    const visual = visualRef.current;
-
-    if (!visual) return;
-
-    const properties = [
-      "--orbit-x",
-      "--orbit-y",
-      "--core-x",
-      "--core-y",
-      "--label-a-x",
-      "--label-a-y",
-      "--label-b-x",
-      "--label-b-y",
-      "--label-c-x",
-      "--label-c-y",
-    ];
-
-    properties.forEach((property) => {
-      visual.style.setProperty(property, "0px");
-    });
-  };
-
   return (
     <main>
       {/* HERO */}
@@ -171,173 +120,48 @@ export default function Solucoes() {
             </div>
           </div>
 
-          {/* ILUSTRAÇÃO INTERATIVA */}
-          <div
-            className="solutions-visual"
-            ref={visualRef}
-            onPointerMove={handleVisualMove}
-            onPointerLeave={handleVisualLeave}
-          >
-            <div className="solution-orbit orbit-a" />
-            <div className="solution-orbit orbit-b" />
-
-            PAINEL CENTRAL
-            <div className="solution-core">
-              <div className="lumora-dashboard">
-                <div className="dashboard-header">
-                  <div>
-                    <span className="dashboard-kicker">
-                      LUMORA SMARTBUILDING
-                    </span>
-
-                    <h3>Visão geral da operação</h3>
-
-                    <small>Edifício inteligente • Exemplo</small>
-                  </div>
-
-                  <span className="dashboard-live">
-                    <i />
-                    AO VIVO
-                  </span>
-                </div>
-
-                <div className="dashboard-period">
-                  <span>Monitoramento predial</span>
-                  <span>Hoje ▾</span>
-                </div>
-
-                <div className="dashboard-metrics">
-                  <div>
-                    <small>Energia</small>
-                    <strong>
-                      42,8 <span>kW</span>
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small>Ambientes</small>
-                    <strong>
-                      24 <span>ativos</span>
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small>Dispositivos</small>
-                    <strong>
-                      18 <span>online</span>
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="dashboard-chart">
-                  <div className="chart-heading">
-                    <div>
-                      <strong>Consumo de energia</strong>
-                      <small>Histórico de hoje</small>
-                    </div>
-
-                    <span>kWh</span>
-                  </div>
-
-                  <svg
-                    viewBox="0 0 320 105"
-                    preserveAspectRatio="none"
-                    aria-label="Gráfico ilustrativo de consumo de energia"
-                    role="img"
-                  >
-                    <defs>
-                      <linearGradient
-                        id="lumoraChartFill"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="0%"
-                          stopColor="#7C3AED"
-                          stopOpacity=".35"
-                        />
-                        <stop
-                          offset="100%"
-                          stopColor="#7C3AED"
-                          stopOpacity="0"
-                        />
-                      </linearGradient>
-                    </defs>
-
-                    <path
-                      d="M0 78 C25 72 30 45 60 57 S95 75 120 43 S155 52 180 35 S215 58 240 28 S285 45 320 14 L320 105 L0 105 Z"
-                      fill="url(#lumoraChartFill)"
-                    />
-
-                    <path
-                      d="M0 78 C25 72 30 45 60 57 S95 75 120 43 S155 52 180 35 S215 58 240 28 S285 45 320 14"
-                      fill="none"
-                      stroke="#A78BFA"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                    />
-
-                    <circle cx="240" cy="28" r="4" fill="#60A5FA" />
-                  </svg>
-
-                  <div className="chart-hours">
-                    <span>00h</span>
-                    <span>06h</span>
-                    <span>12h</span>
-                    <span>18h</span>
-                    <span>24h</span>
-                  </div>
-                </div>
-
-                <div className="dashboard-alert">
-                  <span className="alert-icon">✦</span>
-
-                  <div>
-                    <strong>Análise inteligente</strong>
-                    <p>
-                      Identificada uma oportunidade de otimização no consumo
-                      de energia.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="dashboard-footer">
-                  <span>
-                    <i />
-                    Sistemas conectados
-                  </span>
-
-                  <strong>LUMORA</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* ETIQUETAS DE DIFERENCIAIS */}
-            <div className="orbit-label label-a">
-              <b>ϟ</b>
+          {/* EXEMPLO ILUSTRATIVO DE BENEFÍCIOS */}
+          <div className="solutions-form-card">
+            <div className="solutions-form-heading">
+              <span className="solutions-form-mark">
+                <Image src="/images/logo.png" alt="Lumora" width={38} height={38} />
+              </span>
               <div>
-                <strong>ENERGIA</strong>
-                <small>Consumo inteligente</small>
+                <span>A DIFERENÇA LUMORA</span>
+                <h2>Da operação fragmentada à visão integrada</h2>
               </div>
             </div>
-
-            <div className="orbit-label label-b">
-              <b>◉</b>
-              <div>
-                <strong>AMBIENTES</strong>
-                <small>Monitoramento integrado</small>
+            <p className="solutions-form-intro">
+              Compare um cenário com informações isoladas a uma operação
+              conectada e acompanhada em um só lugar.
+            </p>
+            <div className="solutions-impact-chart" role="img" aria-label="Comparação ilustrativa: integração, visibilidade e agilidade são maiores com a Lumora do que em uma operação fragmentada.">
+              <div className="impact-legend">
+                <span><i className="isolated-key" /> Sistemas isolados</span>
+                <span><i className="lumora-key" /> Com Lumora</span>
+              </div>
+              <div className="impact-row">
+                <div className="impact-label"><span>Informações integradas</span><b>30% <em>→</em> 90%</b></div>
+                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "30%" }} /><i className="impact-bar lumora" style={{ width: "90%" }} /></div>
+              </div>
+              <div className="impact-row">
+                <div className="impact-label"><span>Visibilidade da operação</span><b>38% <em>→</em> 94%</b></div>
+                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "38%" }} /><i className="impact-bar lumora" style={{ width: "94%" }} /></div>
+              </div>
+              <div className="impact-row">
+                <div className="impact-label"><span>Agilidade nas respostas</span><b>42% <em>→</em> 86%</b></div>
+                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "42%" }} /><i className="impact-bar lumora" style={{ width: "86%" }} /></div>
               </div>
             </div>
-
-            <div className="orbit-label label-c">
-              <b>⌘</b>
-              <div>
-                <strong>OPERAÇÃO</strong>
-                <small>Gestão centralizada</small>
-              </div>
-            </div>
+            <ul className="solutions-benefit-list">
+              <li><span>✓</span> Informações centralizadas para a equipe</li>
+              <li><span>✓</span> Alertas para agir com mais agilidade</li>
+              <li><span>✓</span> Indicadores para orientar decisões</li>
+            </ul>
+            <small className="solutions-example-note">
+              Gráfico ilustrativo com dados fictícios, usado para representar
+              benefícios possíveis. Os resultados variam conforme cada projeto.
+            </small>
           </div>
         </div>
       </section>

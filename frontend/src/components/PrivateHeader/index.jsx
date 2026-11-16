@@ -46,10 +46,15 @@ export default function Header({
 }) {
   const [alerts, setAlerts] = useState(false);
   const [buildingOpen, setBuildingOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [selectedBuilding, setSelectedBuilding] = useState(null);
 
   const searchRef = useRef(null);
   const buildingRef = useRef(null);
+  const profileRef = useRef(null);
 
   // Atalhos e fechamento dos menus
   useEffect(() => {
@@ -65,6 +70,7 @@ export default function Header({
       if (event.key === "Escape") {
         setBuildingOpen(false);
         setAlerts(false);
+        setProfileOpen(false);
       }
     }
 
@@ -75,6 +81,10 @@ export default function Header({
       ) {
         setBuildingOpen(false);
       }
+
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
     }
 
     window.addEventListener("keydown", handleShortcut);
@@ -83,6 +93,49 @@ export default function Header({
     return () => {
       window.removeEventListener("keydown", handleShortcut);
       document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+    const token = window.localStorage.getItem("lumora_token");
+
+    if (!token) {
+      setProfileError("Sessão não encontrada. Entre novamente para ver seus dados.");
+      return () => {
+        ativo = false;
+      };
+    }
+
+    async function carregarPerfil() {
+      setProfileLoading(true);
+      try {
+        const configuredApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
+        const apiUrl = configuredApiUrl.endsWith("/api")
+          ? configuredApiUrl
+          : `${configuredApiUrl}/api`;
+        const response = await fetch(`${apiUrl}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.erro || data.message || "Não foi possível carregar os dados do usuário.");
+        }
+
+        if (ativo) setProfileData(data.dados ?? data.usuario ?? data);
+      } catch (error) {
+        if (ativo) {
+          setProfileError(error instanceof Error ? error.message : "Não foi possível carregar os dados do usuário.");
+        }
+      } finally {
+        if (ativo) setProfileLoading(false);
+      }
+    }
+
+    carregarPerfil();
+    return () => {
+      ativo = false;
     };
   }, []);
 
@@ -115,7 +168,16 @@ export default function Header({
     selectedBuilding?.name ??
     buildingName;
 
-  const initials = userName
+  const nomeUsuario = profileData?.nome ?? userName;
+  const perfilUsuario = profileData?.perfil ?? userRole;
+  const perfilLabels = {
+    administrador: "Administrador",
+    manutencao: "Manutenção",
+    porteiro: "Porteiro",
+    funcionario: "Funcionário",
+  };
+  const nomePerfil = perfilLabels[String(perfilUsuario).toLowerCase()] ?? perfilUsuario;
+  const initials = nomeUsuario
     .trim()
     .split(" ")
     .filter(Boolean)
@@ -316,18 +378,74 @@ export default function Header({
         </div>
 
         {/* PERFIL */}
-        <div className="lumora-profile">
-          <span className="lumora-profile-avatar">
-            {initials || "U"}
-            <i />
-          </span>
+        <div className="lumora-profile" ref={profileRef}>
+          <button
+            type="button"
+            className="lumora-profile-trigger"
+            onClick={() => setProfileOpen(!profileOpen)}
+            aria-label="Abrir informações do usuário"
+            aria-expanded={profileOpen}
+            aria-haspopup="dialog"
+          >
+            <span className="lumora-profile-avatar">
+              {initials || "U"}
+              <i />
+            </span>
 
-          <span className="lumora-profile-info">
-            <b>{userName}</b>
-            <small>{userRole}</small>
-          </span>
+            <span className="lumora-profile-info">
+              <b>{nomeUsuario}</b>
+              <small>{nomePerfil}</small>
+            </span>
 
-          <HeaderIcon name="chevron" size={15} />
+            <span className={`lumora-profile-chevron ${profileOpen ? "open" : ""}`}>
+              <HeaderIcon name="chevron" size={15} />
+            </span>
+          </button>
+
+          {profileOpen && (
+            <section className="lumora-profile-dropdown" role="dialog" aria-label="Informações do usuário">
+              <div className="lumora-profile-dropdown-heading">
+                <b>Dados do usuário</b>
+                <small>Informações da sua conta</small>
+              </div>
+              {profileLoading ? (
+                <p className="lumora-profile-state">Carregando dados...</p>
+              ) : profileError ? (
+                <p className="lumora-profile-state error" role="alert">{profileError}</p>
+              ) : profileData ? (
+                <dl className="lumora-profile-fields">
+                  {[
+                    ["ID do usuário", profileData.id_usuario],
+                    ["ID do prédio", profileData.id_predio],
+                    ["Nome", profileData.nome],
+                    ["E-mail", profileData.email],
+                    ["Telefone", profileData.telefone],
+                    ["Perfil", nomePerfil],
+                    ["CPF", profileData.cpf],
+                    ["Foto", profileData.foto],
+                    ["Data de nascimento", profileData.data_nascimento],
+                    ["Situação", profileData.ativo],
+                    ["Senha", "Protegida por segurança"],
+                  ].map(([label, value]) => {
+                    const exibido = value == null || value === ""
+                      ? "Não informado"
+                      : label === "Data de nascimento" && /^\d{4}-\d{2}-\d{2}/.test(String(value))
+                        ? String(value).slice(0, 10).split("-").reverse().join("/")
+                        : String(value);
+
+                    return (
+                      <div className="lumora-profile-field" key={label}>
+                        <dt>{label}</dt>
+                        <dd title={exibido}>{exibido}</dd>
+                      </div>
+                    );
+                  })}
+                </dl>
+              ) : (
+                <p className="lumora-profile-state">Não há dados disponíveis.</p>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </header>

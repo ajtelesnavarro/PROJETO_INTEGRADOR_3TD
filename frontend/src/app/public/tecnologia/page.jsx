@@ -46,6 +46,8 @@ export default function Tecnologia() {
 
     visual.style.setProperty("--label-c-x", `${x * 13}px`);
     visual.style.setProperty("--label-c-y", `${y * -16}px`);
+    visual.style.setProperty("--label-d-x", `${x * -13}px`);
+    visual.style.setProperty("--label-d-y", `${y * -17}px`);
   };
 
   const handleVisualLeave = () => {
@@ -64,6 +66,8 @@ export default function Tecnologia() {
       "--label-b-y",
       "--label-c-x",
       "--label-c-y",
+      "--label-d-x",
+      "--label-d-y",
     ];
 
     properties.forEach((property) => {
@@ -82,15 +86,18 @@ export default function Tecnologia() {
           <div className="hero-buttons"><Link href="/orcamento" className="button white">Fale com nosso time <span>↗</span></Link><a href="#arquitetura" className="button tech-outline">Conheça a arquitetura ↓</a></div>
           <div className="tech-hero-foot"><span><i/> CONECTIVIDADE</span><span><i/> VISIBILIDADE</span><span><i/> CONTROLE</span></div>
         </div>
-        <div className="tech-network" aria-label="Ilustração conceitual de sistemas conectados">
+        <div
+          className="tech-network"
+          aria-label="Ilustração conceitual de sistemas conectados"
+          ref={visualRef}
+          onPointerMove={handleVisualMove}
+          onPointerLeave={handleVisualLeave}
+        >
           <div className="network-ring ring-one"/><div className="network-ring ring-two"/><div className="network-ring ring-three"/>
           <div className="network-line line-one"/><div className="network-line line-two"/><div className="network-line line-three"/>
           <div className="network-node node-center">
             <div
             className="image"
-            ref={visualRef}
-            onPointerMove={handleVisualMove}
-            onPointerLeave={handleVisualLeave}
             />
             <small>LUMORA CORE</small>
             </div>

@@ -24,6 +24,28 @@ export async function buscarPorEmail(email) {
     return linhas[0] || null;
 }
 
+export async function buscarPorId(id) {
+    const [linhas] = await pool.query(
+        `SELECT
+            id_usuario,
+            id_predio,
+            nome,
+            email,
+            telefone,
+            perfil,
+            cpf,
+            foto,
+            data_nascimento,
+            ativo
+        FROM usuario
+        WHERE id_usuario = ?
+        LIMIT 1`,
+        [id]
+    );
+
+    return linhas[0] || null;
+}
+
 export async function criar(usuario) {
     const sql = `
         INSERT INTO usuario (

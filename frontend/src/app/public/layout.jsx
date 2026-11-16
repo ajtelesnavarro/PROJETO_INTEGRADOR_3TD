@@ -9,12 +9,10 @@ export const metadata = {
 
 export default function PublicLayout({ children }) {
   return (
-    <html lang="pt-BR">
-      <body>
-        <Navbar />
-        {children}
-        <Footer />
-      </body>
-    </html>
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
   );
 }

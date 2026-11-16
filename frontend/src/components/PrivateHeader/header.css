@@ -401,10 +401,26 @@
 /* PERFIL */
 
 .lumora-profile {
+  position: relative;
+  padding-left: 2px;
+}
+
+.lumora-profile-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-left: 2px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lumora-profile-trigger:focus-visible {
+  outline: 2px solid #5276C5;
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 
 .lumora-profile-avatar {
@@ -454,8 +470,91 @@
   font-size: 10px;
 }
 
-.lumora-profile > svg {
+.lumora-profile-chevron {
+  display: flex;
+  align-items: center;
   color: #8996AA;
+  transition: transform .2s ease;
+}
+
+.lumora-profile-chevron.open {
+  transform: rotate(180deg);
+}
+
+.lumora-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 100;
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(70vh, 620px);
+  overflow: auto;
+  box-sizing: border-box;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 20px 55px rgba(25, 42, 75, .2);
+}
+
+.lumora-profile-dropdown-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #E9EDF4;
+}
+
+.lumora-profile-dropdown-heading b {
+  color: #243653;
+  font-size: 13px;
+}
+
+.lumora-profile-dropdown-heading small,
+.lumora-profile-state {
+  color: #8794A9;
+  font-size: 10px;
+}
+
+.lumora-profile-state {
+  margin: 0;
+  padding: 18px 20px;
+  line-height: 1.6;
+}
+
+.lumora-profile-state.error {
+  color: #B42318;
+}
+
+.lumora-profile-fields {
+  display: grid;
+  margin: 0;
+  padding: 8px 20px 14px;
+}
+
+.lumora-profile-field {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0F2F6;
+}
+
+.lumora-profile-field:last-child {
+  border-bottom: 0;
+}
+
+.lumora-profile-field dt {
+  color: #8794A9;
+  font-size: 10px;
+}
+
+.lumora-profile-field dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #243653;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 /* RESPONSIVIDADE */
@@ -522,13 +621,18 @@
 
   .lumora-building-info,
   .lumora-header-divider,
-  .lumora-profile-info,
-  .lumora-profile > svg {
+  .lumora-profile-info {
     display: none;
   }
 
   .lumora-profile {
     padding: 0;
+  }
+
+  .lumora-profile-dropdown {
+    position: fixed;
+    top: 75px;
+    right: 10px;
   }
 
   .lumora-header-icon {
