@@ -285,14 +285,6 @@ export default function Ambientes({ toast }) {
         </div>
 
         <div className="amb-summary-item">
-          <span className="amb-summary-icon purple"><Icon name="calendar" /></span>
-          <div>
-            <strong>{environments.filter((item) => item.reservation).length}</strong>
-            <span>Permitem reserva</span>
-          </div>
-        </div>
-
-        <div className="amb-summary-item">
           <span className="amb-summary-icon cyan"><Icon name="device" /></span>
           <div>
             <strong>

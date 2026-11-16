@@ -181,7 +181,7 @@ export default function Solucoes() {
             <div className="solution-orbit orbit-a" />
             <div className="solution-orbit orbit-b" />
 
-            {/* PAINEL CENTRAL */}
+            PAINEL CENTRAL
             <div className="solution-core">
               <div className="lumora-dashboard">
                 <div className="dashboard-header">
