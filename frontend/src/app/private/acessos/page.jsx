@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -631,6 +630,55 @@ export default function Acessos({ toast = () => {} }) {
           </div>
         )}
       </section>
+      {/* <div className="">
+        <form action="">
+          <label htmlFor="tipo_acesso">Tipo de acesso</label>
+          <select name="tipo_acesso" id="tipo_acesso">
+            <option selected="" disabled="" />
+            <option value="entrada">Entrada</option>
+            <option value="saida">Saida</option>
+          </select>
+          <label htmlFor="decisao_acesso">Decisão de acesso</label>
+          <select name="decisao_acesso" id="decisao_acesso">
+            <option selected="" disabled="" />
+            <option value="permitido">Permitido</option>
+            <option value="negado">Negado</option>
+          </select>
+          <label htmlFor="token_tentado">Token</label>
+          <input type="text" name="token_tentado" id="token_tentado" />
+          <label htmlFor="status_evento">Status</label>
+          <select name="status_evento" id="status_evento">
+            <option selected="" disabled="" />
+            <option value="processando">Processando</option>
+            <option value="concluido">Concluído</option>
+            <option value="pendente">Pendente</option>
+            <option value="falha">Falha</option>
+            <option value="bloqueado">Bloqueado</option>
+          </select>
+          <label htmlFor="data_expiracao">data de expiração</label>
+          <input type="date" name="data_expiracao" id="data_expiracao" />
+          <label htmlFor="data_utilizacao">Data de ultilização</label>
+          <input type="date" name="data_utilizacao" id="data_utilizacao" />
+          <label htmlFor="motivo">Motivo</label>
+          <select name="motivo" id="motivo">
+            <option selected="" disabled="" />
+            <option value="acesso_autorizado">Acesso autorizado</option>
+            <option value="acesso_de_manutencao">Acesso de manutenção</option>
+            <option value="saida_registrada">Saída registrada</option>
+            <option value="credencial_bloqueada">Credencial bloqueada</option>
+            <option value="credencial_expirada">Credencial expirada</option>
+            <option value="token_nao_reconhecido">Token não reconhecido</option>
+            <option value="sem_permissao">Sem permição</option>
+            <option value="fora_do_horario_permitido">
+              Fora do horário permitido
+            </option>
+            <option value="ambiente_restrito">Ambiente restrito</option>
+            <option value="falha_na_validacao">Falha na validação</option>
+            <option value="falha_de_comunicacao">falha de conunicação</option>
+          </select>
+          <button type="submit">Cadastrar</button>
+        </form>
+      </div> */}
     </div>
   );
 }

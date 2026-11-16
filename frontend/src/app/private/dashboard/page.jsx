@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -434,6 +433,28 @@ export default function DashboardPage() {
       </section>
 
       <Incidents toast={showToast} />
+
+      {/* <div className="">
+          <form action="">
+            <label htmlFor="nome_predio">Nome do prédio</label>
+            <input type="text" name="nome_predio" id="nome_predio" />
+            <label htmlFor="">Estado</label>
+            <input type="text" name="estado" id="estado" />
+            <label htmlFor="cidade">Cidade</label>
+            <input type="text" name="cidade" id="cidade" />
+            <label htmlFor="bairro">Bairro</label>
+            <input type="text" name="bairro" id="bairro" />
+            <label htmlFor="rua">Rua</label>
+            <input type="text" name="rua" id="rua" />
+            <label htmlFor="numero">Numero</label>
+            <input type="number" name="numero" id="numero" min={0} />
+            <label htmlFor="">CEP</label>
+            <input type="text" name="cep" id="cep" />
+            <label htmlFor="">Complemeto</label>
+            <input type="text" name="complemento" id="complemento" />
+            <button type="submit">Cadastrar</button>
+          </form>
+        </div> */}
 
       {toast && (
         <div className="dash-toast">
