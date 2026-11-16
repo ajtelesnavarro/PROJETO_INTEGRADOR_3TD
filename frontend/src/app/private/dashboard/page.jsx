@@ -38,6 +38,7 @@ function Icon({ name, size = 18 }) {
 }
 
 function PageTitle() {
+  const [showModal, setShowModal] = useState(false);
   return (
     <div className="dash-title">
       <div>
@@ -52,7 +53,7 @@ function PageTitle() {
         onClick={() => setModalAberto(true)}
       >
         <span>＋</span>
-        Adicionar andar
+        Adicionar prédio
       </button>
         <span className="dash-demo">
           <i />
