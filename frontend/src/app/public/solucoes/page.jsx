@@ -303,7 +303,7 @@ export default function Solucoes() {
             Conte um pouco sobre sua estrutura e os desafios da sua operação.
           </p>
 
-          <Link href="/orcamento" className="button primary">
+          <Link href="/public/orcamento" className="button primary">
             Solicitar uma conversa →
           </Link>
         </div>

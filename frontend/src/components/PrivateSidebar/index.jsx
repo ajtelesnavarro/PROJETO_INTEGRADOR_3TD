@@ -2,8 +2,19 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import "./sidebar.css";
+
+// PERMISSÕES DE PERFIL
+
+const permissoesPorPerfil = {
+  locador: ["dashboard", "predios", "orcamentos"],
+  administrador: ["dashboard", "predios", "ambientes", "dispositivos", "acessos", "ocorrencias", "orcamentos", "equipes"],
+  manutencao: ["dashboard", "ambientes", "dispositivos", "ocorrencias"],
+  porteiro: ["dashboard", "acessos", "ocorrencias"],
+};
+
 
 // PÁGINAS DO SISTEMA
 const nav = [
@@ -67,6 +78,7 @@ function Icon({ name, size = 19 }) {
 }
 
 function Logo() {
+
   return (
     <div className="lumora-logo">
       <div className="lumora-logo-symbol">
@@ -83,6 +95,22 @@ function Logo() {
 
 export default function Sidebar({ sidebar, setSidebar }) {
   const pathname = usePathname();
+
+  const [linksVisiveis, setLinksVisiveis] = useState([]);
+
+  // perfil deve vir do resultado de /auth/me
+
+useEffect(() => {
+  fetch("http:localhost:8080/api/auth/me")
+  .then(res => res.json())
+  .then(dados => {
+    const linksVisiveis = dados.filter((item) =>
+      permissoesPorPerfil[item.perfil]?.includes(item.id)
+    );
+
+    setLink(linksVisiveis);
+  })
+})
 
   return (
     <>
@@ -116,6 +144,7 @@ export default function Sidebar({ sidebar, setSidebar }) {
             const active = pathname === item.href ||
               pathname.startsWith(`${item.href}/`);
 
+            if (item.href.includes(link[1].value))
             return (
               <Link
                 key={item.id}
@@ -137,6 +166,7 @@ export default function Sidebar({ sidebar, setSidebar }) {
             );
           })}
         </nav>
+        
 
         <div className="lumora-sidebar-footer">
           <div className="lumora-storage">
