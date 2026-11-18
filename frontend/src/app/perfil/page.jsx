@@ -9,9 +9,10 @@ export default function user() {
                 <div className="">
                     <form action="">
                         <div className="">
-                            <label htmlFor="foto">Perfil</label>
+                            <label htmlFor="foto">
+                                <img src="images/logo.png" alt=""  />
+                            </label>
                             <input type="file" name="foto" id="foto" hidden/>
-                            <img src="images/logo.png" alt=""  />
                         </div>
 
                         <label htmlFor="nome_usuario">Nome Complemeto</label>
