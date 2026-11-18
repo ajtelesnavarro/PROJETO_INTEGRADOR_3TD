@@ -126,11 +126,9 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: #FFFFFF;
     padding: 10px 18px;
     border-radius: 12px;
     width: fit-content;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .footer .logo-simbolo {
