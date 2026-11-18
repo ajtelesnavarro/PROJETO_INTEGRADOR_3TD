@@ -42,10 +42,9 @@ const app = express();
 // ==========================================
 
 app.use(helmet());
-
 const origensPermitidas = (
     process.env.CORS_ORIGENS ||
-    "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
+    "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://back.smartbuilding.10.189.87.231.sslip.io"
 )
     .split(",")
     .map(origem => origem.trim())
