@@ -12,6 +12,7 @@ export default function PublicLayout({ children }) {
     <>
       <Navbar />
       {children}
+      {/* a */}
       <Footer />
     </>
   );
