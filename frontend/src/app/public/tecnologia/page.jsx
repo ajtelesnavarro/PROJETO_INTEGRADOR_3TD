@@ -105,7 +105,6 @@ export default function Tecnologia() {
           <div className="network-node node-left"><b>ϟ</b><small>ENERGIA</small></div>
           <div className="network-node node-right"><b>⌘</b><small>SISTEMAS</small></div>
           <div className="network-node node-bottom"><b>▤</b><small>DADOS</small></div>
-          <span className="network-caption">ECOSSISTEMA CONECTADO <i/></span>
         </div>
       </div>
     </section>

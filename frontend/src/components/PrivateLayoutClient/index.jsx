@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Header from "@/components/PrivateHeader";
-import Sidebar from "@/components/PrivateSidebar/index";
+import Sidebar from "@/components/PrivateSidebar_Adm/index";
 
 export default function PrivateLayoutClient({ children }) {
   const [sidebar, setSidebar] = useState(true);
