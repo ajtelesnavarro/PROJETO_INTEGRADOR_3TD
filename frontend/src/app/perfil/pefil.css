@@ -70,7 +70,3 @@ form button {
 form button:hover {
     background-color: var(--aqua);
 }
-
-input[type="file"] {
-    margin: 10px 0;
-}
