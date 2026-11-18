@@ -1,6 +1,6 @@
 
 /* ========================================
-   PÁGINA DE SOLUÇÕES
+   PÃƒÆ’Ã‚ÂGINA DE SOLUÃƒÆ’Ã¢â‚¬Â¡ÃƒÆ’Ã¢â‚¬Â¢ES
 ======================================== */
 
 /* HERO */
@@ -45,198 +45,6 @@
     line-height: 1.9;
 }
 
-/* ENTREGAS DO PROJETO */
-
-.solutions-form-card {
-    width: 100%;
-    max-width: 580px;
-    justify-self: center;
-    padding: 32px;
-    border: 1px solid rgba(25, 181, 165, .38);
-    border-radius: 22px;
-    color: #FFFFFF;
-    background: radial-gradient(circle at 100% 0%, rgba(25, 181, 165, .17), transparent 34%), linear-gradient(145deg, #123047, #0B2939);
-    box-shadow: 0 24px 60px rgba(18, 48, 71, .2);
-    transform: none;
-    transform-origin: center;
-    transition: transform .35s ease;
-}
-
-.solutions-form-card:hover,
-.solutions-form-card:focus-within {
-    transform: translateY(-3px);
-}
-
-.solutions-form-heading {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.solutions-form-mark {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
-    border-radius: 13px;
-    background: #FFFFFF;
-}
-
-.solutions-form-mark img {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
-}
-
-.solutions-form-heading > div > span {
-    display: inline-block;
-    color: #123047;
-    background: #BDF3EC;
-    padding: 5px 9px;
-    border-radius: 99px;
-    font: 700 10px "DM Mono", monospace;
-    letter-spacing: 1px;
-}
-
-.solutions-form-heading h2 {
-    margin: 5px 0 0;
-    color: #FFFFFF;
-    font: 800 clamp(23px, 2.5vw, 30px)/1.15 "Plus Jakarta Sans";
-    letter-spacing: -.7px;
-}
-
-.solutions-form-card .solutions-form-intro {
-    margin: 18px 0 22px;
-    color: #C7D8DE;
-    font-size: 14px;
-    line-height: 1.65;
-}
-
-.solutions-impact-chart {
-    display: grid;
-    gap: 18px;
-    padding: 20px;
-    border: 1px solid rgba(125, 224, 213, .3);
-    border-radius: 15px;
-    background: rgba(255, 255, 255, .07);
-}
-
-.impact-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(199, 216, 222, .16);
-}
-
-.impact-legend span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #C7D8DE;
-    font-size: 10px;
-}
-
-.impact-legend i {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.isolated-key,
-.impact-bar.isolated {
-    background: #7895A1;
-}
-
-.lumora-key,
-.impact-bar.lumora {
-    background: linear-gradient(90deg, #19B5A5, #7DE0D5);
-}
-
-.impact-row {
-    display: grid;
-    gap: 8px;
-}
-
-.impact-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    color: #E6F2F3;
-    font-size: 11px;
-}
-
-.impact-label b {
-    flex: 0 0 auto;
-    color: #FFFFFF;
-    font: 700 10px "DM Mono", monospace;
-}
-
-.impact-label em {
-    color: #19B5A5;
-    font-style: normal;
-}
-
-.impact-track {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    width: 100%;
-    height: 15px;
-}
-
-.impact-bar {
-    display: block;
-    height: 5px;
-    border-radius: 99px;
-}
-
-.solutions-benefit-list {
-    display: grid;
-    gap: 11px;
-    margin: 20px 0;
-    padding: 0;
-    list-style: none;
-}
-
-.solutions-benefit-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    color: #E6F2F3;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.solutions-benefit-list li span {
-    color: #19B5A5;
-    font-weight: 800;
-}
-
-.solutions-example-note {
-    display: block;
-    padding-top: 13px;
-    border-top: 1px solid rgba(199, 216, 222, .16);
-    color: #A9C3CB;
-    font-size: 9px;
-    line-height: 1.6;
-}
-@media (hover: none), (prefers-reduced-motion: reduce) {
-    .solutions-form-card {
-        transform: none;
-        transition: none;
-    }
-}
-
-@media (max-width: 560px) {
-    .solutions-form-card {
-        padding: 22px;
-    }
-}
-
 .solutions-intro {
     padding-top: 110px;
     padding-bottom: 110px;
@@ -272,7 +80,7 @@
 }
 
 /* ========================================
-   CATÁLOGO DE SOLUÇÕES
+   CATÃƒÆ’Ã‚ÂLOGO DE SOLUÃƒÆ’Ã¢â‚¬Â¡ÃƒÆ’Ã¢â‚¬Â¢ES
 ======================================== */
 
 .solution-catalog {
@@ -782,3 +590,88 @@
         transform: none;
     }
 }
+
+/* Cartão Lumora e comparativo ilustrativo */
+.solutions-form-card {
+    width: 100%;
+    max-width: 580px;
+    justify-self: center;
+    padding: 28px;
+    border: 1px solid #D9E3EE;
+    border-radius: 18px;
+    color: #183047;
+    background: #FFFFFF;
+    box-shadow: 0 16px 42px rgba(18, 48, 71, .1);
+}
+
+.solutions-form-heading { display: flex; align-items: center; gap: 13px; }
+.solutions-form-mark {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border: 1px solid #E5EBF0;
+    border-radius: 12px;
+    background: #FFFFFF;
+}
+.solutions-form-mark img { width: 36px; height: 36px; object-fit: contain; }
+.solutions-form-heading > div > span {
+    color: #526D83;
+    font: 700 9px "DM Mono", monospace;
+    letter-spacing: 1px;
+}
+.solutions-form-heading h2 {
+    margin: 5px 0 0;
+    color: #123047;
+    font: 800 clamp(21px, 2.3vw, 27px)/1.16 "Plus Jakarta Sans", sans-serif;
+    letter-spacing: -.6px;
+}
+.solutions-form-card .solutions-form-intro {
+    margin: 15px 0 18px;
+    color: #586F7A;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.solutions-impact-chart {
+    display: grid;
+    gap: 14px;
+    padding: 17px;
+    border: 1px solid #E1E7EF;
+    border-radius: 12px;
+    background: #F7F9FC;
+}
+.impact-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 11px;
+    border-bottom: 1px solid #E2E8F0;
+}
+.impact-legend span { display: flex; align-items: center; gap: 7px; color: #526579; font-size: 10px; }
+.impact-legend i { width: 9px; height: 9px; border-radius: 3px; }
+.isolated-key, .impact-bar.isolated { background: #4D86C6; }
+.lumora-key, .impact-bar.lumora { background: #795BC6; }
+.impact-row { display: grid; gap: 8px; }
+.impact-label { color: #263D53; font: 700 12px "Manrope", sans-serif; }
+.impact-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.impact-measure { display: grid; gap: 5px; }
+.impact-value { display: flex; justify-content: space-between; gap: 6px; color: #687C8D; font: 10px "Manrope", sans-serif; }
+.impact-value b { color: #263D53; font: 700 11px "DM Mono", monospace; }
+.impact-track { width: 100%; height: 7px; overflow: hidden; border-radius: 99px; background: #E1E7EF; }
+.impact-bar { display: block; height: 100%; border-radius: inherit; }
+
+.solutions-benefit-list { display: grid; gap: 8px; margin: 17px 0 12px; padding: 0; list-style: none; }
+.solutions-benefit-list li { display: flex; align-items: flex-start; gap: 8px; color: #3F586C; font-size: 11px; line-height: 1.5; }
+.solutions-benefit-list li span { color: #795BC6; font-weight: 800; }
+.solutions-example-note { display: block; padding-top: 11px; border-top: 1px solid #E7ECF1; color: #718391; font-size: 9px; line-height: 1.5; }
+
+@media (max-width: 560px) {
+    .solutions-form-card { padding: 20px; }
+    .solutions-impact-chart { gap: 12px; padding: 13px; }
+    .impact-comparison { gap: 9px; }
+    .impact-value { font-size: 9px; }
+    .impact-value b { font-size: 10px; }
+}
+

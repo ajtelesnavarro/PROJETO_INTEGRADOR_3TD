@@ -845,6 +845,74 @@
         transform: none;
     }
 }
+
+/* Tipografia ampliada para facilitar a leitura da página */
+.technology-page .tech-hero-copy > p,
+.technology-page .tech-manifesto-grid > div:last-child > p,
+.technology-page .section-heading > p,
+.technology-page .layer-copy p,
+.technology-page .aside-bottom p,
+.technology-page .tech-pillars-heading > p,
+.technology-page .tech-pillars-grid p,
+.technology-page .security-copy > p,
+.technology-page .tech-cta p {
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.technology-page .tech-manifesto h2,
+.technology-page .tech-pillars-heading h2,
+.technology-page .security-copy h2 {
+    font-size: clamp(40px, 4vw, 50px);
+}
+
+.technology-page .layer-copy h3,
+.technology-page .tech-pillars-grid h3 {
+    font-size: 19px;
+}
+
+.technology-page .tech-hero-foot span,
+.technology-page .layer-copy > span,
+.technology-page .aside-top,
+.technology-page .flow-step span,
+.technology-page .flow-step small,
+.technology-page .tech-pillars-grid article > span,
+.technology-page .security-chip {
+    font-size: 11px;
+}
+
+.technology-page .flow-step b { font-size: 15px; }
+.technology-page .security-copy li { font-size: 14px; }
+.technology-page .security-disclaimer,
+.technology-page .tech-manifesto-grid .tech-note { font-size: 13px !important; }
+
+@media (max-width: 560px) {
+    .technology-page .tech-hero-copy > p,
+    .technology-page .tech-manifesto-grid > div:last-child > p,
+    .technology-page .section-heading > p,
+    .technology-page .layer-copy p,
+    .technology-page .aside-bottom p,
+    .technology-page .tech-pillars-heading > p,
+    .technology-page .tech-pillars-grid p,
+    .technology-page .security-copy > p,
+    .technology-page .tech-cta p {
+        font-size: 15px;
+    }
+
+    .technology-page .tech-hero-foot span,
+    .technology-page .layer-copy > span,
+    .technology-page .aside-top,
+    .technology-page .flow-step span,
+    .technology-page .flow-step small,
+    .technology-page .tech-pillars-grid article > span,
+    .technology-page .security-chip {
+        font-size: 10px;
+    }
+
+    .technology-page .layer-copy h3,
+    .technology-page .tech-pillars-grid h3 { font-size: 17px; }
+    .technology-page .security-copy li { font-size: 13px; }
+}
 .network-node.node-center {
     background: linear-gradient(145deg, #172B46, #344B70 65%, #514B78);
     border: 1px solid rgba(169, 155, 232, .65);

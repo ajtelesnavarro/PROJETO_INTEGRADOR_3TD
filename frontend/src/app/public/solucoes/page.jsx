@@ -120,7 +120,6 @@ export default function Solucoes() {
             </div>
           </div>
 
-          {/* EXEMPLO ILUSTRATIVO DE BENEFÍCIOS */}
           <div className="solutions-form-card">
             <div className="solutions-form-heading">
               <span className="solutions-form-mark">
@@ -132,36 +131,38 @@ export default function Solucoes() {
               </div>
             </div>
             <p className="solutions-form-intro">
-              Compare um cenário com informações isoladas a uma operação
-              conectada e acompanhada em um só lugar.
+              Compare um cenário com informações isoladas a uma operação conectada e acompanhada em um só lugar.
             </p>
-            <div className="solutions-impact-chart" role="img" aria-label="Comparação ilustrativa: integração, visibilidade e agilidade são maiores com a Lumora do que em uma operação fragmentada.">
+            <div className="solutions-impact-chart" role="img" aria-label="Comparação ilustrativa de informações integradas, visibilidade e agilidade.">
               <div className="impact-legend">
                 <span><i className="isolated-key" /> Sistemas isolados</span>
                 <span><i className="lumora-key" /> Com Lumora</span>
               </div>
-              <div className="impact-row">
-                <div className="impact-label"><span>Informações integradas</span><b>30% <em>→</em> 90%</b></div>
-                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "30%" }} /><i className="impact-bar lumora" style={{ width: "90%" }} /></div>
-              </div>
-              <div className="impact-row">
-                <div className="impact-label"><span>Visibilidade da operação</span><b>38% <em>→</em> 94%</b></div>
-                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "38%" }} /><i className="impact-bar lumora" style={{ width: "94%" }} /></div>
-              </div>
-              <div className="impact-row">
-                <div className="impact-label"><span>Agilidade nas respostas</span><b>42% <em>→</em> 86%</b></div>
-                <div className="impact-track"><i className="impact-bar isolated" style={{ width: "42%" }} /><i className="impact-bar lumora" style={{ width: "86%" }} /></div>
-              </div>
+              {[
+                ["Informações integradas", 30, 90],
+                ["Visibilidade da operação", 38, 94],
+                ["Agilidade nas respostas", 42, 86],
+              ].map(([label, isolated, lumora]) => (
+                <div className="impact-row" key={label}>
+                  <div className="impact-label">{label}</div>
+                  <div className="impact-comparison">
+                    <div className="impact-measure">
+                      <div className="impact-value"><span>Isolados</span><b>{isolated}%</b></div>
+                      <div className="impact-track"><i className="impact-bar isolated" style={{ width: `${isolated}%` }} /></div>
+                    </div>
+                    <div className="impact-measure">
+                      <div className="impact-value"><span>Com Lumora</span><b>{lumora}%</b></div>
+                      <div className="impact-track"><i className="impact-bar lumora" style={{ width: `${lumora}%` }} /></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
             <ul className="solutions-benefit-list">
               <li><span>✓</span> Informações centralizadas para a equipe</li>
-              <li><span>✓</span> Alertas para agir com mais agilidade</li>
-              <li><span>✓</span> Indicadores para orientar decisões</li>
+              <li><span>✓</span> Alertas e indicadores para apoiar decisões</li>
             </ul>
-            <small className="solutions-example-note">
-              Gráfico ilustrativo com dados fictícios, usado para representar
-              benefícios possíveis. Os resultados variam conforme cada projeto.
-            </small>
+            <small className="solutions-example-note">Exemplo ilustrativo. Os resultados variam conforme cada projeto.</small>
           </div>
         </div>
       </section>
