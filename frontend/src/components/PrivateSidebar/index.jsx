@@ -99,9 +99,46 @@ function Logo() {
 }
 
 export default function Sidebar({ sidebar, setSidebar }) {
+
+  const [latency, setLatency] = useState(null);
+  const [online, setOnline] = useState(false);
+
+  useEffect(() => {
+    const observer = new PerformanceObserver((item) => {
+      const entries = item.getEntries();
+
+      for (const entry of entries) {
+        const ehMinhaApi = entry.name.includes('/api') || entry.name.includes('localhost:');
+
+        if ((entry.initiatorType === 'fetch' || entry.initiatorType === 'xmlhttprequest') && ehMinhaApi) {
+          
+          if (entry.responseStatus === 0 || entry.responseStatus >= 500) {
+            setOnline(false);
+            setLatency(null);
+          } else {
+            setOnline(true);
+            setLatency(Math.round(entry.duration));
+          }
+        }
+      }
+    });
+
+    observer.observe({ type: 'resource', buffered: true });
+
+    // Detecta também se a internet do usuário cair
+    const handleOffline = () => setOnline(false);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  
   const pathname = usePathname();
-  const router = useRouter(); // 2. Inicialize o router
-  const [test, setTeste] = useState(true);
+  const router = useRouter();
+
   const [linksVisiveis, setLinksVisiveis] = useState([]);
 
   // useEffect(() => {
@@ -152,10 +189,12 @@ export default function Sidebar({ sidebar, setSidebar }) {
             <Icon name="close" />
           </button>
           <div className="lumora-api-status">
-            <i />
+            <i className={`statusDot ${online ? 'online' : 'offline'}`} />
             <div>
-              <b>ONLINE</b>
-              <span>API conectada · 24ms</span>
+              <b className={`statusTitle ${online ? 'online' : 'offline'}`}>
+              {online ? 'ONLINE' : 'OFFLINE'}
+              </b>
+              <span className="text-xs text-slate-300">{latency !== null ? `API conectada · ${latency}ms` : 'API conectada · aguardando...'}</span>
             </div>
           </div>
         </div>

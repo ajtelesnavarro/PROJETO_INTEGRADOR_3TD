@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import "./dashboard.css";
 import { useEffect, useState } from "react";
 
@@ -463,9 +462,9 @@ function Incidents({ toast }) {
           <p>Registros que precisam de acompanhamento da equipe.</p>
         </div>
 
-        <Link href="/tickets" className="dash-link">
+        <button className="dash-link" onClick={() => setModalAberto(true)}>
           Ver todas <Icon name="arrow" size={15} />
-        </Link>
+        </button>
       </div>
 
       <div className="dash-table-wrapper">

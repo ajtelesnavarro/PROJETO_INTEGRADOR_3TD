@@ -12,6 +12,15 @@
 
 /* SIDEBAR */
 
+
+.statusDot.offline{
+  background-color: rgb(236, 136, 136);
+}
+
+.statusTitle.offline{
+  color: rgb(236, 136, 136);
+}
+
 .lumora-sidebar {
   position: fixed;
   top: 0;

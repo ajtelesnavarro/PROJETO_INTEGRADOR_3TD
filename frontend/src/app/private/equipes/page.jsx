@@ -224,6 +224,8 @@ const emptyForm = {
   since: new Date().toLocaleDateString("pt-BR"),
 };
 
+const emptyTeamForm = { name: "", abbreviation: "", color: "#4775D1", description: "" };
+
 export default function Page() {
   const [teams, setTeams] = useState(teamSeed);
   const [activeTeam, setActiveTeam] = useState(1);
@@ -231,6 +233,8 @@ export default function Page() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [modalOpen, setModalOpen] = useState(false);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [teamForm, setTeamForm] = useState(emptyTeamForm);
   const [editingMember, setEditingMember] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState("");
@@ -287,6 +291,29 @@ export default function Page() {
     setEditingMember(null);
     setForm(emptyForm);
     setModalOpen(true);
+  }
+
+  function openNewTeam() {
+    setTeamForm(emptyTeamForm);
+    setTeamModalOpen(true);
+  }
+
+  function saveTeam(event) {
+    event.preventDefault();
+    const newTeam = {
+      id: Date.now(),
+      ...teamForm,
+      name: teamForm.name.trim(),
+      abbreviation: teamForm.abbreviation.trim().slice(0, 4).toUpperCase(),
+      members: [],
+    };
+    setTeams((current) => [...current, newTeam]);
+    setActiveTeam(newTeam.id);
+    setSelectedMember(null);
+    setSearch("");
+    setFilter("Todos");
+    setFeedback("Grupo criado com sucesso.");
+    setTeamModalOpen(false);
   }
 
   function openEditMember(member) {
@@ -411,9 +438,9 @@ export default function Page() {
           <p>Gerencie as equipes e os funcionários vinculados ao edifício.</p>
         </div>
 
-        <button className="tm-primary-button" onClick={openNewMember}>
+        <button className="tm-primary-button" onClick={openNewTeam}>
           <Icon name="plus" size={17} />
-          Adicionar integrante
+          Criar grupo
         </button>
       </header>
 
@@ -885,6 +912,53 @@ export default function Page() {
                   <Icon name="check" size={16} />
                   {editingMember ? "Salvar alterações" : "Cadastrar integrante"}
                 </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {teamModalOpen && (
+        <div className="tm-modal-overlay" onMouseDown={() => setTeamModalOpen(false)}>
+          <section
+            className="tm-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tm-team-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="tm-modal-header">
+              <div>
+                <span className="tm-section-label">GESTÃO DE PESSOAS</span>
+                <h2 id="tm-team-modal-title">Criar grupo</h2>
+                <p>Informe os dados do novo grupo de trabalho.</p>
+              </div>
+              <button className="tm-modal-close" onClick={() => setTeamModalOpen(false)} aria-label="Fechar">
+                <Icon name="close" size={19} />
+              </button>
+            </div>
+            <form onSubmit={saveTeam}>
+              <div className="tm-form-grid">
+                <label className="tm-form-full">
+                  Nome do grupo
+                  <input autoFocus value={teamForm.name} onChange={(event) => setTeamForm((current) => ({ ...current, name: event.target.value }))} placeholder="Ex.: Equipe de Limpeza" required />
+                </label>
+                <label>
+                  Sigla
+                  <input maxLength={4} value={teamForm.abbreviation} onChange={(event) => setTeamForm((current) => ({ ...current, abbreviation: event.target.value.toUpperCase() }))} placeholder="Ex.: LIM" required />
+                </label>
+                <label>
+                  Cor do grupo
+                  <input type="color" value={teamForm.color} onChange={(event) => setTeamForm((current) => ({ ...current, color: event.target.value }))} />
+                </label>
+                <label className="tm-form-full">
+                  Descrição
+                  <input value={teamForm.description} onChange={(event) => setTeamForm((current) => ({ ...current, description: event.target.value }))} placeholder="Descreva as responsabilidades do grupo" required />
+                </label>
+              </div>
+              <div className="tm-modal-footer">
+                <button type="button" className="tm-cancel-button" onClick={() => setTeamModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Criar grupo</button>
               </div>
             </form>
           </section>
