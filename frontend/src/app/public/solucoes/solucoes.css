@@ -49,21 +49,22 @@
 
 .solutions-form-card {
     width: 100%;
-    max-width: 540px;
+    max-width: 580px;
     justify-self: center;
-    padding: 30px;
-    border: 1px solid rgba(25, 181, 165, .28);
-    border-radius: 18px;
+    padding: 32px;
+    border: 1px solid rgba(25, 181, 165, .38);
+    border-radius: 22px;
     color: #FFFFFF;
-    background: linear-gradient(145deg, #123047, #0B2939);
-    transform: perspective(1000px) rotate(3deg);
+    background: radial-gradient(circle at 100% 0%, rgba(25, 181, 165, .17), transparent 34%), linear-gradient(145deg, #123047, #0B2939);
+    box-shadow: 0 24px 60px rgba(18, 48, 71, .2);
+    transform: none;
     transform-origin: center;
     transition: transform .35s ease;
 }
 
 .solutions-form-card:hover,
 .solutions-form-card:focus-within {
-    transform: perspective(1000px) rotate(0deg);
+    transform: translateY(-3px);
 }
 
 .solutions-form-heading {
@@ -89,32 +90,36 @@
 }
 
 .solutions-form-heading > div > span {
-    color: #7DE0D5;
-    font: 9px "DM Mono", monospace;
-    letter-spacing: 1.4px;
+    display: inline-block;
+    color: #123047;
+    background: #BDF3EC;
+    padding: 5px 9px;
+    border-radius: 99px;
+    font: 700 10px "DM Mono", monospace;
+    letter-spacing: 1px;
 }
 
 .solutions-form-heading h2 {
     margin: 5px 0 0;
     color: #FFFFFF;
-    font: 800 clamp(21px, 2.4vw, 27px)/1.15 "Plus Jakarta Sans";
+    font: 800 clamp(23px, 2.5vw, 30px)/1.15 "Plus Jakarta Sans";
     letter-spacing: -.7px;
 }
 
 .solutions-form-card .solutions-form-intro {
     margin: 18px 0 22px;
     color: #C7D8DE;
-    font-size: 12px;
-    line-height: 1.7;
+    font-size: 14px;
+    line-height: 1.65;
 }
 
 .solutions-impact-chart {
     display: grid;
-    gap: 16px;
-    padding: 17px;
-    border: 1px solid rgba(199, 216, 222, .18);
-    border-radius: 11px;
-    background: rgba(255, 255, 255, .04);
+    gap: 18px;
+    padding: 20px;
+    border: 1px solid rgba(125, 224, 213, .3);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, .07);
 }
 
 .impact-legend {
@@ -130,7 +135,7 @@
     align-items: center;
     gap: 6px;
     color: #C7D8DE;
-    font-size: 8px;
+    font-size: 10px;
 }
 
 .impact-legend i {
@@ -141,12 +146,12 @@
 
 .isolated-key,
 .impact-bar.isolated {
-    background: #70909D;
+    background: #7895A1;
 }
 
 .lumora-key,
 .impact-bar.lumora {
-    background: linear-gradient(90deg, #19B5A5, #3B82F6, #7C3AED);
+    background: linear-gradient(90deg, #19B5A5, #7DE0D5);
 }
 
 .impact-row {
@@ -160,13 +165,13 @@
     align-items: center;
     gap: 8px;
     color: #E6F2F3;
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .impact-label b {
     flex: 0 0 auto;
     color: #FFFFFF;
-    font: 500 8px "DM Mono", monospace;
+    font: 700 10px "DM Mono", monospace;
 }
 
 .impact-label em {
@@ -180,12 +185,12 @@
     align-items: flex-start;
     gap: 4px;
     width: 100%;
-    height: 13px;
+    height: 15px;
 }
 
 .impact-bar {
     display: block;
-    height: 4px;
+    height: 5px;
     border-radius: 99px;
 }
 
@@ -202,7 +207,7 @@
     align-items: flex-start;
     gap: 9px;
     color: #E6F2F3;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
 }
 
@@ -216,7 +221,7 @@
     padding-top: 13px;
     border-top: 1px solid rgba(199, 216, 222, .16);
     color: #A9C3CB;
-    font-size: 8px;
+    font-size: 9px;
     line-height: 1.6;
 }
 @media (hover: none), (prefers-reduced-motion: reduce) {
