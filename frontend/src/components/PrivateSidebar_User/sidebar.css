@@ -1,487 +1,103 @@
+.user-sidebar {
+  --user-navy: #123047;
+  --user-aqua: #19b5a5;
+  --user-ink: #183447;
+  --user-muted: #78909c;
+  position: fixed;
+  z-index: 40;
+  inset: 0 auto 0 0;
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  min-height: 100vh;
+  padding: 25px 18px 18px;
+  color: #eaf4f5;
+  background: linear-gradient(180deg, #123047 0%, #0d293a 100%);
+  box-shadow: 12px 0 35px rgba(12, 39, 55, .12);
+  transition: transform .25s ease;
+}
 
-:root {
-    --lumora-navy: #0B132B;
-    --lumora-blue-dark: #172B5E;
-    --lumora-blue: #3568D4;
-    --lumora-blue-light: #7AA7FF;
-    --lumora-purple: #7956D8;
-    --lumora-lilac: #A78BFA;
-    --lumora-white: #F8FAFF;
-    --lumora-muted: #9AA9C5;
-  }
-  
-  /* SIDEBAR */
-  
-  
-  .statusDot.offline{
-    background-color: rgb(236, 136, 136);
-  }
-  
-  .statusTitle.offline{
-    color: rgb(236, 136, 136);
-  }
-  
-  .lumora-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    width: 278px;
-    height: 100vh;
-    padding: 27px 19px 20px;
-    box-sizing: border-box;
-    color: var(--lumora-white);
-    background:
-      radial-gradient(circle at 0% 0%, rgba(53, 104, 212, .16), transparent 34%),
-      linear-gradient(165deg, #101D3B 0%, #0B132B 55%, #10172E 100%);
-    border-right: 1px solid rgba(148, 163, 184, .12);
-    transition: transform .3s ease;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #34466B transparent;
-  }
-  
-  .lumora-sidebar-top {
-    position: relative;
-    padding-bottom: 25px;
-    border-bottom: 1px solid rgba(255, 255, 255, .09);
-  }
-  
-  /* LOGO */
-  
-  .lumora-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 43px;
-  }
-  
-  .lumora-logo-symbol {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-  border: 1px solid rgba(112, 80, 201, 0.5);
-  box-shadow: 0 0 16px rgba(112, 80, 201, 0.35);
-  }
-  
-  .lumora-logo-symbol img {
-    width: 20px;
-  }
-  
-  .lumora-logo-symbol i:nth-child(1) {
-    height: 14px;
-    opacity: .7;
-  }
-  
-  .lumora-logo-symbol i:nth-child(2) {
-    height: 23px;
-  }
-  
-  .lumora-logo-symbol i:nth-child(3) {
-    height: 17px;
-    opacity: .85;
-  }
-  
-  .lumora-logo-text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  
-  .lumora-logo-text b {
-    color: #FFFFFF;
-    font-size: 19px;
-    font-weight: 800;
-    letter-spacing: 2px;
-  }
-  
-  .lumora-logo-text span {
-    color: #9EAFD0;
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: 1.15px;
-  }
-  
-  /* STATUS DA API */
-  
-  .lumora-api-status {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    margin-top: 27px;
-    padding: 12px 13px;
-    border: 1px solid rgba(130, 155, 205, .12);
-    border-radius: 11px;
-    background: rgba(255, 255, 255, .035);
-  }
-  
-  .lumora-api-status > i {
-    width: 8px;
-    height: 8px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: #48C6A8;
-    box-shadow: 0 0 10px rgba(72, 198, 168, .6);
-  }
-  
-  .lumora-api-status div {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  
-  .lumora-api-status b {
-    color: #6DDBBE;
-    font-size: 10px;
-    letter-spacing: 1px;
-  }
-  
-  .lumora-api-status span {
-    color: #9AA9C5;
-    font-size: 11px;
-  }
-  
-  /* NAVEGAÇÃO */
-  
-  .lumora-navigation {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-top: 27px;
-  }
-  
-  .lumora-nav-label {
-    margin: 0 0 10px 10px;
-    color: #7183A8;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.6px;
-  }
-  
-  .lumora-nav-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    min-height: 57px;
-    padding: 9px 11px;
-    border: 1px solid transparent;
-    border-radius: 11px;
-    background: transparent;
-    color: #AAB7D0;
-    text-align: left;
-    cursor: pointer;
-    transition: background .2s ease, color .2s ease, border-color .2s ease;
-  }
-  
-  .lumora-nav-item:hover {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, .055);
-  }
-  
-  .lumora-nav-item.active {
-    color: #FFFFFF;
-    border-color: rgba(111, 142, 224, .18);
-    background: linear-gradient(
-      100deg,
-      rgba(53, 104, 212, .23),
-      rgba(121, 86, 216, .13)
-    );
-  }
-  
-  .lumora-nav-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 35px;
-    height: 35px;
-    flex-shrink: 0;
-    border-radius: 9px;
-    color: #8FA4CB;
-    background: rgba(255, 255, 255, .045);
-    transition: .2s ease;
-  }
-  
-  .lumora-nav-item.active .lumora-nav-icon {
-    color: #FFFFFF;
-    background: linear-gradient(140deg, #3568D4, #7956D8);
-    box-shadow: 0 4px 12px rgba(53, 104, 212, .2);
-  }
-  
-  .lumora-nav-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-  
-  .lumora-nav-text b {
-    font-size: 12px;
-    font-weight: 650;
-    white-space: nowrap;
-  }
-  
-  .lumora-nav-text small {
-    color: #7F91B3;
-    font-size: 10px;
-    white-space: nowrap;
-  }
-  
-  .lumora-nav-item.active .lumora-nav-text small {
-    color: #AFC2E9;
-  }
-  
-  .lumora-nav-indicator {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    width: 3px;
-    height: 24px;
-    border-radius: 5px 0 0 5px;
-    background: #8C9FFF;
-    transform: translateY(-50%);
-  }
-  
-  .lumora-live-tag {
-    margin-left: auto;
-    padding: 4px 6px;
-    border: 1px solid rgba(72, 198, 168, .2);
-    border-radius: 5px;
-    color: #6DDBBE;
-    background: rgba(72, 198, 168, .08);
-    font-size: 8px;
-    font-style: normal;
-    font-weight: 700;
-    letter-spacing: .6px;
-  }
-  
-  /* RODAPÉ */
-  
-  .lumora-sidebar-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 19px;
-    margin-top: auto;
-    padding-top: 25px;
-  }
-  
-  .lumora-storage {
-    padding: 15px;
-    border: 1px solid rgba(148, 163, 184, .12);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, .035);
-  }
-  
-  .lumora-storage-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  
-  .lumora-storage-heading span {
-    color: #B3C0D8;
-    font-size: 11px;
-  }
-  
-  .lumora-storage-heading b {
-    color: #FFFFFF;
-    font-size: 12px;
-  }
-  
-  .lumora-storage-bar {
-    height: 5px;
-    overflow: hidden;
-    border-radius: 10px;
-    background: #263657;
-  }
-  
-  .lumora-storage-bar i {
-    display: block;
-    width: 78%;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #477BE3, #9A7AE9);
-  }
-  
-  .lumora-storage small {
-    display: block;
-    margin-top: 10px;
-    color: #8092B4;
-    font-size: 10px;
-  }
-  
-  .lumora-support {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    width: 100%;
-    padding: 12px 10px;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    color: #DCE5F7;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    transition: .2s ease;
-  }
-  
-  .lumora-support:hover {
-    border-color: rgba(148, 163, 184, .12);
-    background: rgba(255, 255, 255, .055);
-  }
-  
-  .lumora-support-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 31px;
-    height: 31px;
-    border-radius: 9px;
-    color: #B9A5FF;
-    background: rgba(121, 86, 216, .18);
-    font-size: 17px;
-    font-weight: 700;
-  }
-  
-  .lumora-support-text {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .lumora-support-text b {
-    font-size: 11px;
-  }
-  
-  .lumora-support-text small {
-    color: #8394B4;
-    font-size: 10px;
-  }
-  
-  .lumora-support > svg {
-    color: #8196BD;
-  }
-  
-  /* BOTÃO MOBILE */
-  
-  .lumora-mobile-close {
-    display: none;
-    position: absolute;
-    top: 5px;
-    right: 0;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border: 0;
-    border-radius: 8px;
-    color: #C5D1E8;
-    background: rgba(255, 255, 255, .07);
-    cursor: pointer;
-  }
-  
-  /* SOBREPOSIÇÃO MOBILE */
-  
-  .lumora-sidebar-overlay {
-    display: none;
-  }
-  
-  /* RESPONSIVIDADE */
-  
-  @media (max-width: 900px) {
-    .lumora-sidebar {
-      transform: translateX(-100%);
-    }
-  
-    .lumora-sidebar.open {
-      transform: translateX(0);
-    }
-  
-    .lumora-mobile-close {
-      display: flex;
-    }
-  
-    .lumora-sidebar-overlay {
-      display: block;
-      position: fixed;
-      inset: 0;
-      z-index: 90;
-      border: 0;
-      background: rgba(5, 12, 29, .58);
-      backdrop-filter: blur(3px);
-    }
-  }
-  
-  @media (max-height: 700px) {
-    .lumora-sidebar {
-      padding-top: 18px;
-      padding-bottom: 14px;
-    }
-  
-    .lumora-navigation {
-      margin-top: 18px;
-      gap: 2px;
-    }
-  
-    .lumora-nav-item {
-      min-height: 49px;
-    }
-  
-    .lumora-sidebar-footer {
-      padding-top: 15px;
-      gap: 10px;
-    }
-  }
-  
-  /* BOTÃO DE FECHAR SIDEBAR */
-  .lumora-sidebar-top {
-    position: relative;
-  }
-  
-  .lumora-mobile-close {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  
-    position: absolute;
-    top: 0;
-    right: 0;
-  
-    width: 36px;
-    height: 36px;
-  
-    padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-  
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-  
-    cursor: pointer;
-    z-index: 20;
-  
-    transition: all 0.2s ease;
-  }
-  
-  .lumora-mobile-close:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: #ffffff;
-    transform: scale(1.05);
-  }
-  
-  .lumora-mobile-close svg {
-    width: 20px;
-    height: 20px;
-    display: block;
-  }
+.user-sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 5px 20px;
+  border-bottom: 1px solid rgba(221, 242, 242, .12);
+}
+
+.user-brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.user-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  flex: 0 0 43px;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #fff;
+}
+.user-brand-mark img { width: 36px; height: 36px; object-fit: contain; }
+.user-brand-name { display: grid; gap: 3px; }
+.user-brand-name b { color: #fff; font: 800 16px/1 "Plus Jakarta Sans", sans-serif; letter-spacing: 1.2px; }
+.user-brand-name small { color: #9cb9c1; font: 8px/1.3 "DM Mono", monospace; letter-spacing: .7px; white-space: nowrap; }
+.user-sidebar-close { display: none; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; color: #d9eded; background: rgba(255,255,255,.08); cursor: pointer; }
+
+.user-sidebar svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.user-sidebar-welcome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 1px 27px;
+  padding: 14px 13px;
+  border: 1px solid rgba(125, 224, 213, .2);
+  border-radius: 14px;
+  background: linear-gradient(110deg, rgba(25,181,165,.15), rgba(255,255,255,.035));
+}
+.user-welcome-icon { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 12px; color: #9af0e5; background: rgba(25,181,165,.18); }
+.user-sidebar-welcome div { display: grid; gap: 4px; }
+.user-sidebar-welcome small { color: #8fb2bc; font: 9px "DM Mono", monospace; letter-spacing: 1px; }
+.user-sidebar-welcome b { color: #fff; font: 700 14px "Plus Jakarta Sans", sans-serif; }
+
+.user-sidebar-nav { display: grid; align-content: start; gap: 7px; }
+.user-sidebar-label { margin: 0 10px 8px; color: #83a3ae; font: 9px "DM Mono", monospace; letter-spacing: 1.3px; }
+.user-sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #bfd0d5;
+  transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.user-sidebar-link:hover { color: #fff; background: rgba(255,255,255,.07); transform: translateX(2px); }
+.user-sidebar-link.active { color: #fff; border-color: rgba(125,224,213,.23); background: linear-gradient(100deg, rgba(25,181,165,.2), rgba(25,181,165,.07)); }
+.user-sidebar-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 11px; color: #a7c5ca; background: rgba(255,255,255,.055); }
+.user-sidebar-link.active .user-sidebar-icon { color: #062f38; background: #77ded2; }
+.user-sidebar-copy { display: grid; gap: 4px; min-width: 0; }
+.user-sidebar-copy b { color: inherit; font: 700 11px/1.25 "Manrope", sans-serif; }
+.user-sidebar-copy small { color: #8faab2; font: 10px/1.35 "Manrope", sans-serif; }
+.user-sidebar-link.active .user-sidebar-copy small { color: #b3d8d8; }
+.user-sidebar-active-mark { position: absolute; top: 50%; right: -1px; width: 3px; height: 25px; border-radius: 4px 0 0 4px; background: #57d0c2; transform: translateY(-50%); }
+
+.user-sidebar-footer { display: flex; align-items: center; gap: 11px; margin-top: auto; padding: 17px 7px 2px; border-top: 1px solid rgba(221,242,242,.12); }
+.user-footer-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(125,224,213,.3); border-radius: 11px; color: #a2eee4; background: rgba(25,181,165,.12); font: 800 15px "Plus Jakarta Sans", sans-serif; }
+.user-sidebar-footer div { display: grid; gap: 4px; }
+.user-sidebar-footer b { color: #dcebed; font: 700 10px "Manrope", sans-serif; }
+.user-sidebar-footer small { color: #88a7b0; font: 9px "Manrope", sans-serif; }
+.user-sidebar-overlay { display: none; }
+
+@media (max-width: 900px) {
+  .user-sidebar { z-index: 60; width: min(300px, calc(100vw - 48px)); transform: translateX(-105%); }
+  .user-sidebar.is-open { transform: translateX(0); }
+  .user-sidebar-close { display: grid; }
+  .user-sidebar-overlay { position: fixed; z-index: 50; inset: 0; display: block; width: 100%; height: 100%; border: 0; background: rgba(7, 24, 34, .48); backdrop-filter: blur(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-sidebar, .user-sidebar-link { transition: none; }
+}
