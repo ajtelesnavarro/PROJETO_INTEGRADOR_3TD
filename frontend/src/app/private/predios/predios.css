@@ -232,15 +232,6 @@
   background: #8da6ed;
 }
 
-.pa-art-label {
-  position: absolute;
-  bottom: 0;
-  color: rgba(206, 219, 255, 0.57);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
 .pa-building-info {
   position: relative;
   z-index: 1;

@@ -262,7 +262,6 @@ function Step({ n, text }) {
         <div>
             <b>{n}</b>
             <span>{text}</span>
-            <i>↗</i>
         </div>
     );
 }

@@ -557,7 +557,6 @@ export default function PrediosAndares() {
                 <div className="pa-building-base" />
               </div>
 
-              <span className="pa-art-label">SMART BUILDING</span>
             </div>
 
             <div className="pa-building-info">
@@ -571,6 +570,11 @@ export default function PrediosAndares() {
 
               <div className="pa-building-meta">
                 <span>
+                  <Icon>⌂</Icon>
+                  {edificioFormatado.rua}, {edificioFormatado.numero}
+                </span>
+
+                <span>
                   <Icon>⌖</Icon>
                   {edificioFormatado.cidadeUf}
                 </span>
@@ -579,11 +583,7 @@ export default function PrediosAndares() {
                   <Icon>▦</Icon>
                   {edificioFormatado.tipo}
                 </span>
-
-                <span>
-                  <Icon>⌂</Icon>
-                  {edificioFormatado.rua}, {edificioFormatado.numero}
-                </span>
+                
               </div>
 
               <div
