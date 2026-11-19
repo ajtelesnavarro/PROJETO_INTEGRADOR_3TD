@@ -100,13 +100,6 @@ export default function Sidebar({ sidebar, setSidebar }) {
   <Icon name="close" />
 </button>
 
-          <div className="lumora-api-status">
-            <i />
-            <div>
-              <b>ONLINE</b>
-              <span>API conectada · 24ms</span>
-            </div>
-          </div>
         </div>
 
         <nav className="lumora-navigation">
@@ -135,28 +128,14 @@ export default function Sidebar({ sidebar, setSidebar }) {
                 {active && <i className="lumora-nav-indicator" />}
 
                 {index === 0 && (
-                  <em className="lumora-live-tag">LIVE</em>
+                  <em className="lumora-live-tag">AO VIVO</em>
                 )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="lumora-sidebar-footer">
-          <div className="lumora-storage">
-            <div className="lumora-storage-heading">
-              <span>Capacidade da rede</span>
-              <b>78%</b>
-            </div>
-
-            <div className="lumora-storage-bar">
-              <i />
-            </div>
-
-            <small>1.014 de 1.300 dispositivos</small>
-          </div>
-
-        </div>
+        
       </aside>
 
       {sidebar && (

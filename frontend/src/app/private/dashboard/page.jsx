@@ -249,11 +249,6 @@ function DeviceHealth({ dispositivos }) {
           ))}
         </div>
       </div>
-
-      <div className="dash-health-note">
-        <Icon name="activity" size={16} />
-        <span>Dados sincronizados com o banco de dados</span>
-      </div>
     </section>
   );
 }

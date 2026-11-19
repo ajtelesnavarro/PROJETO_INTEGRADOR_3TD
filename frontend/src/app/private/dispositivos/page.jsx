@@ -707,13 +707,6 @@ function DispositivosConteudo() {
             </small>
           </div>
         </div>
-        <div className="dv-command-meta">
-          <span>
-            <i className="dv-pulse" /> Conexão com MySQL ativa
-          </span>
-          <span className="dv-command-divider" />
-          <span>{devices.length} ativos mapeados</span>
-        </div>
       </section>
 
       <section className="dv-metrics">

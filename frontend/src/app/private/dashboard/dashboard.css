@@ -529,16 +529,6 @@
   background: #df737b;
 }
 
-.dash-health-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-top: 13px;
-  border-top: 1px solid #edf0f5;
-  color: #8995a8;
-  font-size: 10px;
-}
-
 /* Ocorrências */
 
 .dash-incidents {

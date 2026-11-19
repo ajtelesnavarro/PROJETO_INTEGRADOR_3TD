@@ -735,9 +735,6 @@ export default function PrediosAndares() {
                   </div>
 
                   <div className="pa-floor-title">
-                    <span>
-                      PAVIMENTO {String(andar.numero_andar).padStart(2, "0")}
-                    </span>
 
                     <h3>{andar.nome}</h3>
                     <p>{andar.descricao}</p>
