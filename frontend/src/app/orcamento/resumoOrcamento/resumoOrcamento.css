@@ -275,3 +275,117 @@
         text-align: left;
     }
 }
+
+
+.investimento-descricao {
+    color: #8a8492;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.investimento-grupo {
+    padding: 22px 0;
+    border-top: 1px solid #eeeaf2;
+}
+
+.investimento-grupo h3 {
+    color: #6247aa;
+    font-size: 16px;
+    margin: 0 0 20px;
+}
+
+.investimento-linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 0;
+}
+
+.investimento-linha div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.investimento-linha strong {
+    color: #352b43;
+    font-size: 14px;
+}
+
+.investimento-linha small {
+    color: #96909e;
+    font-size: 12px;
+}
+
+.investimento-linha > span {
+    color: #352b43;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.investimento-subtotal {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+    margin-top: 10px;
+    border-top: 1px dashed #e5deed;
+    color: #625b6d;
+    font-size: 14px;
+}
+
+.investimento-subtotal strong {
+    color: #6247aa;
+}
+
+.investimento-resumo {
+    background: #f8f5fc;
+    border-radius: 12px;
+    padding: 22px;
+    margin-top: 15px;
+}
+
+.investimento-resumo > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 16px;
+}
+
+.investimento-resumo span {
+    color: #625b6d;
+    font-size: 14px;
+}
+
+.investimento-resumo strong {
+    color: #352b43;
+    font-size: 15px;
+}
+
+.investimento-resumo .investimento-desconto strong {
+    color: #39845c;
+}
+
+.investimento-resumo .investimento-total {
+    border-top: 1px solid #e6deef;
+    padding-top: 20px;
+    margin: 20px 0 0;
+}
+
+.investimento-total span {
+    color: #6247aa;
+    font-weight: 700;
+}
+
+.investimento-total strong {
+    color: #6247aa;
+    font-size: 26px;
+}
+
+.investimento-resumo p {
+    color: #96909e;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 15px 0 0;
+}
