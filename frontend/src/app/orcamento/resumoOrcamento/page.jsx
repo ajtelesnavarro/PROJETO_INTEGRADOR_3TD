@@ -1,28 +1,46 @@
-﻿"use client";
+﻿
+"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+import "./resumoOrcamento.css";
 
 export default function ResumoOrcamentoPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-
     const id = searchParams.get("id");
 
     const [orcamento, setOrcamento] = useState(null);
     const [erro, setErro] = useState("");
+    const [carregando, setCarregando] = useState(true);
+    const [processando, setProcessando] = useState(false);
 
     useEffect(() => {
-        if (!id) return;
+        if (!id) {
+            setErro("Identificador do orçamento não informado.");
+            setCarregando(false);
+            return;
+        }
 
         requisicaoAPI(`/orcamentos/${id}`)
-            .then(setOrcamento)
-            .catch((erro) => setErro(erro.message));
+            .then((resposta) => {
+                const dados = resposta.dados?.dados
+                    ?? resposta.dados
+                    ?? resposta.orcamento
+                    ?? resposta;
+
+                setOrcamento(dados);
+            })
+            .catch((erro) => setErro(erro.message))
+            .finally(() => setCarregando(false));
     }, [id]);
 
     async function aprovar() {
         try {
+            setProcessando(true);
+            setErro("");
+
             await requisicaoAPI(`/orcamentos/${id}/aprovar`, {
                 method: "PATCH"
             });
@@ -30,11 +48,16 @@ export default function ResumoOrcamentoPage() {
             router.push(`/pedido/criacao?idOrcamento=${id}`);
         } catch (erro) {
             setErro(erro.message);
+        } finally {
+            setProcessando(false);
         }
     }
 
     async function recusar() {
         try {
+            setProcessando(true);
+            setErro("");
+
             await requisicaoAPI(`/orcamentos/${id}/recusar`, {
                 method: "PATCH"
             });
@@ -42,29 +65,203 @@ export default function ResumoOrcamentoPage() {
             router.push("/orcamento");
         } catch (erro) {
             setErro(erro.message);
+        } finally {
+            setProcessando(false);
         }
     }
 
-    if (!orcamento) return <p>{erro || "Carregando or├ºamento..."}</p>;
+    function moeda(valor) {
+        return Number(valor || 0).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+        });
+    }
+
+    if (carregando) {
+        return (
+            <main className="resumo-page">
+                <div className="resumo-mensagem">
+                    Carregando orçamento...
+                </div>
+            </main>
+        );
+    }
+
+    if (erro && !orcamento) {
+        return (
+            <main className="resumo-page">
+                <div className="resumo-mensagem erro">
+                    <h2>Não foi possível carregar o orçamento</h2>
+                    <p>{erro}</p>
+                    <button onClick={() => router.push("/orcamento")}>
+                        Voltar
+                    </button>
+                </div>
+            </main>
+        );
+    }
+
+    if (!orcamento) return null;
 
     return (
-        <div>
-            <h1>Resumo do Or├ºamento</h1>
+        <main className="resumo-page">
+            <div className="resumo-container">
 
-            <p>Empresa: {orcamento.nome_empresa}</p>
-            <p>Respons├ível: {orcamento.nome_responsavel}</p>
-            <p>Servi├ºos: {orcamento.servicos_desejados}</p>
-            <p>Subtotal: {orcamento.valor_subtotal}</p>
-            <p>Desconto: {orcamento.valor_desconto}</p>
-            <p>Valor total: {orcamento.valor_total}</p>
-            <p>Prazo: {orcamento.prazo_estimado_dias} dias</p>
-            <p>Validade: {orcamento.data_validade}</p>
-            <p>Status: {orcamento.status_orcamento}</p>
+                <header className="resumo-header">
+                    <span className="resumo-kicker">
+                        LUMORA SMARTBUILDING
+                    </span>
 
-            {erro && <p>{erro}</p>}
+                    <h1>Resumo do orçamento</h1>
 
-            <button onClick={aprovar}>Aprovar</button>
-            <button onClick={recusar}>Recusar</button>
-        </div>
+                    <p>
+                        Confira os detalhes da solicitação e os valores
+                        apresentados para o seu projeto.
+                    </p>
+
+                    <span className="resumo-id">
+                        ORÇAMENTO Nº {id}
+                    </span>
+                </header>
+
+                {erro && (
+                    <div className="resumo-alerta">
+                        {erro}
+                    </div>
+                )}
+
+                <section className="resumo-card">
+                    <div className="resumo-card-header">
+                        <div>
+                            <span className="resumo-label">SOLICITAÇÃO</span>
+                            <h2>Dados do projeto</h2>
+                        </div>
+
+                        <span className="resumo-status">
+                            {orcamento.status_orcamento || "Solicitado"}
+                        </span>
+                    </div>
+
+                    <div className="resumo-dados">
+                        <div>
+                            <span>Empresa</span>
+                            <strong>{orcamento.nome_empresa || "Não informado"}</strong>
+                        </div>
+
+                        <div>
+                            <span>Responsável</span>
+                            <strong>{orcamento.nome_responsavel || "Não informado"}</strong>
+                        </div>
+
+                        <div>
+                            <span>E-mail</span>
+                            <strong>{orcamento.email || "Não informado"}</strong>
+                        </div>
+
+                        <div>
+                            <span>Telefone</span>
+                            <strong>{orcamento.telefone || "Não informado"}</strong>
+                        </div>
+
+                        <div>
+                            <span>Quantidade de andares</span>
+                            <strong>{orcamento.quantidade_andares ?? 0}</strong>
+                        </div>
+
+                        <div>
+                            <span>Quantidade de ambientes</span>
+                            <strong>{orcamento.quantidade_ambientes ?? 0}</strong>
+                        </div>
+
+                        <div>
+                            <span>Quantidade de dispositivos</span>
+                            <strong>{orcamento.quantidade_dispositivos ?? 0}</strong>
+                        </div>
+
+                        <div>
+                            <span>Serviços desejados</span>
+                            <strong>{orcamento.servicos_desejados || "Não informado"}</strong>
+                        </div>
+                    </div>
+
+                    {orcamento.descricao && (
+                        <div className="resumo-descricao">
+                            <span>Descrição do projeto</span>
+                            <p>{orcamento.descricao}</p>
+                        </div>
+                    )}
+                </section>
+
+                <section className="resumo-card">
+                    <div className="resumo-card-header">
+                        <div>
+                            <span className="resumo-label">INVESTIMENTO</span>
+                            <h2>Resumo financeiro</h2>
+                        </div>
+                    </div>
+
+                    <div className="resumo-financeiro">
+                        <div>
+                            <span>Valor subtotal</span>
+                            <strong>{moeda(orcamento.valor_subtotal)}</strong>
+                        </div>
+
+                        <div>
+                            <span>Desconto</span>
+                            <strong>{moeda(orcamento.valor_desconto)}</strong>
+                        </div>
+
+                        <div className="resumo-total">
+                            <span>Valor total</span>
+                            <strong>{moeda(orcamento.valor_total)}</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="resumo-card resumo-prazo">
+                    <div>
+                        <span>Prazo estimado</span>
+                        <strong>{orcamento.prazo_estimado_dias ?? 0} dias</strong>
+                    </div>
+
+                    <div>
+                        <span>Validade da proposta</span>
+                        <strong>
+                            {orcamento.data_validade
+                                ? new Date(
+                                    `${String(orcamento.data_validade).slice(0, 10)}T12:00:00`
+                                ).toLocaleDateString("pt-BR")
+                                : "Não informada"}
+                        </strong>
+                    </div>
+                </section>
+
+                <section className="resumo-acoes">
+                    <p>
+                        Confira todas as informações antes de decidir
+                        sobre a proposta.
+                    </p>
+
+                    <div className="resumo-botoes">
+                        <button
+                            className="btn-recusar"
+                            onClick={recusar}
+                            disabled={processando}
+                        >
+                            Recusar orçamento
+                        </button>
+
+                        <button
+                            className="btn-aprovar"
+                            onClick={aprovar}
+                            disabled={processando}
+                        >
+                            {processando ? "Processando..." : "Aprovar orçamento"}
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
     );
 }

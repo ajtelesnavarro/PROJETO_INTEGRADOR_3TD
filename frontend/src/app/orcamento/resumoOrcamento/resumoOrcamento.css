@@ -1,0 +1,277 @@
+
+.resumo-page {
+    min-height: 100vh;
+    padding: 70px 24px;
+    background: #f7f5fa;
+    color: #292333;
+}
+
+.resumo-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.resumo-header {
+    margin-bottom: 35px;
+}
+
+.resumo-kicker,
+.resumo-label {
+    display: block;
+    color: #9163cb;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.resumo-header h1 {
+    font-size: 38px;
+    margin: 0 0 12px;
+    color: #6247aa;
+}
+
+.resumo-header p {
+    color: #77717f;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.resumo-id {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 9px 15px;
+    border-radius: 8px;
+    background: #eee7f7;
+    color: #6247aa;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.resumo-card {
+    background: #fff;
+    border: 1px solid #ece6f2;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(45, 30, 70, 0.04);
+}
+
+.resumo-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.resumo-card-header h2 {
+    font-size: 21px;
+    margin: 0;
+    color: #352b43;
+}
+
+.resumo-status {
+    background: #eee7f7;
+    color: #6247aa;
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.resumo-dados {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.resumo-dados div,
+.resumo-financeiro div,
+.resumo-prazo div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resumo-dados span,
+.resumo-financeiro span,
+.resumo-prazo span,
+.resumo-descricao span {
+    color: #8a8492;
+    font-size: 13px;
+}
+
+.resumo-dados strong,
+.resumo-financeiro strong,
+.resumo-prazo strong {
+    color: #352b43;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.resumo-descricao {
+    border-top: 1px solid #eeeaf2;
+    margin-top: 25px;
+    padding-top: 20px;
+}
+
+.resumo-descricao p {
+    color: #5f5868;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.resumo-financeiro {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.resumo-financeiro div {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resumo-financeiro .resumo-total {
+    border-top: 1px solid #eeeaf2;
+    padding-top: 20px;
+    margin-top: 5px;
+}
+
+.resumo-total strong {
+    color: #6247aa;
+    font-size: 24px;
+}
+
+.resumo-prazo {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.resumo-acoes {
+    text-align: right;
+    padding: 15px 0;
+}
+
+.resumo-acoes p {
+    color: #77717f;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.resumo-botoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.resumo-botoes button,
+.resumo-mensagem button {
+    border: none;
+    border-radius: 9px;
+    padding: 14px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-recusar {
+    background: #fff;
+    border: 1px solid #d8d0e2 !important;
+    color: #6247aa;
+}
+
+.btn-aprovar {
+    background: #6247aa;
+    color: #fff;
+}
+
+.btn-aprovar:hover {
+    background: #50368f;
+}
+
+.btn-recusar:hover {
+    background: #f3eef8;
+}
+
+.resumo-botoes button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resumo-mensagem {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 35px;
+    text-align: center;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(45, 30, 70, 0.05);
+}
+
+.resumo-mensagem.erro {
+    border: 1px solid #ead5d5;
+}
+
+.resumo-mensagem.erro h2 {
+    color: #6247aa;
+}
+
+.resumo-mensagem p {
+    color: #77717f;
+}
+
+.resumo-mensagem button {
+    margin-top: 15px;
+    background: #6247aa;
+    color: #fff;
+}
+
+.resumo-alerta {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    background: #fff0f0;
+    border: 1px solid #f0cccc;
+    border-radius: 9px;
+    color: #a33b3b;
+}
+
+@media (max-width: 650px) {
+    .resumo-page {
+        padding: 40px 16px;
+    }
+
+    .resumo-header h1 {
+        font-size: 29px;
+    }
+
+    .resumo-card {
+        padding: 21px;
+    }
+
+    .resumo-dados,
+    .resumo-prazo {
+        grid-template-columns: 1fr;
+    }
+
+    .resumo-card-header {
+        align-items: flex-start;
+    }
+
+    .resumo-botoes {
+        flex-direction: column-reverse;
+    }
+
+    .resumo-botoes button {
+        width: 100%;
+    }
+
+    .resumo-acoes {
+        text-align: left;
+    }
+}
