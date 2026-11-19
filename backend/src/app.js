@@ -87,8 +87,6 @@ app.get("/api/v1/check", (_req, res) => {
 // ==========================================
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1", recursosRouter);
-app.use("/api/v1", gestaoRouter);
 
 // ==========================================
 // ORÇAMENTO, PEDIDO E PAGAMENTO
@@ -128,10 +126,15 @@ const pagamentoController = criarPagamentoController({
 });
 
 // Rotas
+// Rotas
 app.use(
     "/api/v1/orcamentos",
     criarOrcamentoRoutes({ orcamentoController })
 );
+
+// Rotas protegidas
+app.use("/api/v1", recursosRouter);
+app.use("/api/v1", gestaoRouter);
 
 app.use(
     "/api/v1/pedidos",
