@@ -457,7 +457,6 @@ export default function Dispositivos() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nome, código ou ambiente..."
             />
-            <kbd>⌘ K</kbd>
           </label>
 
           <select value={type} onChange={(e) => setType(e.target.value)}>
