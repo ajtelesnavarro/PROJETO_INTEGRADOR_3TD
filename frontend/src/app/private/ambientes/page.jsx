@@ -154,12 +154,7 @@ export default function Ambientes({ toast }) {
       const matchesFloor =
         floorFilter === "Todos" || item.floor === floorFilter;
 
-      const matchesReservation =
-        reservationFilter === "Todos" ||
-        (reservationFilter === "Permite reserva" && item.reservation) ||
-        (reservationFilter === "Sem reserva" && !item.reservation);
-
-      return matchesSearch && matchesFloor && matchesReservation;
+      return matchesSearch && matchesFloor;
     });
   }, [environments, search, floorFilter, reservationFilter]);
 
@@ -333,14 +328,6 @@ export default function Ambientes({ toast }) {
               </select>
             </label>
 
-            <select
-              value={reservationFilter}
-              onChange={(event) => setReservationFilter(event.target.value)}
-            >
-              <option>Todos</option>
-              <option>Permite reserva</option>
-              <option>Sem reserva</option>
-            </select>
           </div>
 
           <div className="amb-list">

@@ -62,6 +62,12 @@
   gap: 24px;
 }
 
+.pa-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .pa-eyebrow {
   display: block;
   margin-bottom: 9px;
@@ -107,6 +113,33 @@
 .pa-primary-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(67, 86, 194, 0.3);
+}
+
+.pa-secondary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 45px;
+  padding: 0 18px;
+  border: 1px solid #dce4f4;
+  border-radius: 11px;
+  color: #4561ad;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(45, 68, 130, 0.08);
+  font-size: 12px;
+  font-weight: 800;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.pa-secondary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 21px rgba(45, 68, 130, 0.14);
+}
+
+.pa-secondary-button span {
+  font-size: 19px;
+  font-weight: 400;
 }
 
 .pa-primary-button span {
@@ -1248,7 +1281,8 @@
 }
 
 .pa-modal input,
-.pa-modal textarea {
+.pa-modal textarea,
+.pa-modal select {
   width: 100%;
   padding: 12px;
   border: 1px solid #e2e8f2;
@@ -1263,7 +1297,8 @@
 }
 
 .pa-modal input:focus,
-.pa-modal textarea:focus {
+.pa-modal textarea:focus,
+.pa-modal select:focus {
   border-color: #8299e8;
   box-shadow: 0 0 0 3px rgba(84, 117, 219, 0.09);
 }
@@ -1353,6 +1388,14 @@
 
   .pa-primary-button {
     width: 100%;
+  }
+
+  .pa-heading-actions {
+    width: 100%;
+  }
+
+  .pa-heading-actions > button {
+    flex: 1 1 100%;
   }
 
   .pa-building-card {

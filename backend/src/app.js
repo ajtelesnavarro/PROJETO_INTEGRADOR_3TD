@@ -38,7 +38,7 @@ app.use(
   }),
 );
 
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "4mb" }));
 
 // 2. Rotas
 

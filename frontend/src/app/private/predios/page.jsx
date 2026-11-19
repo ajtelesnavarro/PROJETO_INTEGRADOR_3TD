@@ -18,13 +18,18 @@ import "./predios.css";
 // id, numero, nome, descricao, status e indicadores.
 //
 // SETORES:
-// id, nome, ambientes, dispositivos e responsavel.
+// id, andar, nome, descrição, responsável, ambientes e dispositivos.
 //
 // Todos esses dados são utilizados nos cards, indicadores,
 // pesquisas, listagens e painéis de detalhes.
 // ==================================================
 
 const DADOS_API = {
+  usuariosResponsaveis: [
+    { id_usuario: 1, nome: "Marina Costa", perfil: "administrador" },
+    { id_usuario: 2, nome: "Rafael Nunes", perfil: "manutencao" },
+  ],
+
   edificio: {
     nome: "Edifício Empresarial Central",
     codigo: "LUM-001",
@@ -191,6 +196,13 @@ const CONFIGURACOES = {
     descricao: "",
   },
 
+  setorVazio: {
+    nome: "",
+    descricao: "",
+    idAndar: "",
+    idResponsavel: "",
+  },
+
   statusPadraoAndar: "Ativo",
   descricaoPadraoAndar: "Andar cadastrado na plataforma.",
 };
@@ -223,6 +235,16 @@ function Status({ value }) {
   );
 }
 
+function nomePerfil(perfil) {
+  const nomes = {
+    administrador: "Administrador",
+    manutencao: "Manutenção",
+    porteiro: "Porteiro",
+    locador: "Locador",
+  };
+  return nomes[perfil] || perfil;
+}
+
 // ==================================================
 // PÁGINA: PRÉDIOS E ANDARES
 // ==================================================
@@ -240,6 +262,8 @@ export default function PrediosAndares() {
   const [modalAberto, setModalAberto] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [novoAndar, setNovoAndar] = useState(CONFIGURACOES.andarVazio);
+  const [modalSetorAberto, setModalSetorAberto] = useState(false);
+  const [novoSetor, setNovoSetor] = useState(CONFIGURACOES.setorVazio);
 
   // Pesquisa por nome, descrição ou setor.
   const andaresFiltrados = useMemo(() => {
@@ -259,7 +283,10 @@ export default function PrediosAndares() {
   }, [andares, pesquisa, filtro]);
 
   // Indicadores gerais recebidos da API.
-  const totalSetores = indicadores.setores;
+  const totalSetores = andares.reduce(
+    (total, andar) => total + andar.setores.length,
+    0,
+  );
   const totalAmbientes = indicadores.ambientes;
   const totalDispositivos = indicadores.dispositivos;
 
@@ -280,7 +307,7 @@ export default function PrediosAndares() {
   function abrirDetalhesEdificio() {
     setSelecionado({
       tipo: "edificio",
-      dados: edificio,
+      dados: { ...edificio, andaresCadastrados: andares.length },
     });
   }
 
@@ -299,6 +326,14 @@ export default function PrediosAndares() {
         nomeAndar: andar.nome,
       },
     });
+  }
+
+  function abrirCadastroSetor() {
+    setNovoSetor({
+      ...CONFIGURACOES.setorVazio,
+      idAndar: String(andares[0]?.id ?? ""),
+    });
+    setModalSetorAberto(true);
   }
 
   // Cadastro demonstrativo de andar.
@@ -341,6 +376,58 @@ export default function PrediosAndares() {
     });
   }
 
+  function adicionarSetor(event) {
+    event.preventDefault();
+
+    const andarId = Number(novoSetor.idAndar);
+    const nome = novoSetor.nome.trim();
+    const andar = andares.find((item) => item.id === andarId);
+    const responsavel = DADOS_API.usuariosResponsaveis.find(
+      (usuario) => usuario.id_usuario === Number(novoSetor.idResponsavel),
+    );
+
+    if (!andar || !nome) {
+      mostrarMensagem("Informe o nome do setor e selecione um andar.");
+      return;
+    }
+
+    if (!responsavel) {
+      mostrarMensagem("Selecione um usuário responsável pelo setor.");
+      return;
+    }
+
+    if (andar.setores.some((setor) => setor.nome.toLowerCase() === nome.toLowerCase())) {
+      mostrarMensagem("Esse setor já existe no andar selecionado.");
+      return;
+    }
+
+    const setor = {
+      id: Date.now(),
+      id_andar: andarId,
+      id_usuario_responsavel: responsavel?.id_usuario ?? null,
+      nome,
+      descricao: novoSetor.descricao.trim(),
+      ambientes: 0,
+      dispositivos: 0,
+      responsavel: responsavel.nome,
+      perfilResponsavel: responsavel.perfil,
+    };
+
+    setAndares((atuais) => atuais.map((item) => item.id === andarId
+      ? {
+          ...item,
+          setores: [...item.setores, setor],
+          indicadores: {
+            ...item.indicadores,
+            setores: item.setores.length + 1,
+          },
+        }
+      : item));
+    setNovoSetor(CONFIGURACOES.setorVazio);
+    setModalSetorAberto(false);
+    mostrarMensagem("Setor cadastrado no andar selecionado.");
+  }
+
   function fecharDetalhes() {
     setSelecionado(null);
   }
@@ -360,13 +447,19 @@ export default function PrediosAndares() {
           </p>
         </div>
 
-        <button
-          className="pa-primary-button"
-          onClick={() => setModalAberto(true)}
-        >
-          <span>＋</span>
-          Adicionar andar
-        </button>
+        <div className="pa-heading-actions">
+          <button className="pa-secondary-button" onClick={abrirCadastroSetor}>
+            <span>＋</span>
+            Adicionar setor
+          </button>
+          <button
+            className="pa-primary-button"
+            onClick={() => setModalAberto(true)}
+          >
+            <span>＋</span>
+            Adicionar andar
+          </button>
+        </div>
       </header>
 
       <section className="pa-building-card">
@@ -431,7 +524,7 @@ export default function PrediosAndares() {
         <div className="pa-building-number">
           <span>ESTRUTURA</span>
           <strong>
-            {String(edificio.andaresCadastrados).padStart(2, "0")}
+            {String(andares.length).padStart(2, "0")}
           </strong>
           <small>andares cadastrados</small>
         </div>
@@ -443,7 +536,7 @@ export default function PrediosAndares() {
 
           <div>
             <small>Andares cadastrados</small>
-            <strong>{edificio.andaresCadastrados}</strong>
+            <strong>{andares.length}</strong>
             <span>Na estrutura do edifício</span>
           </div>
         </div>
@@ -825,7 +918,11 @@ export default function PrediosAndares() {
 
                     <div className="wide">
                       <span>Responsável</span>
-                      <strong>{selecionado.dados.responsavel}</strong>
+                      <strong>
+                        {selecionado.dados.responsavel}
+                        {selecionado.dados.perfilResponsavel &&
+                          ` · ${nomePerfil(selecionado.dados.perfilResponsavel)}`}
+                      </strong>
                     </div>
                   </div>
 
@@ -949,6 +1046,120 @@ export default function PrediosAndares() {
                 className="pa-detail-primary"
               >
                 Cadastrar andar
+                <span>＋</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Modal de cadastro de setor vinculado a um andar do prédio. */}
+      {modalSetorAberto && (
+        <div
+          className="pa-modal-layer"
+          onMouseDown={() => setModalSetorAberto(false)}
+        >
+          <form
+            className="pa-modal"
+            onSubmit={adicionarSetor}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="pa-modal-header">
+              <div>
+                <span className="pa-eyebrow">ESTRUTURA PREDIAL</span>
+                <h2>Novo setor</h2>
+                <p>Escolha o andar do prédio ao qual o setor pertence.</p>
+              </div>
+              <button
+                type="button"
+                className="pa-close-button"
+                onClick={() => setModalSetorAberto(false)}
+                aria-label="Fechar cadastro de setor"
+              >
+                ×
+              </button>
+            </div>
+
+            <label>
+              Andar do prédio
+              <select
+                value={novoSetor.idAndar}
+                onChange={(event) => setNovoSetor((atual) => ({
+                  ...atual,
+                  idAndar: event.target.value,
+                }))}
+                required
+              >
+                {andares.map((andar) => (
+                  <option key={andar.id} value={andar.id}>
+                    {andar.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Nome do setor
+              <input
+                autoFocus
+                value={novoSetor.nome}
+                onChange={(event) => setNovoSetor((atual) => ({
+                  ...atual,
+                  nome: event.target.value,
+                }))}
+                placeholder="Ex.: Recursos Humanos"
+                maxLength={100}
+                required
+              />
+            </label>
+
+            <label>
+              Usuário responsável
+              <select
+                value={novoSetor.idResponsavel}
+                onChange={(event) => setNovoSetor((atual) => ({
+                  ...atual,
+                  idResponsavel: event.target.value,
+                }))}
+                required
+              >
+                <option value="">Selecione um usuário</option>
+                {DADOS_API.usuariosResponsaveis.map((usuario) => (
+                  <option key={usuario.id_usuario} value={usuario.id_usuario}>
+                    {usuario.nome} · {nomePerfil(usuario.perfil)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Descrição
+              <textarea
+                value={novoSetor.descricao}
+                onChange={(event) => setNovoSetor((atual) => ({
+                  ...atual,
+                  descricao: event.target.value,
+                }))}
+                placeholder="Descreva a finalidade deste setor..."
+                maxLength={255}
+                rows={3}
+              />
+            </label>
+
+            <div className="pa-modal-actions">
+              <button
+                type="button"
+                className="pa-detail-secondary"
+                onClick={() => setModalSetorAberto(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="pa-detail-primary"
+                disabled={andares.length === 0}
+              >
+                Cadastrar setor
                 <span>＋</span>
               </button>
             </div>

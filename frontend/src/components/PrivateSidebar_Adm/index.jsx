@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,7 +22,11 @@ const nav = [
   { id: "ocorrencias", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
   { id: "orcamentos", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
   { id: "equipes", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
+  { id: "perfil", label: "Meu Perfil", meta: "Conta", icon: "house", href: "/private/perfil" },
+  { id: "reclamacoes", label: "Reclamações", meta: "Usuário · ambiente · dispositivo", icon: "chat", href: "/private/reclamacao" },
 ];
+
+
 
 const icons = {
   grid: (
@@ -64,6 +67,13 @@ const icons = {
   users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8m13 18v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
   close: <path d="m6 6 12 12M18 6 6 18" />,
   arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
+  house: <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
+  chat: (
+    <>
+      <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.8 8.8 0 0 1-3.4-.7L4 20l1.3-3.5A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7Z" />
+      <path d="M8 10h8m-8 3h5" />
+    </>
+  ),
 };
 
 function Icon({ name, size = 19 }) {
@@ -214,7 +224,7 @@ export default function Sidebar({ sidebar, setSidebar }) {
                 onClick={() => setSidebar?.(false)}
               >
                 <span className="lumora-nav-icon">
-                  <Icon name={item.icon} />
+                  <Icon name={item.icon} size={item.icon === "chat" ? 22 : 19} />
                 </span>
                 <span className="lumora-nav-text">
                   <b>{item.label}</b>

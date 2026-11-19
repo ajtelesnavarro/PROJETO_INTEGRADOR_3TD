@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import "./equipes.css";
+import { PredioContexto } from "@/components/PrivateLayoutClient";
 
-const teamSeed = [
+// Dados de demonstração exibidos na lista de equipes.
+const equipesIniciais = [
   {
     id: 1,
     name: "Equipe de Manutenção",
@@ -205,7 +207,7 @@ function Icon({ name, size = 18 }) {
   );
 }
 
-function getInitials(name) {
+function obterIniciais(name) {
   return name
     .split(" ")
     .filter(Boolean)
@@ -215,29 +217,102 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-const emptyForm = {
+// Valores iniciais dos formulários.
+const formularioUsuarioVazio = {
   name: "",
   role: "",
   email: "",
   phone: "",
   status: "Ativo",
   since: new Date().toLocaleDateString("pt-BR"),
+  cpf: "",
+  senha: "",
+  perfil: "locador",
+  data_nascimento: "",
 };
 
-const emptyTeamForm = { name: "", abbreviation: "", color: "#4775D1", description: "" };
+const formularioEquipeVazio = {
+  name: "",
+  abbreviation: "",
+  color: "#4775D1",
+  description: "",
+};
 
-export default function Page() {
-  const [teams, setTeams] = useState(teamSeed);
+// URL base usada pelas chamadas da página.
+function obterApiUrl() {
+  const configurada = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api")
+    .replace(/\/+$/, "");
+  return configurada.endsWith("/api") ? configurada : `${configurada}/api`;
+}
+
+function lerArquivoComoDataUrl(arquivo) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = () => reject(new Error("Não foi possível ler a imagem selecionada."));
+    leitor.readAsDataURL(arquivo);
+  });
+}
+
+export default function EquipesPage() {
+  // O prédio atual vem do perfil do administrador carregado pelo cabeçalho.
+  const { idPredioSelecionado } = useContext(PredioContexto);
+
+  // Estado da página e dos modais.
+  const [teams, setTeams] = useState(equipesIniciais);
   const [activeTeam, setActiveTeam] = useState(1);
   const [selectedMember, setSelectedMember] = useState(1);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [modalOpen, setModalOpen] = useState(false);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
-  const [teamForm, setTeamForm] = useState(emptyTeamForm);
+  const [teamForm, setTeamForm] = useState(formularioEquipeVazio);
   const [editingMember, setEditingMember] = useState(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(formularioUsuarioVazio);
   const [feedback, setFeedback] = useState("");
+  const [registrationStep, setRegistrationStep] = useState(1);
+  const [credential, setCredential] = useState({
+    token: "",
+    tipo_credencial: "qr_code",
+  });
+  const [permissions, setPermissions] = useState([]);
+  const [environments, setEnvironments] = useState([]);
+  const [registrationError, setRegistrationError] = useState("");
+  const [savingRegistration, setSavingRegistration] = useState(false);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+
+  useEffect(() => {
+    if (!photoPreview) return undefined;
+    return () => URL.revokeObjectURL(photoPreview);
+  }, [photoPreview]);
+
+  useEffect(() => {
+    if (!modalOpen || editingMember) return;
+
+    let ativo = true;
+    async function carregarAmbientes() {
+      try {
+        const token = window.localStorage.getItem("lumora_token");
+        const response = await fetch(`${obterApiUrl()}/usuarios/ambientes`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.erro || "Não foi possível carregar os ambientes.");
+        }
+        if (ativo) setEnvironments(data.dados || []);
+      } catch (error) {
+        if (!ativo) return;
+        setRegistrationError(error.message === "Failed to fetch"
+          ? "Não foi possível conectar à API. Confira se o servidor está ativo e tente novamente."
+          : error.message);
+      }
+    }
+
+    carregarAmbientes();
+    return () => { ativo = false; };
+  }, [modalOpen, editingMember]);
 
   const team = teams.find((item) => item.id === activeTeam);
 
@@ -276,7 +351,7 @@ export default function Page() {
     (member) => member.id === selectedMember
   );
 
-  function changeTeam(id) {
+  function selecionarEquipe(id) {
     const nextTeam = teams.find((item) => item.id === id);
 
     if (!nextTeam) return;
@@ -287,18 +362,24 @@ export default function Page() {
     setFilter("Todos");
   }
 
-  function openNewMember() {
+  function abrirCadastroUsuario() {
     setEditingMember(null);
-    setForm(emptyForm);
+    setForm(formularioUsuarioVazio);
+    setRegistrationStep(1);
+    setCredential({ token: "", tipo_credencial: "qr_code" });
+    setPermissions([]);
+    setRegistrationError("");
+    setPhotoFile(null);
+    setPhotoPreview("");
     setModalOpen(true);
   }
 
-  function openNewTeam() {
-    setTeamForm(emptyTeamForm);
+  function abrirCadastroEquipe() {
+    setTeamForm(formularioEquipeVazio);
     setTeamModalOpen(true);
   }
 
-  function saveTeam(event) {
+  function salvarEquipe(event) {
     event.preventDefault();
     const newTeam = {
       id: Date.now(),
@@ -316,7 +397,7 @@ export default function Page() {
     setTeamModalOpen(false);
   }
 
-  function openEditMember(member) {
+  function abrirEdicaoIntegrante(member) {
     setEditingMember(member.id);
     setForm({
       name: member.name,
@@ -329,50 +410,103 @@ export default function Page() {
     setModalOpen(true);
   }
 
-  function handleFormChange(event) {
+  function alterarCampoFormulario(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
   }
 
-  function saveMember(event) {
-    event.preventDefault();
+  function atualizarIntegrante() {
+    setTeams((current) => current.map((item) => item.id === activeTeam
+      ? {
+          ...item,
+          members: item.members.map((member) => member.id === editingMember
+            ? { ...member, ...form }
+            : member),
+        }
+      : item));
+    setFeedback("Integrante atualizado com sucesso.");
+    setSelectedMember(editingMember);
+  }
 
+  async function cadastrarUsuario() {
+    if (!idPredioSelecionado) {
+      setRegistrationError("O prédio do administrador ainda não foi carregado pelo cabeçalho.");
+      return false;
+    }
+    if (!permissions.length) {
+      setRegistrationError("Adicione pelo menos uma permissão de ambiente.");
+      return false;
+    }
+
+    setSavingRegistration(true);
+    setRegistrationError("");
+    try {
+      const token = window.localStorage.getItem("lumora_token");
+      const foto_upload = photoFile ? await lerArquivoComoDataUrl(photoFile) : null;
+      const response = await fetch(`${obterApiUrl()}/usuarios/com-acesso`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          usuario: {
+            nome: form.name,
+            email: form.email,
+            senha: form.senha,
+            cpf: form.cpf,
+            telefone: form.phone,
+            perfil: form.perfil,
+            data_nascimento: form.data_nascimento || null,
+            id_predio: idPredioSelecionado,
+            foto_upload,
+          },
+          credencial: credential,
+          permissoes,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.erro || "Não foi possível cadastrar o usuário.");
+      }
+
+      const novoIntegrante = {
+        id: data.dados.id_usuario,
+        name: form.name,
+        role: form.perfil,
+        email: form.email,
+        phone: form.phone,
+        status: "Ativo",
+        since: new Date().toLocaleDateString("pt-BR"),
+      };
+      setTeams((current) => current.map((item) => item.id === activeTeam
+        ? { ...item, members: [...item.members, novoIntegrante] }
+        : item));
+      setSelectedMember(novoIntegrante.id);
+      setFeedback("Usuário, credencial e permissões cadastrados com sucesso.");
+      return true;
+    } catch (error) {
+      setRegistrationError(error.message === "Failed to fetch"
+        ? "Não foi possível conectar à API. Confira se o servidor está ativo e tente novamente."
+        : error.message);
+      return false;
+    } finally {
+      setSavingRegistration(false);
+    }
+  }
+
+  async function salvarIntegrante(event) {
+    event.preventDefault();
     if (!team) return;
 
     if (editingMember) {
-      setTeams((current) =>
-        current.map((item) =>
-          item.id === activeTeam
-            ? {
-                ...item,
-                members: item.members.map((member) =>
-                  member.id === editingMember
-                    ? { ...member, ...form }
-                    : member
-                ),
-              }
-            : item
-        )
-      );
-
-      setFeedback("Integrante atualizado com sucesso.");
-      setSelectedMember(editingMember);
+      atualizarIntegrante();
+    } else if (registrationStep < 3) {
+      setRegistrationStep((step) => step + 1);
+      return;
     } else {
-      const newMember = {
-        id: Date.now(),
-        ...form,
-      };
-
-      setTeams((current) =>
-        current.map((item) =>
-          item.id === activeTeam
-            ? { ...item, members: [...item.members, newMember] }
-            : item
-        )
-      );
-
-      setSelectedMember(newMember.id);
-      setFeedback("Integrante cadastrado com sucesso.");
+      const cadastroConcluido = await cadastrarUsuario();
+      if (!cadastroConcluido) return;
     }
 
     setModalOpen(false);
@@ -380,7 +514,7 @@ export default function Page() {
     setFilter("Todos");
   }
 
-  function deleteMember(memberId) {
+  function excluirIntegrante(memberId) {
     const member = team?.members.find((item) => item.id === memberId);
 
     if (!member) return;
@@ -408,7 +542,7 @@ export default function Page() {
     setFeedback("Integrante removido da equipe.");
   }
 
-  function toggleMemberStatus(memberId) {
+  function alternarStatusIntegrante(memberId) {
     setTeams((current) =>
       current.map((item) =>
         item.id === activeTeam
@@ -438,10 +572,16 @@ export default function Page() {
           <p>Gerencie as equipes e os funcionários vinculados ao edifício.</p>
         </div>
 
-        <button className="tm-primary-button" onClick={openNewTeam}>
-          <Icon name="plus" size={17} />
-          Criar grupo
-        </button>
+        <div className="tm-page-actions">
+          <button className="tm-primary-button tm-secondary-action" onClick={abrirCadastroEquipe}>
+            <Icon name="plus" size={17} />
+            Criar grupo
+          </button>
+          <button className="tm-primary-button" onClick={abrirCadastroUsuario}>
+            <Icon name="plus" size={17} />
+            Registrar usuário
+          </button>
+        </div>
       </header>
 
       {feedback && (
@@ -513,7 +653,7 @@ export default function Page() {
                 className={`tm-team-option ${
                   activeTeam === item.id ? "active" : ""
                 }`}
-                onClick={() => changeTeam(item.id)}
+                onClick={() => selecionarEquipe(item.id)}
               >
                 <span
                   className="tm-team-symbol"
@@ -597,7 +737,7 @@ export default function Page() {
                   <h3>Integrantes da equipe</h3>
                   <span>{visibleMembers.length} registro(s) encontrado(s)</span>
                 </div>
-                <button className="tm-add-inline" onClick={openNewMember}>
+                <button className="tm-add-inline" onClick={abrirCadastroUsuario}>
                   <Icon name="plus" size={16} />
                   Novo integrante
                 </button>
@@ -629,7 +769,7 @@ export default function Page() {
                               className="tm-employee-avatar"
                               style={{ "--team-color": team.color }}
                             >
-                              {getInitials(member.name)}
+                              {obterIniciais(member.name)}
                             </span>
                             <div>
                               <strong>{member.name}</strong>
@@ -657,7 +797,7 @@ export default function Page() {
                               onClick={(event) => {
                                 event.stopPropagation();
                                 setSelectedMember(member.id);
-                                openEditMember(member);
+                                abrirEdicaoIntegrante(member);
                               }}
                             >
                               <Icon name="edit" size={16} />
@@ -668,7 +808,7 @@ export default function Page() {
                               aria-label={`Excluir ${member.name}`}
                               onClick={(event) => {
                                 event.stopPropagation();
-                                deleteMember(member.id);
+                                excluirIntegrante(member.id);
                               }}
                             >
                               <Icon name="trash" size={16} />
@@ -724,7 +864,7 @@ export default function Page() {
                   className="tm-profile-avatar"
                   style={{ "--team-color": team.color }}
                 >
-                  {getInitials(selected.name)}
+                  {obterIniciais(selected.name)}
                 </div>
                 <h3>{selected.name}</h3>
                 <span>{selected.role}</span>
@@ -777,7 +917,7 @@ export default function Page() {
               <div className="tm-profile-actions">
                 <button
                   className="tm-edit-button"
-                  onClick={() => openEditMember(selected)}
+                  onClick={() => abrirEdicaoIntegrante(selected)}
                 >
                   <Icon name="edit" size={16} />
                   Editar cadastro
@@ -785,7 +925,7 @@ export default function Page() {
 
                 <button
                   className="tm-toggle-button"
-                  onClick={() => toggleMemberStatus(selected.id)}
+                  onClick={() => alternarStatusIntegrante(selected.id)}
                 >
                   {selected.status === "Ativo"
                     ? "Marcar como ausente"
@@ -816,9 +956,9 @@ export default function Page() {
               <div>
                 <span className="tm-section-label">GESTÃO DE PESSOAS</span>
                 <h2 id="tm-modal-title">
-                  {editingMember ? "Editar integrante" : "Novo integrante"}
+                  {editingMember ? "Editar integrante" : "Cadastrar usuário"}
                 </h2>
-                <p>Preencha os dados do funcionário e seu vínculo com a equipe.</p>
+                <p>{editingMember ? "Atualize os dados do integrante." : `Etapa ${registrationStep} de 3 · cadastro de usuário e acesso.`}</p>
               </div>
               <button
                 className="tm-modal-close"
@@ -829,14 +969,14 @@ export default function Page() {
               </button>
             </div>
 
-            <form onSubmit={saveMember}>
-              <div className="tm-form-grid">
+            <form onSubmit={salvarIntegrante}>
+              {editingMember ? <div className="tm-form-grid">
                 <label className="tm-form-full">
                   Nome completo
                   <input
                     name="name"
                     value={form.name}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                     placeholder="Ex.: João da Silva"
                     required
                   />
@@ -847,7 +987,7 @@ export default function Page() {
                   <input
                     name="role"
                     value={form.role}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                     placeholder="Ex.: Técnico"
                     required
                   />
@@ -858,7 +998,7 @@ export default function Page() {
                   <input
                     name="phone"
                     value={form.phone}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                     placeholder="(11) 99999-9999"
                     required
                   />
@@ -870,7 +1010,7 @@ export default function Page() {
                     type="email"
                     name="email"
                     value={form.email}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                     placeholder="funcionario@lumora.com"
                     required
                   />
@@ -881,7 +1021,7 @@ export default function Page() {
                   <input
                     name="since"
                     value={form.since}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                     placeholder="DD/MM/AAAA"
                     required
                   />
@@ -892,13 +1032,58 @@ export default function Page() {
                   <select
                     name="status"
                     value={form.status}
-                    onChange={handleFormChange}
+                    onChange={alterarCampoFormulario}
                   >
                     <option value="Ativo">Ativo</option>
                     <option value="Ausente">Ausente</option>
                   </select>
                 </label>
-              </div>
+              </div> : <>
+                {registrationStep === 1 && <div className="tm-form-grid">
+                  <label className="tm-form-full">Nome completo<input name="name" value={form.name} onChange={alterarCampoFormulario} required /></label>
+                  <label>E-mail<input type="email" name="email" value={form.email} onChange={alterarCampoFormulario} required /></label>
+                  <label>Senha inicial<input type="password" name="senha" value={form.senha} onChange={alterarCampoFormulario} minLength={8} required /></label>
+                  <label>CPF (11 números)<input name="cpf" value={form.cpf} onChange={alterarCampoFormulario} inputMode="numeric" maxLength={14} required /></label>
+                  <label>Telefone<input name="phone" value={form.phone} onChange={alterarCampoFormulario} /></label>
+                  <label>Perfil<select name="perfil" value={form.perfil} onChange={alterarCampoFormulario}><option value="administrador">Administrador</option><option value="manutencao">Manutenção</option><option value="porteiro">Porteiro</option><option value="locador">Locador</option></select></label>
+                  <label>Data de nascimento<input type="date" name="data_nascimento" value={form.data_nascimento} onChange={alterarCampoFormulario} /></label>
+                  <label className="tm-form-full tm-photo-field">Foto do usuário (opcional)<input className="tm-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => {
+                    const arquivo = event.target.files?.[0];
+                    if (!arquivo) return;
+                    if (!/^image\/(png|jpeg|webp)$/.test(arquivo.type) || arquivo.size > 2 * 1024 * 1024) {
+                      setRegistrationError("Selecione uma imagem PNG, JPG ou WebP de até 2 MB.");
+                      event.target.value = "";
+                      setPhotoFile(null);
+                      setPhotoPreview("");
+                      return;
+                    }
+                    setRegistrationError("");
+                    setPhotoFile(arquivo);
+                    setPhotoPreview(URL.createObjectURL(arquivo));
+                  }} /></label>
+                  {photoPreview && <div className="tm-photo-preview tm-form-full"><img src={photoPreview} alt="Prévia da foto selecionada" /><span>{photoFile?.name}</span></div>}
+                </div>}
+                {registrationStep === 2 && <div className="tm-form-grid">
+                  <label>Tipo de credencial<select value={credential.tipo_credencial} onChange={(event) => setCredential((current) => ({ ...current, tipo_credencial: event.target.value }))}><option value="qr_code">QR Code</option><option value="cartao_rfid">Cartão RFID</option><option value="tag_nfc">Tag NFC</option></select></label>
+                  <label className="tm-form-full">Token da credencial<input value={credential.token} onChange={(event) => setCredential((current) => ({ ...current, token: event.target.value }))} placeholder="Digite ou cole o token único" required /></label>
+                  <p className="tm-form-full tm-step-help">Este token identifica o cartão, tag ou QR Code. O sistema salva somente o hash do token.</p>
+                </div>}
+                {registrationStep === 3 && <div className="tm-form-grid">
+                  <p className="tm-form-full">Selecione os ambientes e configure a vigência e os horários permitidos.</p>
+                  {permissions.map((permission, index) => <div className="tm-permission-card tm-form-full" key={index}>
+                    <label>Ambiente<select value={permission.id_ambiente} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, id_ambiente: event.target.value } : item))} required><option value="">Selecione</option>{environments.map((env) => <option key={env.id_ambiente} value={env.id_ambiente}>{env.nome} · Andar {env.numero_andar} · {env.localizacao}</option>)}</select></label>
+                    <label>Data inicial<input type="date" value={permission.data_inicio} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, data_inicio: event.target.value } : item))} required /></label>
+                    <label>Data final (opcional)<input type="date" value={permission.data_fim} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, data_fim: event.target.value } : item))} /></label>
+                    <label>Horário inicial<input type="time" value={permission.horario_inicio} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, horario_inicio: event.target.value } : item))} /></label>
+                    <label>Horário final<input type="time" value={permission.horario_fim} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, horario_fim: event.target.value } : item))} /></label>
+                    <label className="tm-form-full">Dias da semana (opcional)<input value={permission.dias_semana} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, dias_semana: event.target.value } : item))} placeholder="Ex.: seg,ter,qua,qui,sex" /></label>
+                    <button type="button" className="tm-cancel-button" onClick={() => setPermissions((items) => items.filter((_, i) => i !== index))}>Remover ambiente</button>
+                  </div>)}
+                  <button type="button" className="tm-add-inline tm-form-full" onClick={() => setPermissions((items) => [...items, { id_ambiente: "", data_inicio: new Date().toISOString().slice(0, 10), data_fim: "", horario_inicio: "", horario_fim: "", dias_semana: "" }])}>+ Adicionar ambiente</button>
+                  {environments.length === 0 && <p className="tm-form-full">Não há ambientes disponíveis para selecionar.</p>}
+                </div>}
+                {registrationError && <p className="tm-registration-error" role="alert">{registrationError}</p>}
+              </>}
 
               <div className="tm-modal-footer">
                 <button
@@ -908,9 +1093,10 @@ export default function Page() {
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="tm-primary-button">
+                {!editingMember && registrationStep > 1 && <button type="button" className="tm-cancel-button" onClick={() => setRegistrationStep((step) => step - 1)}>Voltar</button>}
+                <button type="submit" className="tm-primary-button" disabled={savingRegistration}>
                   <Icon name="check" size={16} />
-                  {editingMember ? "Salvar alterações" : "Cadastrar integrante"}
+                  {editingMember ? "Salvar alterações" : registrationStep < 3 ? "Avançar" : savingRegistration ? "Cadastrando..." : "Concluir cadastro"}
                 </button>
               </div>
             </form>
@@ -937,7 +1123,7 @@ export default function Page() {
                 <Icon name="close" size={19} />
               </button>
             </div>
-            <form onSubmit={saveTeam}>
+            <form onSubmit={salvarEquipe}>
               <div className="tm-form-grid">
                 <label className="tm-form-full">
                   Nome do grupo

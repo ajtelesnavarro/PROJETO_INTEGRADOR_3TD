@@ -1172,3 +1172,129 @@
     width: 100%;
   }
 }
+
+.tm-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.tm-primary-button.tm-secondary-action {
+  border: 1px solid #dce6f5;
+  background: #f3f7fd;
+  color: #4168a9;
+}
+
+.tm-primary-button.tm-secondary-action:hover {
+  background: #e8f0fc;
+}
+
+@media (max-width: 600px) {
+  .tm-page-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+
+.tm-step-help,
+.tm-registration-error {
+  margin: 0;
+  color: #71809a;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tm-registration-error {
+  margin-top: 12px;
+  color: #b54747;
+}
+
+.tm-permission-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e4eaf2;
+  border-radius: 9px;
+  background: #fbfcfe;
+}
+
+.tm-permission-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #52647e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tm-permission-card input,
+.tm-permission-card select {
+  height: 39px;
+  padding: 0 10px;
+  border: 1px solid #e1e7ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #40536f;
+  font: inherit;
+}
+
+@media (max-width: 600px) {
+  .tm-permission-card { grid-template-columns: 1fr; }
+}
+
+.tm-photo-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #52647e;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.tm-photo-preview img {
+  width: 84px;
+  height: 84px;
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #f5f7fa;
+}
+
+.tm-photo-preview span { min-width: 0; }
+
+.tm-form-grid .tm-file-input {
+  display: block;
+  height: auto;
+  min-height: 44px;
+  padding: 5px;
+  overflow: hidden;
+  border: 1px dashed #cbd7e8;
+  border-radius: 8px;
+  background: #f8faff;
+  color: #687992;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.tm-form-grid .tm-file-input::file-selector-button {
+  min-height: 32px;
+  margin-right: 10px;
+  padding: 0 12px;
+  border: 1px solid #dce6f5;
+  border-radius: 6px;
+  background: #eef4fc;
+  color: #4168a9;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s ease;
+}
+
+.tm-form-grid .tm-file-input::file-selector-button:hover {
+  background: #e2ecfa;
+}
+
+.tm-photo-field { gap: 8px; }

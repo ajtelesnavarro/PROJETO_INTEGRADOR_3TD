@@ -24,6 +24,14 @@ export async function buscarPorEmail(email) {
     return linhas[0] || null;
 }
 
+export async function buscarPorCpf(cpf) {
+    const [linhas] = await pool.query(
+        `SELECT id_usuario FROM usuario WHERE cpf = ? LIMIT 1`,
+        [cpf]
+    );
+    return linhas[0] || null;
+}
+
 export async function buscarPorId(id) {
     const [linhas] = await pool.query(
         `SELECT
@@ -44,6 +52,18 @@ export async function buscarPorId(id) {
     );
 
     return linhas[0] || null;
+}
+
+export async function atualizarPerfil(id, usuario) {
+    const [resultado] = await pool.query(
+        `UPDATE usuario
+         SET nome = ?, email = ?, telefone = ?, cpf = ?, data_nascimento = ?,
+             foto = ?, senha_hash = COALESCE(?, senha_hash)
+         WHERE id_usuario = ?`,
+        [usuario.nome, usuario.email, usuario.telefone, usuario.cpf,
+         usuario.data_nascimento, usuario.foto, usuario.senha_hash, id]
+    );
+    return resultado.affectedRows > 0;
 }
 
 export async function criar(usuario) {

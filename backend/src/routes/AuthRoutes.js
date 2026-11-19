@@ -7,3 +7,4 @@ export const authRouter = express.Router();
 authRouter.post('/registrar', AuthController.registrar);
 authRouter.post('/login', AuthController.login);
 authRouter.get('/me', autenticar, AuthController.perfilAtual);
+authRouter.put('/me', autenticar, AuthController.atualizarPerfil);

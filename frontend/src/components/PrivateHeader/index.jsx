@@ -123,7 +123,19 @@ export default function Header({
           throw new Error(data.erro || data.message || "Não foi possível carregar os dados do usuário.");
         }
 
-        if (ativo) setProfileData(data.dados ?? data.usuario ?? data);
+        if (ativo) {
+          const perfil = data.dados ?? data.usuario ?? data;
+          setProfileData(perfil);
+
+          const idPredio = perfil.id_predio;
+          if (idPredio) {
+            const predio = buildings.find(
+              (item) => Number(item.id_predio ?? item.id) === Number(idPredio)
+            ) ?? { id_predio: Number(idPredio) };
+            setSelectedBuilding(predio);
+            onBuildingChange?.(predio);
+          }
+        }
       } catch (error) {
         if (ativo) {
           setProfileError(error instanceof Error ? error.message : "Não foi possível carregar os dados do usuário.");

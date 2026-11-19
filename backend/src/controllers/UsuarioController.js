@@ -29,6 +29,20 @@ export async function listar(req, res, next) {
   }
 }
 
+export async function listarAmbientes(req, res, next) {
+  try {
+    const ambientes = await UsuarioService.listarAmbientes();
+    return res.status(200).json({ sucesso: true, dados: ambientes });
+  } catch (erro) { return responderErro(erro, res, next); }
+}
+
+export async function criarComAcesso(req, res, next) {
+  try {
+    const usuario = await UsuarioService.criarComAcesso(req.body);
+    return res.status(201).json({ sucesso: true, dados: usuario });
+  } catch (erro) { return responderErro(erro, res, next); }
+}
+
 
 export async function buscarPorId(req, res, next) {
   try {

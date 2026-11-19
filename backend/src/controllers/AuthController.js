@@ -50,3 +50,12 @@ export async function perfilAtual(req, res, next) {
     return responderErro(erro, res, next);
   }
 }
+
+export async function atualizarPerfil(req, res, next) {
+  try {
+    const usuario = await AuthService.atualizarPerfil(req.usuario.id, req.body);
+    return res.status(200).json({ sucesso: true, dados: usuario });
+  } catch (erro) {
+    return responderErro(erro, res, next);
+  }
+}
