@@ -26,7 +26,6 @@ export default async function Home() {
         <div className="hero-video-overlay"></div>
         <div className="container hero-layout">
           <Reveal className="hero-copy">
-            <div className="pill"><span className="pulse"></span> SMART BUILDING, REIMAGINED</div>
             <h1>O futuro do seu edifício <em>começa aqui.</em></h1>
             <p>
               Uma plataforma inteligente para conectar ambientes, dispositivos,

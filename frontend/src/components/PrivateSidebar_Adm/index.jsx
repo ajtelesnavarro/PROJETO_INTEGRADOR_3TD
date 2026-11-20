@@ -23,7 +23,7 @@ const nav = [
   { id: "orcamentos", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
   { id: "equipes", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
   { id: "perfil", label: "Meu Perfil", meta: "Conta", icon: "house", href: "/private/perfil" },
-  { id: "reclamacoes", label: "Reclamações", meta: "Usuário · ambiente · dispositivo", icon: "chat", href: "/private/reclamacao" },
+  { id: "reclamacoes", label: "Reclamações", meta: "Usuário · ambiente · dispositivo", icon: "chat", href: "/private/reclamacoes" },
 ];
 
 
@@ -109,42 +109,6 @@ function Logo() {
 }
 
 export default function Sidebar({ sidebar, setSidebar }) {
-
-  const [latency, setLatency] = useState(null);
-  const [online, setOnline] = useState(false);
-
-  useEffect(() => {
-    const observer = new PerformanceObserver((item) => {
-      const entries = item.getEntries();
-
-      for (const entry of entries) {
-        const ehMinhaApi = entry.name.includes('/api') || entry.name.includes('localhost:');
-
-        if ((entry.initiatorType === 'fetch' || entry.initiatorType === 'xmlhttprequest') && ehMinhaApi) {
-          
-          if (entry.responseStatus === 0 || entry.responseStatus >= 500) {
-            setOnline(false);
-            setLatency(null);
-          } else {
-            setOnline(true);
-            setLatency(Math.round(entry.duration));
-          }
-        }
-      }
-    });
-
-    observer.observe({ type: 'resource', buffered: true });
-
-    // Detecta também se a internet do usuário cair
-    const handleOffline = () => setOnline(false);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
   
   const pathname = usePathname();
   const router = useRouter();
@@ -198,15 +162,6 @@ export default function Sidebar({ sidebar, setSidebar }) {
           >
             <Icon name="close" />
           </button>
-          <div className="lumora-api-status">
-            <i className={`statusDot ${online ? 'online' : 'offline'}`} />
-            <div>
-              <b className={`statusTitle ${online ? 'online' : 'offline'}`}>
-              {online ? 'ONLINE' : 'OFFLINE'}
-              </b>
-              <span className="text-xs text-slate-300">{latency !== null ? `API conectada · ${latency}ms` : 'API conectada · aguardando...'}</span>
-            </div>
-          </div>
         </div>
 
         <nav className="lumora-navigation">
