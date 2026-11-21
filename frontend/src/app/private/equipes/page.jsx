@@ -1076,7 +1076,30 @@ export default function EquipesPage() {
                     <label>Data final (opcional)<input type="date" value={permission.data_fim} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, data_fim: event.target.value } : item))} /></label>
                     <label>Horário inicial<input type="time" value={permission.horario_inicio} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, horario_inicio: event.target.value } : item))} /></label>
                     <label>Horário final<input type="time" value={permission.horario_fim} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, horario_fim: event.target.value } : item))} /></label>
-                    <label className="tm-form-full">Dias da semana (opcional)<input value={permission.dias_semana} onChange={(event) => setPermissions((items) => items.map((item, i) => i === index ? { ...item, dias_semana: event.target.value } : item))} placeholder="Ex.: seg,ter,qua,qui,sex" /></label>
+                    <div className="tm-form-full">
+                        <span className="tm-field-label">Dias da semana (opcional)</span>
+                        <div className="tm-days-group">
+                          {['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'].map((dia) => {
+                            const ativos = permission.dias_semana ? permission.dias_semana.split(',') : [];
+                            return (
+                              <label key={dia} className="tm-day-pill">
+                                <input
+                                  type="checkbox"
+                                  checked={ativos.includes(dia)}
+                                  onChange={(e) => {
+                                    const novos = e.target.checked ? [...ativos, dia] : ativos.filter((d) => d !== dia);
+                                    setPermissions((items) =>
+                                      items.map((item, i) => (i === index ? { ...item, dias_semana: novos.join(',') } : item))
+                                    );
+                                  }}
+                                />
+                                {dia}
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                     <button type="button" className="tm-cancel-button" onClick={() => setPermissions((items) => items.filter((_, i) => i !== index))}>Remover ambiente</button>
                   </div>)}
                   <button type="button" className="tm-add-inline tm-form-full" onClick={() => setPermissions((items) => [...items, { id_ambiente: "", data_inicio: new Date().toISOString().slice(0, 10), data_fim: "", horario_inicio: "", horario_fim: "", dias_semana: "" }])}>+ Adicionar ambiente</button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./pefil.css";
+import "./pefil.css?v=1";
 
 const perfilVazio = {
   nome: "",

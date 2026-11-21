@@ -246,7 +246,8 @@
 
 .rec-filters {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 8px;
   padding: 0 17px 14px;
 }
@@ -825,4 +826,36 @@
   .rec-form-footer > div { width: 100%; }
   .rec-form-footer button { flex: 1; }
   .rec-list-footer { flex-direction: column; }
+}
+
+/* Visão do locador */
+
+.rec-summary.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rec-user-message {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  border: 1px solid #dce6fb;
+  border-radius: 10px;
+  background: #f1f5ff;
+  color: #3f5f9f;
+}
+
+.rec-user-message svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.rec-user-message p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .rec-summary.three { grid-template-columns: 1fr; }
 }

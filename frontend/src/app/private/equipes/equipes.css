@@ -56,7 +56,7 @@
   padding: 0 17px;
   border: 0;
   border-radius: 9px;
-  background: #2859ad;
+  background: linear-gradient(110deg, #345de0, #7650d9);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -1298,3 +1298,61 @@
 }
 
 .tm-photo-field { gap: 8px; }
+
+/* Título do campo dentro de formulário */
+.tm-field-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #53647c;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Container dos botões */
+.tm-days-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Cada dia como pílula */
+.tm-day-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 38px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #e4e9f0;
+  border-radius: 8px;
+  background: #fbfcfe;
+  color: #71809a;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  cursor: pointer;
+  user-select: none;
+  transition: all .18s ease;
+}
+
+.tm-day-pill:hover {
+  border-color: #b8cbea;
+  background: #f5f8fd;
+  color: #4168a9;
+}
+
+/* Estado marcado */
+.tm-day-pill:has(input:checked) {
+  border-color: #4775d1;
+  background: #edf3fc;
+  color: #345de0;
+  box-shadow: 0 1px 3px rgba(52, 93, 224, .12);
+}
+
+/* Esconde o quadrado padrão */
+.tm-day-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
