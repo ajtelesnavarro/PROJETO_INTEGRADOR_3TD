@@ -190,7 +190,7 @@ export default function ResumoOrcamentoPage() {
               <span>Serviços desejados</span>
               <strong>{orcamento.servicos_desejados || "Não informado"}</strong>
             </div>
-          </div>
+          </div
 
           {orcamento.descricao && (
             <div className="resumo-descricao">
