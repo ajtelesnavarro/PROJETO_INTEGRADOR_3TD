@@ -186,6 +186,7 @@ export default function Header({
     administrador: "Administrador",
     manutencao: "Manutenção",
     porteiro: "Porteiro",
+    locador: "Locador",
     funcionario: "Funcionário",
   };
   const nomePerfil = perfilLabels[String(perfilUsuario).toLowerCase()] ?? perfilUsuario;

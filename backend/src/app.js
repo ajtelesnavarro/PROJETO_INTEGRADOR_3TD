@@ -12,6 +12,8 @@ import { authRouter } from "./routes/AuthRoutes.js";
 import { recursosRouter } from "./routes/RecursoRoutes.js";
 import { gestaoRouter } from "./routes/GestaoRoutes.js";
 import { compatRouter } from "./routes/CompatRoutes.js";
+import { informacaoRouter } from "./routes/InformacaoRoutes.js";
+import { relatorioRouter } from "./routes/RelatorioRoutes.js";
 
 // Rotas de orçamento, pedido e pagamento
 import { criarOrcamentoRoutes } from "./routes/orcamentoRoutes.js";
@@ -137,6 +139,8 @@ app.use(
 app.use("/api/v1", recursosRouter);
 app.use("/api/v1", gestaoRouter);
 app.use("/api/v1", compatRouter);
+app.use("/api/v1", informacaoRouter);
+app.use("/api/v1", relatorioRouter);
 
 app.use(
     "/api/v1/pedidos",

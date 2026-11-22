@@ -3,15 +3,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import "./sidebar.css";
+import { apiFetch, unwrap } from "@/lib/api";
+import { PERMISSOES_POR_PERFIL } from "@/components/RoleGuard";
 
-// PERMISSÕES DE PERFIL
-const permissoesPorPerfil = {
-  locador: ["dashboard", "predios", "orcamentos"],
-  administrador: ["dashboard", "predios", "ambientes", "dispositivos", "acessos", "ocorrencias", "orcamentos", "equipes"],
-  manutencao: ["dashboard", "ambientes", "dispositivos", "ocorrencias"],
-  porteiro: ["dashboard", "acessos", "ocorrencias"],
-};
-
+// PERMISSÕES DE PERFIL são centralizadas no RoleGuard.
 // PÁGINAS DO SISTEMA
 const nav = [
   { id: "dashboard", label: "Dashboard", meta: "Visão geral", icon: "grid", href: "/private/dashboard" },
@@ -22,6 +17,8 @@ const nav = [
   { id: "ocorrencias", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
   { id: "orcamentos", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
   { id: "equipes", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
+  { id: "historico", label: "Histórico", meta: "Leituras · acessos · ocorrências", icon: "ticket", href: "/private/historico" },
+  { id: "versao", label: "Versão do sistema", meta: "Notas de versão", icon: "grid", href: "/private/versao" },
   { id: "perfil", label: "Meu Perfil", meta: "Conta", icon: "house", href: "/private/perfil" },
   { id: "reclamacoes", label: "Reclamações", meta: "Usuário · ambiente · dispositivo", icon: "chat", href: "/private/reclamacoes" },
 ];
@@ -115,6 +112,18 @@ export default function Sidebar({ sidebar, setSidebar }) {
 
   const [linksVisiveis, setLinksVisiveis] = useState([]);
 
+  useEffect(() => {
+    let ativo = true;
+    apiFetch("/auth/me")
+      .then((data) => {
+        const usuario = unwrap(data);
+        const permitidas = PERMISSOES_POR_PERFIL[usuario.perfil] || [];
+        if (ativo) setLinksVisiveis(nav.filter((item) => permitidas.includes(item.id)));
+      })
+      .catch(() => { if (ativo) setLinksVisiveis([]); });
+    return () => { ativo = false; };
+  }, [pathname]);
+
   // useEffect(() => {
   //   const token = localStorage.getItem("lumora_token");
 
@@ -168,7 +177,7 @@ export default function Sidebar({ sidebar, setSidebar }) {
           <span className="lumora-nav-label">PLATAFORMA</span>
           {/* {test === true && */}
           {/* // (linksVisiveis.length > 0 ? linksVisiveis :  */}
-          {nav.map((item) => {
+          {linksVisiveis.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (

@@ -102,7 +102,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
       const [[existente]] = await pool.query("SELECT id_usuario, perfil FROM usuario WHERE email = ? LIMIT 1", [emailNormalizado]);
       if (existente) {
         idUsuario = existente.id_usuario;
-        if (existente.perfil === "visitante") {
+        if (existente.perfil === "locador") {
           const senhaHash = await bcrypt.hash(String(dados.senha), 12);
           await pool.query("UPDATE usuario SET nome = ?, telefone = ?, senha_hash = ?, ativo = 'ativo' WHERE id_usuario = ?", [nomeResponsavel, telefone, senhaHash, idUsuario]);
         }
@@ -116,7 +116,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
           if (!cpfExistente) break;
           cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
         }
-        const [novo] = await pool.query(`INSERT INTO usuario (id_predio, nome, email, senha_hash, telefone, perfil, cpf, ativo) VALUES (?, ?, ?, ?, ?, 'visitante', ?, 'ativo')`, [predio.id_predio, nomeResponsavel, emailNormalizado, senhaHash, telefone || null, cpf]);
+        const [novo] = await pool.query(`INSERT INTO usuario (id_predio, nome, email, senha_hash, telefone, perfil, cpf, ativo) VALUES (?, ?, ?, ?, ?, 'locador', ?, 'ativo')`, [predio.id_predio, nomeResponsavel, emailNormalizado, senhaHash, telefone || null, cpf]);
         idUsuario = novo.insertId;
       }
     }

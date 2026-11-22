@@ -3,6 +3,7 @@
 import { createContext, useCallback, useMemo, useState } from "react";
 import Header from "@/components/PrivateHeader";
 import Sidebar from "@/components/PrivateSidebar_Adm/index";
+import RoleGuard from "@/components/RoleGuard";
 
 export const PredioContexto = createContext({ idPredioSelecionado: null });
 
@@ -20,6 +21,7 @@ export default function PrivateLayoutClient({ children }) {
   );
 
   return (
+    <RoleGuard>
     <div className={`private-layout ${sidebar ? "sidebar-open" : "sidebar-closed"}`}>
       {sidebar && (
         <Sidebar setSidebar={setSidebar} />
@@ -39,5 +41,6 @@ export default function PrivateLayoutClient({ children }) {
         </PredioContexto.Provider>
       </div>
     </div>
+    </RoleGuard>
   );
 }

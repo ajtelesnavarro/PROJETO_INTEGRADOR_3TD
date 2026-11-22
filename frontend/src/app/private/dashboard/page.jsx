@@ -522,7 +522,16 @@ export default function DashboardPage() {
   const [metricas, setMetricas] = useState({ predios: 0, ambientes: 0, dispositivos: 0, ativos: 0, ocorrencias: 0 });
 
   useEffect(() => {
-    Promise.all([apiFetch("/predios?limite=1"), apiFetch("/ambientes?limite=200"), apiFetch("/dispositivos?limite=200"), apiFetch("/ocorrencias?limite=200")]).then(([p,a,d,o]) => { const ds=unwrap(d), os=unwrap(o); setMetricas({predios:unwrap(p).length, ambientes:unwrap(a).length, dispositivos:ds.length, ativos:ds.filter(x=>x.status_dispositivo==="ativo").length, ocorrencias:os.length}); }).catch(()=>{});
+    apiFetch("/dashboard").then((res) => {
+      const m = unwrap(res);
+      setMetricas({
+        predios: Number(m.predios || 0),
+        ambientes: Number(m.ambientes || 0),
+        dispositivos: Number(m.dispositivos || 0),
+        ativos: Number(m.ativos || 0),
+        ocorrencias: Number(m.ocorrencias || 0),
+      });
+    }).catch(() => {});
   }, []);
 
   function showToast(message) {

@@ -1,144 +1,38 @@
-
 import express from 'express';
-
 import * as Controller from '../controllers/RecursoController.js';
-
-import {
-    autenticar,
-    autorizarPerfis
-} from '../middlewares/AuthMiddleware.js';
+import { autenticar, autorizarPerfis } from '../middlewares/AuthMiddleware.js';
 
 export const recursosRouter = express.Router();
-
-// Todas as rotas exigem autenticação
 recursosRouter.use(autenticar);
 
-// Perfis de acesso
-const consulta = autorizarPerfis(
-    'administrador',
-    'manutencao',
-    'porteiro',
-    'funcionario'
-);
+const admin = autorizarPerfis('administrador');
+const adminManutencao = autorizarPerfis('administrador', 'manutencao');
+const adminManutencaoPorteiro = autorizarPerfis('administrador', 'manutencao', 'porteiro');
+const adminPorteiro = autorizarPerfis('administrador', 'porteiro');
+const todos = autorizarPerfis('administrador', 'manutencao', 'porteiro', 'locador');
 
-const escritaPredios = autorizarPerfis('administrador');
-
-const escritaDispositivos = autorizarPerfis(
-    'administrador',
-    'manutencao'
-);
-
-// Configuração dos recursos disponíveis
 const rotas = [
-    {
-        nome: 'predios',
-        escrita: escritaPredios,
-        permiteAtualizar: true,
-        permiteExcluir: true
-    },
-    {
-        nome: 'andares',
-        escrita: escritaPredios,
-        permiteAtualizar: true,
-        permiteExcluir: true
-    },
-    {
-        nome: 'setores',
-        escrita: escritaPredios,
-        permiteAtualizar: true,
-        permiteExcluir: true
-    },
-    {
-        nome: 'ambientes',
-        escrita: escritaPredios,
-        permiteAtualizar: true,
-        permiteExcluir: true
-    },
-    {
-        nome: 'dispositivos',
-        escrita: escritaDispositivos,
-        permiteAtualizar: true,
-        permiteExcluir: true
-    },
-    {
-        nome: 'ocorrencias',
-        escrita: autorizarPerfis(
-            'administrador',
-            'manutencao'
-        ),
-        permiteAtualizar: true,
-        permiteExcluir: false
-    },
-    {
-        nome: 'acessos',
-        permiteAtualizar: false,
-        permiteExcluir: false
-    }
+    { nome: 'predios', leitura: admin, escrita: admin, permiteAtualizar: true, permiteExcluir: true },
+    { nome: 'andares', leitura: admin, escrita: admin, permiteAtualizar: true, permiteExcluir: true },
+    { nome: 'setores', leitura: admin, escrita: admin, permiteAtualizar: true, permiteExcluir: true },
+    { nome: 'ambientes', leitura: adminManutencao, escrita: admin, permiteAtualizar: true, permiteExcluir: true },
+    { nome: 'dispositivos', leitura: adminManutencao, escrita: adminManutencao, permiteAtualizar: true, permiteExcluir: true },
+    { nome: 'ocorrencias', leitura: adminManutencaoPorteiro, escrita: adminManutencaoPorteiro, atualizacao: adminManutencao, permiteAtualizar: true, permiteExcluir: false },
+    { nome: 'acessos', leitura: adminManutencaoPorteiro, escrita: adminPorteiro, permiteAtualizar: false, permiteExcluir: false }
 ];
 
-// Criação das rotas
 for (const recurso of rotas) {
     const router = express.Router();
-
-    router.get('/', consulta, Controller.listar(recurso.nome));
-    router.get('/:id', consulta, Controller.buscar(recurso.nome));
-
-    if (recurso.escrita) {
-        router.post(
-            '/',
-            recurso.escrita,
-            Controller.criar(recurso.nome)
-        );
-    }
-
-    if (recurso.permiteAtualizar) {
-        router.patch(
-            '/:id',
-            recurso.escrita,
-            Controller.atualizar(recurso.nome)
-        );
-    }
-
-    if (recurso.permiteExcluir) {
-        router.delete(
-            '/:id',
-            recurso.escrita,
-            Controller.excluir(recurso.nome)
-        );
-    }
-
+    router.get('/', recurso.leitura, Controller.listar(recurso.nome));
+    router.get('/:id', recurso.leitura, Controller.buscar(recurso.nome));
+    if (recurso.escrita) router.post('/', recurso.escrita, Controller.criar(recurso.nome));
+    if (recurso.permiteAtualizar) router.patch('/:id', recurso.atualizacao || recurso.escrita, Controller.atualizar(recurso.nome));
+    if (recurso.permiteExcluir) router.delete('/:id', recurso.escrita, Controller.excluir(recurso.nome));
     recursosRouter.use(`/${recurso.nome}`, router);
 }
 
-// Rotas de leituras dos sensores
 const leiturasRouter = express.Router();
-
-// Permissões para registrar leituras
-const escritaLeituras = autorizarPerfis(
-    'administrador',
-    'manutencao'
-);
-
-// Consultar todas as leituras
-leiturasRouter.get(
-    '/',
-    consulta,
-    Controller.listarLeituras
-);
-
-// Buscar uma leitura específica
-leiturasRouter.get(
-    '/:tipo/:id',
-    consulta,
-    Controller.buscarLeitura
-);
-
-// Registrar uma nova leitura
-leiturasRouter.post(
-    '/:tipo',
-    escritaLeituras,
-    Controller.criarLeitura
-);
-
-// Disponibilizar as rotas
+leiturasRouter.get('/', todos, Controller.listarLeituras);
+leiturasRouter.get('/:tipo/:id', todos, Controller.buscarLeitura);
+leiturasRouter.post('/:tipo', adminManutencao, Controller.criarLeitura);
 recursosRouter.use('/leituras', leiturasRouter);

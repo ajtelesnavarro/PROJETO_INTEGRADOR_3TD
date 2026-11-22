@@ -1,8 +1,9 @@
-CREATE DATABASE IF NOT EXISTS app_db
+
+CREATE DATABASE IF NOT EXISTS db_lumora
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE app_db;
+USE db_lumora;
 
 -- 1. PREDIO
 
@@ -50,11 +51,11 @@ CREATE TABLE usuario (
     telefone VARCHAR(20) NULL,
 
     perfil ENUM(
-    'administrador',
-    'manutencao',
-    'porteiro',
-    'funcionario'
-     ) NOT NULL,
+        'administrador',
+        'manutencao',
+        'porteiro',
+        'visitante'
+    ) NOT NULL DEFAULT 'visitante',
 
     cpf CHAR(11) NOT NULL,
     foto VARCHAR(255) NULL,
@@ -972,7 +973,8 @@ VALUES
 (2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
 (3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
 (4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'porteiro', '12345678904', NULL, '1992-11-17', 'ativo'),
-(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'funcionario', '12345678905', NULL, '2000-06-25', 'ativo');
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'locador', '12345678905', NULL, '2000-06-25', 'ativo');
+
 
 -- SETOR
 
@@ -1276,3 +1278,91 @@ INSERT INTO pagamento (
 ) VALUES
 (1, 4200.00, 'pix', 'pendente', NULL, NULL),
 (2, 5000.00, 'cartao_credito', 'aprovado', 'LUMORA-PGTO-2026-002', '2026-11-11 14:30:00');
+
+-- =============================================
+-- MIGRATION 0002 - AJUSTES NA ESTRUTURA LUMORA
+-- =============================================
+
+-- 1. Adicionar tipo de empreendimento aos prédios
+
+ALTER TABLE predio
+ADD COLUMN tipo_empreendimento ENUM(
+    'Comercial',
+    'Corporativo',
+    'Residencial',
+    'Outro'
+) NOT NULL DEFAULT 'Outro';
+
+
+-- 2. Classificar os prédios de exemplo
+
+UPDATE predio
+SET tipo_empreendimento = CASE id_predio
+    WHEN 1 THEN 'Corporativo'
+    WHEN 2 THEN 'Comercial'
+    WHEN 3 THEN 'Comercial'
+    WHEN 4 THEN 'Corporativo'
+    ELSE 'Outro'
+END
+WHERE id_predio IN (1, 2, 3, 4);
+
+
+-- 3. Remover o valor padrão do tipo de empreendimento
+
+ALTER TABLE predio
+MODIFY COLUMN tipo_empreendimento ENUM(
+    'Comercial',
+    'Corporativo',
+    'Residencial',
+    'Outro'
+) NOT NULL;
+
+
+-- 4. Remover Diego da equipe de suporte
+-- Diego continua cadastrado como usuário.
+
+DELETE FROM equipe_usuario
+WHERE id_usuario = 4
+  AND id_equipe = 2;
+
+
+-- 5. Adicionar vínculo de quem abriu a ocorrência
+
+ALTER TABLE ocorrencia
+ADD COLUMN id_usuario_abertura INT NULL
+AFTER id_dispositivo;
+
+
+-- 6. Criar chave estrangeira para o usuário que abriu a ocorrência
+
+ALTER TABLE ocorrencia
+ADD CONSTRAINT fk_ocorrencia_usuario_abertura
+FOREIGN KEY (id_usuario_abertura)
+REFERENCES usuario(id_usuario);
+USE db_lumora;
+
+-- 1. Visitante passa a ser Locador.
+UPDATE usuario SET perfil = 'locador' WHERE perfil = 'visitante';
+
+ALTER TABLE usuario
+MODIFY COLUMN perfil ENUM(
+    'administrador',
+    'manutencao',
+    'porteiro',
+    'locador'
+) NOT NULL DEFAULT 'locador';
+
+-- 2. Registro de versão do sistema (RF-017/RF-018).
+CREATE TABLE IF NOT EXISTS versao_sistema (
+    id_versao INT AUTO_INCREMENT PRIMARY KEY,
+    versao VARCHAR(30) NOT NULL,
+    data_publicacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    notas TEXT NULL
+) ENGINE=InnoDB;
+
+INSERT INTO versao_sistema (versao, notas)
+SELECT '2.0.0', 'Controle de acesso por perfil: Administrador, Manutenção, Porteiro e Locador; integração com histórico e painel.'
+WHERE NOT EXISTS (SELECT 1 FROM versao_sistema WHERE versao = '2.0.0');
+
+-- 3. Impede que o perfil legado volte a ser criado.
+-- A aplicação também valida o perfil no JWT e nas rotas.

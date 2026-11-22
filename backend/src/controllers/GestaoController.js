@@ -21,7 +21,8 @@ function normalizarPerfil(role) {
     if (texto.includes("admin") || texto.includes("coordenador")) return "administrador";
     if (texto.includes("manut") || texto.includes("tecnic") || texto.includes("eletric") || texto.includes("hidraul")) return "manutencao";
     if (texto.includes("port") || texto.includes("segur")) return "porteiro";
-    return "funcionario";
+    if (texto.includes("locador") || texto.includes("visit")) return "locador";
+    return "locador";
 }
 
 export async function listarEquipes(_req, res, next) {
