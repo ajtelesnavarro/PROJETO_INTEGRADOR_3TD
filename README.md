@@ -1,16 +1,4 @@
 <<<<<<< HEAD
-# Lumora — Edifícios Inteligentes
-
-Projeto organizado no padrão `backend/`, `frontend/` e `docs/`, seguindo a
-referência estrutural fornecida.
-
-O design e o conteúdo visual do ZIP de origem foram preservados. As mudanças
-foram de organização de diretórios e atualização dos caminhos de importação
-necessários após a movimentação dos componentes.
-
-Consulte `docs/ESTRUTURA.md` para a árvore do projeto e instruções de execução.
-=======
-<<<<<<< HEAD
 # Projeto Base Full Stack
 
 Template para alunos criarem forks com a mesma stack de frontend, backend e banco de dados.
@@ -124,7 +112,7 @@ FRONTEND_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8080/api
 
 MYSQL_ROOT_PASSWORD=root_password
-MYSQL_DATABASE=app_db
+MYSQL_DATABASE=db_lumora
 MYSQL_USER=app_user
 MYSQL_PASSWORD=app_password
 
@@ -132,7 +120,7 @@ DB_HOST=database
 DB_PORT=3306
 DB_USER=app_user
 DB_PASSWORD=app_password
-DB_NAME=app_db
+DB_NAME=db_lumora
 ```
 
 Para rodar varios grupos no mesmo servidor, mude pelo menos as portas publicadas no host e a URL publica da API. Exemplo para um segundo grupo:
@@ -158,7 +146,7 @@ DB_HOST=localhost
 DB_PORT=3306
 DB_USER=app_user
 DB_PASSWORD=app_password
-DB_NAME=app_db
+DB_NAME=db_lumora
 ```
 
 Frontend (`frontend/.env.local`):
@@ -315,4 +303,21 @@ A API utiliza `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409` e `500`. Re
 - Leituras, acessos e ocorrências possuem data/hora de registro.
 - O histórico não possui rotas de exclusão para leituras e acessos.
 >>>>>>> origin/andre
->>>>>>> b4c3445aa3cab8a9026e887a4387af9de6392fc5
+
+## Integração Lumora — versão integrada
+
+O frontend Lumora está configurado para consumir a API em `NEXT_PUBLIC_API_URL` usando a base `/api/v1`.
+
+Fluxos integrados:
+- autenticação com JWT (`/auth/gerarToken` e `/auth/me`);
+- orçamento público persistido no MySQL;
+- criação/atualização de usuário a partir do orçamento, com senha bcrypt;
+- aprovação/recusa de orçamento;
+- criação de pedido após aprovação;
+- registro e atualização do pagamento demonstrativo;
+- prédios, andares, setores, ambientes e dispositivos via API;
+- ocorrências e reclamações via API;
+- equipes e credenciais via API;
+- indicadores principais do dashboard consultados na API.
+
+Para desenvolvimento local, configure `frontend/.env.local` com `NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1` e `backend/.env` com `DB_NAME=db_lumora` e um `JWT_SECRET` de pelo menos 32 caracteres.

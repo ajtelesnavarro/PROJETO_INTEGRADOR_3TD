@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Lumora — Smart Buildings
 
 Frontend institucional em Next.js para a Lumora, com identidade visual em azul-marinho, verde-água e tons claros.
@@ -41,34 +40,3 @@ O vídeo de fundo é carregado de um endereço externo. É necessário acesso à
 - Tipografia carregada do Google Fonts.
 - Imagens e vídeo são carregados de serviços externos.
 - Configure `NEXT_PUBLIC_API_URL` no ambiente de desenvolvimento/produção para apontar para a API correta.
-=======
-# Frontend
-
-Aplicacao Next.js do template base.
-
-## Comandos
-
-```bash
-npm install
-npm run dev
-npm run build
-npm start
-npm run lint
-```
-
-## Ambiente
-
-Copie `.env.example` para `.env.local`:
-
-```bash
-cp .env.example .env.local
-```
-
-Variavel principal:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
-```
-
-As instrucoes completas do projeto ficam no `README.md` da raiz.
->>>>>>> b4c3445aa3cab8a9026e887a4387af9de6392fc5

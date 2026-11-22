@@ -1,0 +1,18 @@
+import "../globals.css";
+import Navbar from "@/components/navbar/navbar";
+import Footer from "@/components/footer/footer";
+
+export const metadata = {
+  title: "Lumora — Smart Buildings",
+  description: "Inteligência para edifícios mais eficientes, seguros e conectados."
+};
+
+export default function PublicLayout({ children }) {
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  );
+}

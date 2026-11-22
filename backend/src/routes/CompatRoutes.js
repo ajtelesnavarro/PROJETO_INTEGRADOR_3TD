@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { autenticar } from "../middlewares/AuthMiddleware.js";
+import * as C from "../controllers/CompatController.js";
+export const compatRouter = Router();
+compatRouter.use(autenticar);
+compatRouter.get("/usuarios", C.listarUsuarios);
+compatRouter.get("/usuarios/ambientes", C.listarUsuariosAmbientes);
+compatRouter.get("/usuarios/com-acesso", C.listarUsuariosComAcesso);
+compatRouter.get("/reclamacoes", C.listarReclamacoes);
+compatRouter.post("/reclamacoes", C.criarReclamacao);
+compatRouter.put("/reclamacoes/:id", C.atualizarReclamacao);
+compatRouter.patch("/reclamacoes/:id/status", C.atualizarStatusReclamacao);
+compatRouter.patch("/reclamacoes/:id/responsavel", C.atualizarResponsavelReclamacao);
