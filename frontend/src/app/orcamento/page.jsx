@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+import "./orcamento.css";
 
 export default function Orcamento() {
     const router = useRouter();
@@ -95,10 +96,8 @@ export default function Orcamento() {
 
                     <div className="form-top">
                         <div>
-                            <span className="section-kicker">PROJETO</span>
                             <h2>Solicitar orçamento</h2>
                         </div>
-                        <span>01 / 01</span>
                     </div>
 
                     <div className="form-grid">
@@ -158,10 +157,10 @@ export default function Orcamento() {
                                 value={form.tipo}
                                 onChange={set}
                             >
-                                <option>Comercial</option>
+                                <option disabled>Comercial</option>
                                 <option>Corporativo</option>
-                                <option>Residencial</option>
-                                <option>Outro</option>
+                                <option disabled>Residencial</option>
+                                <option disabled>Outro</option>
                             </select>
                         </label>
 

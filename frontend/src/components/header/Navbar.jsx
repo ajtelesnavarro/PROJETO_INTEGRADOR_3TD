@@ -42,7 +42,7 @@ export default function Navbar() {
           <Link className="mobile-login" href="/login" onClick={() => setOpen(false)}>Entrar na plataforma</Link>
         </nav>
         <div className="nav-actions">
-          <Link href="/public/login" className="login-link">Entrar</Link>
+          <Link href="/login" className="login-link">Entrar</Link>
           <Link href="orcamento" className="nav-cta">Fale com a Lumora <span>↗</span></Link>
         </div>
         <button className="menu-toggle" type="button" aria-label={open ? "Fechar menu" : "Abrir menu"} aria-expanded={open} onClick={() => setOpen(!open)}><span></span><span></span></button>
