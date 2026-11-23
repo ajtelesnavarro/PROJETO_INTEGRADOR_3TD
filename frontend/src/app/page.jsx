@@ -1,10 +1,15 @@
 import Link from "next/link";
 import Reveal from "@/components/animations/Reveal";
 
+import Navbar from "@/components/navbar/navbar";
+import Footer from "@/components/footer/footer";
+
+import "./page.css";
+
 export default async function Home() {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   return (
     <>
+    <Navbar />
       <section className="hero hero-video">
         <video
           className="hero-background-video"
@@ -21,7 +26,6 @@ export default async function Home() {
         <div className="hero-video-overlay"></div>
         <div className="container hero-layout">
           <Reveal className="hero-copy">
-            <div className="pill"><span className="pulse"></span> SMART BUILDING, REIMAGINED</div>
             <h1>O futuro do seu edifício <em>começa aqui.</em></h1>
             <p>
               Uma plataforma inteligente para conectar ambientes, dispositivos,
@@ -132,6 +136,8 @@ export default async function Home() {
           <Link href="/orcamento" className="button white">Solicitar orçamento <span>→</span></Link>
         </div>
       </section>
+
+      <Footer />
     </>
   );
 }
