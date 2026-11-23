@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Reveal from "@/components/animations/Reveal";
 
-import Navbar from "@/components/navbar/navbar";
+import Navbar from "@/components//header/Navbar";
 import Footer from "@/components/footer/footer";
 
 import "./page.css";
