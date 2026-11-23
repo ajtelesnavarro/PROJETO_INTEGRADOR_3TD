@@ -1,15 +1,11 @@
 import Link from "next/link";
 import Reveal from "@/components/animations/Reveal";
 
-import Navbar from "@/components//header/Navbar";
-import Footer from "@/components/footer/footer";
-
 import "./page.css";
 
 export default async function Home() {
   return (
     <>
-    <Navbar />
       <section className="hero hero-video">
         <video
           className="hero-background-video"
@@ -137,7 +133,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <Footer />
     </>
   );
 }
