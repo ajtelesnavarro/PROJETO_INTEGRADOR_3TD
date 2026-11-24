@@ -132,14 +132,16 @@ app.use(
     criarOrcamentoRoutes({ orcamentoController })
 );
 
-// Rotas protegidas
-app.use("/api/v1", recursosRouter);
-app.use("/api/v1", gestaoRouter);
-
+// O cliente cria/consulta o pedido depois de aprovar um orçamento, sem login.
+// Registre antes dos routers protegidos montados em /api/v1.
 app.use(
     "/api/v1/pedidos",
     criarPedidoRoutes({ pedidoController })
 );
+
+// Rotas protegidas
+app.use("/api/v1", recursosRouter);
+app.use("/api/v1", gestaoRouter);
 
 app.use(
     "/api/v1/pagamentos",

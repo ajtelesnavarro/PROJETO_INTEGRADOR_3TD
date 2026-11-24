@@ -37,7 +37,7 @@ export default function CriarPedidoPage() {
 
     return (
         <div>
-            <h1>Cria├º├úo do Pedido</h1>
+            <h1>Criação do Pedido</h1>
 
             {carregando && <p>Criando pedido...</p>}
             {erro && <p>{erro}</p>}

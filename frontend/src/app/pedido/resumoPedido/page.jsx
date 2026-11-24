@@ -31,7 +31,7 @@ export default function ResumoPedidoPage() {
             <p>Empresa: {pedido.nome_empresa}</p>
             <p>Servi├ºos: {pedido.servicos_desejados}</p>
             <p>Valor contratado: {pedido.valor_contratado}</p>
-            <p>Prazo estimado: {pedido.prazo_estimado_dias} dias</p>
+            <p>Prazo estimado: {pedido.prazo_estimado_dias != null ? `${pedido.prazo_estimado_dias} dias` : "A definir"}</p>
             <p>Status: {pedido.status_pedido}</p>
 
             <button

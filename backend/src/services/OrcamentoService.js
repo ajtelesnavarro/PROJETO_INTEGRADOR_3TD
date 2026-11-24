@@ -1,11 +1,3 @@
-const TABELA_SERVICOS = {
-  monitoramento_temperatura: { chave: "temperatura", preco: 480 },
-  controle_iluminacao: { chave: "iluminacao", preco: 620 },
-  monitoramento_energia: { chave: "energia", preco: 750 },
-  controle_acesso: { chave: "acesso", preco: 890 },
-  monitoramento_dispositivos: { chave: "dispositivo", preco: 540 },
-};
-
 const STATUS_VALIDOS = [
   "solicitado",
   "em_analise",
@@ -31,14 +23,11 @@ export function criarOrcamentoService({ orcamentoModel }) {
       dados.quantidadeDispositivos ?? dados.quantidade_dispositivos ?? 0
     );
     const servicosRecebidos = dados.servicosDesejados ?? dados.servicos ?? [];
-
-    const servicosLista = Array.isArray(servicosRecebidos)
-      ? servicosRecebidos
-      : [];
-
-    const servicosDesejados = Array.isArray(servicosRecebidos)
-      ? servicosRecebidos.join(", ")
-      : String(servicosRecebidos).trim();
+    const servicosLista = [...new Set(
+      (Array.isArray(servicosRecebidos) ? servicosRecebidos : [servicosRecebidos])
+        .map((id) => String(id).trim())
+        .filter(Boolean)
+    )];
 
     if (
       !nomeResponsavel ||
@@ -52,10 +41,10 @@ export function criarOrcamentoService({ orcamentoModel }) {
       );
     }
 
-    const servicosDetalhes = servicosLista.map((id) => ({
-      id,
-      ...(TABELA_SERVICOS[id] || { chave: id, preco: 0 }),
-    }));
+    const servicosDetalhes = await orcamentoModel.buscarServicosPorNome(servicosLista);
+    if (servicosDetalhes.length !== servicosLista.length) {
+      throw new Error("Um ou mais serviços selecionados são inválidos.");
+    }
 
     const totalServicos = servicosDetalhes.reduce((acc, s) => acc + s.preco, 0);
     const totalEstrutura =
@@ -79,20 +68,27 @@ export function criarOrcamentoService({ orcamentoModel }) {
         ? Number(dados.valorTotal)
         : Number((valorSubtotal - valorDesconto).toFixed(2));
 
-    const prazoEstimadoDias = Number(
-      dados.prazoEstimadoDias ?? dados.prazo_estimado_dias ?? 15
+    const prazoCalculado = Math.max(
+      5,
+      Math.ceil(quantidadeAndares / 2) +
+        Math.ceil(quantidadeAmbientes / 10) +
+        Math.ceil(quantidadeDispositivos / 20) +
+        servicosDetalhes.length * 2
     );
-    const validade = new Date();
-    validade.setDate(validade.getDate() + prazoEstimadoDias);
+    const prazoInformado = dados.prazoEstimadoDias ?? dados.prazo_estimado_dias;
+    const prazoEstimadoDias =
+      prazoInformado === undefined || prazoInformado === null || prazoInformado === ""
+        ? prazoCalculado
+        : Number(prazoInformado);
+    const validadeCalculada = new Date();
+    validadeCalculada.setUTCDate(validadeCalculada.getUTCDate() + 30);
     const dataValidade =
-      dados.dataValidade || validade.toISOString().slice(0, 10);
+      dados.dataValidade ??
+      dados.data_validade ??
+      validadeCalculada.toISOString().slice(0, 10);
 
     const descricaoBase = (dados.descricao || "").trim();
-    const tagServicos = servicosLista.length
-      ? `[servicos:${servicosLista.join(",")}]`
-      : "";
-    const descricaoFinal =
-      [descricaoBase, tagServicos].filter(Boolean).join(" ").trim() || null;
+    const descricaoFinal = descricaoBase || null;
 
     const idOrcamento = await orcamentoModel.criar({
       idUsuario: dados.idUsuario ?? null,
@@ -103,7 +99,6 @@ export function criarOrcamentoService({ orcamentoModel }) {
       quantidadeAndares,
       quantidadeAmbientes,
       quantidadeDispositivos: quantidadeDispositivos || null,
-      servicosDesejados,
       descricao: descricaoFinal,
       valorSubtotal,
       valorDesconto,

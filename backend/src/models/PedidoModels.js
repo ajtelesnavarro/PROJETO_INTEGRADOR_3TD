@@ -22,7 +22,11 @@ export function criarPedidoModel({ pool }) {
     async function buscarPorId(id) {
         const [resultado] = await pool.query(
             `SELECT p.*, o.nome_empresa, o.nome_responsavel,
-                    o.servicos_desejados, o.prazo_estimado_dias
+                    (SELECT GROUP_CONCAT(s.nome_servico SEPARATOR ', ')
+                     FROM orcamento_servico os
+                     INNER JOIN servico s ON s.id_servico = os.id_servico
+                     WHERE os.id_orcamento = o.id_orcamento) AS servicos_desejados,
+                    o.prazo_estimado_dias
              FROM pedido p
              INNER JOIN orcamento o
              ON p.id_orcamento = o.id_orcamento
