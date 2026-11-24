@@ -15,6 +15,13 @@ const emptyForm = {
   opening: "08:00",
   closing: "18:00",
   reservation: false,
+  temperaturaMinima: "",
+  temperaturaMaxima: "",
+  iluminacaoMinima: "",
+  iluminacaoMaxima: "",
+  consumoMinimo: "",
+  consumoMaximo: "",
+  potenciaMaxima: "",
 };
 
 function Icon({ name, size = 18 }) {
@@ -427,6 +434,7 @@ function AmbientesConteudo({ toast }) {
   const openEdit = (item) => {
     setEditingId(item.id);
     setForm({
+      ...emptyForm,
       id_predio: item.id_predio ? String(item.id_predio) : "",
       id_andar: item.id_andar ? String(item.id_andar) : "",
       id_setor: item.id_setor ? String(item.id_setor) : "",
@@ -483,6 +491,32 @@ function AmbientesConteudo({ toast }) {
       horario_abertura: abertura,
       horario_fechamento: fechamento,
     };
+
+    if (!editingId) {
+      const limitesAmbiente = {};
+      if (form.temperaturaMinima !== "" || form.temperaturaMaxima !== "") {
+        limitesAmbiente.temperatura = {
+          minimo: form.temperaturaMinima,
+          maximo: form.temperaturaMaxima,
+        };
+      }
+      if (form.iluminacaoMinima !== "" || form.iluminacaoMaxima !== "") {
+        limitesAmbiente.iluminacao = {
+          minimo: form.iluminacaoMinima,
+          maximo: form.iluminacaoMaxima,
+        };
+      }
+      if (form.consumoMinimo !== "" || form.consumoMaximo !== "" || form.potenciaMaxima !== "") {
+        limitesAmbiente.energia = {
+          minimo: form.consumoMinimo,
+          maximo: form.consumoMaximo,
+          potencia_maxima: form.potenciaMaxima,
+        };
+      }
+      if (Object.keys(limitesAmbiente).length) {
+        payload.limites_ambiente = limitesAmbiente;
+      }
+    }
 
     if (suportaReserva) {
       payload.requer_reserva = form.reservation ? 1 : 0;
@@ -948,24 +982,6 @@ function AmbientesConteudo({ toast }) {
               </label>
 
               <label>
-                Edifício *
-                <select
-                  value={form.id_predio}
-                  onChange={(event) =>
-                    updateForm("id_predio", event.target.value)
-                  }
-                  required
-                >
-                  <option value="">Selecione o prédio</option>
-                  {predios.map((p) => (
-                    <option key={p.id_predio} value={String(p.id_predio)}>
-                      {p.nome_predio}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
                 Andar *
                 <select
                   value={form.id_andar}
@@ -1007,6 +1023,49 @@ function AmbientesConteudo({ toast }) {
                   placeholder="Quantidade de pessoas"
                 />
               </label>
+
+              {!editingId && (
+                <div className="amb-limits-section full">
+                  <div className="amb-limits-heading">
+                    <strong>Limites de monitoramento</strong>
+                    <small>Opcional. Ao informar um tipo, preencha todos os limites dele; energia também exige potência máxima.</small>
+                  </div>
+                  <div className="amb-limits-grid">
+                    <fieldset className="amb-limit-card">
+                      <legend>Temperatura (°C)</legend>
+                      <label>Mínima
+                        <input type="number" step="0.1" value={form.temperaturaMinima} onChange={(event) => updateForm("temperaturaMinima", event.target.value)} placeholder="Ex.: 18" />
+                      </label>
+                      <label>Máxima
+                        <input type="number" step="0.1" value={form.temperaturaMaxima} onChange={(event) => updateForm("temperaturaMaxima", event.target.value)} placeholder="Ex.: 27" />
+                      </label>
+                    </fieldset>
+
+                    <fieldset className="amb-limit-card">
+                      <legend>Iluminação (lux)</legend>
+                      <label>Mínima
+                        <input type="number" min="0" step="0.01" value={form.iluminacaoMinima} onChange={(event) => updateForm("iluminacaoMinima", event.target.value)} placeholder="Ex.: 150" />
+                      </label>
+                      <label>Máxima
+                        <input type="number" min="0" step="0.01" value={form.iluminacaoMaxima} onChange={(event) => updateForm("iluminacaoMaxima", event.target.value)} placeholder="Ex.: 700" />
+                      </label>
+                    </fieldset>
+
+                    <fieldset className="amb-limit-card">
+                      <legend>Energia</legend>
+                      <label>Consumo mínimo (kWh)
+                        <input type="number" min="0" step="0.0001" value={form.consumoMinimo} onChange={(event) => updateForm("consumoMinimo", event.target.value)} placeholder="Ex.: 0.1" />
+                      </label>
+                      <label>Consumo máximo (kWh)
+                        <input type="number" min="0" step="0.0001" value={form.consumoMaximo} onChange={(event) => updateForm("consumoMaximo", event.target.value)} placeholder="Ex.: 12" />
+                      </label>
+                      <label className="full">Potência máxima (kW)
+                        <input type="number" min="0" step="0.0001" value={form.potenciaMaxima} onChange={(event) => updateForm("potenciaMaxima", event.target.value)} placeholder="Ex.: 3.5" />
+                      </label>
+                    </fieldset>
+                  </div>
+                </div>
+              )}
 
               {suportaReserva ? (
                 <label className="amb-checkbox-field">

@@ -16,6 +16,7 @@ import { gestaoRouter } from "./routes/GestaoRoutes.js";
 import { criarOrcamentoRoutes } from "./routes/orcamentoRoutes.js";
 import { criarPedidoRoutes } from "./routes/pedidoRoutes.js";
 import { criarPagamentoRoutes } from "./routes/pagamentoRoutes.js";
+import { tarifaEnergiaRouter } from "./routes/TarifaEnergiaRoutes.js";
 
 // Models
 import { criarOrcamentoModel } from "./models/OrcamentoModels.js";
@@ -139,14 +140,17 @@ app.use(
     criarPedidoRoutes({ pedidoController })
 );
 
-// Rotas protegidas
-app.use("/api/v1", recursosRouter);
-app.use("/api/v1", gestaoRouter);
-
+// O cliente registra/consulta o pagamento do pedido sem login.
 app.use(
     "/api/v1/pagamentos",
     criarPagamentoRoutes({ pagamentoController })
 );
+
+app.use("/api/v1/tarifa-energia", tarifaEnergiaRouter);
+
+// Rotas protegidas
+app.use("/api/v1", recursosRouter);
+app.use("/api/v1", gestaoRouter);
 
 // ==========================================
 // TRATAMENTO DE ERROS

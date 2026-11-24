@@ -243,6 +243,71 @@
   box-shadow: 0 3px 12px rgba(29, 49, 86, 0.025);
 }
 
+.dash-tarifa-panel { margin-bottom: 20px; }
+
+.dash-tarifa-atual {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid #dcefe9;
+  border-radius: 9px;
+  background: #f0faf6;
+  color: #28745a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dash-tarifa-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.3fr) minmax(160px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.dash-tarifa-form label {
+  display: grid;
+  gap: 7px;
+  color: #65738a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dash-tarifa-form input,
+.dash-tarifa-form select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  outline: 0;
+  background: #fbfcfe;
+  color: var(--dash-text);
+}
+
+.dash-tarifa-form input:focus,
+.dash-tarifa-form select:focus {
+  border-color: #829ce0;
+  box-shadow: 0 0 0 3px rgba(49, 95, 209, .09);
+}
+
+.dash-tarifa-form button {
+  min-height: 42px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dash-primary);
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dash-tarifa-form button:hover { background: var(--dash-primary-dark); }
+.dash-tarifa-form button:disabled { cursor: wait; opacity: .65; }
+.dash-tarifa-form small,
+.dash-tarifa-empty { grid-column: 1 / -1; margin: 0; color: var(--dash-muted); font-size: 10px; }
+
 .dash-panel-heading {
   display: flex;
   align-items: flex-start;
@@ -770,6 +835,9 @@
   .dash-health-content {
     justify-content: flex-start;
   }
+
+  .dash-tarifa-form { grid-template-columns: 1fr 1fr; }
+  .dash-tarifa-form button { grid-column: 1 / -1; }
 }
 
 @media (max-width: 600px) {
@@ -817,6 +885,10 @@
   .dash-panel-heading {
     flex-wrap: wrap;
   }
+
+  .dash-tarifa-form { grid-template-columns: 1fr; }
+  .dash-tarifa-form button,
+  .dash-tarifa-form small { grid-column: auto; }
 
   .dash-range {
     width: 100%;

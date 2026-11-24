@@ -340,12 +340,17 @@ export default function DashboardPage() {
   const [equipes, setEquipes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [leituras, setLeituras] = useState([]);
+  const [predioTarifaId, setPredioTarifaId] = useState("");
+  const [tarifaAtual, setTarifaAtual] = useState(null);
+  const [valorTarifa, setValorTarifa] = useState("");
+  const [carregandoTarifa, setCarregandoTarifa] = useState(false);
+  const [salvandoTarifa, setSalvandoTarifa] = useState(false);
 
-  function showToast(message) {
+  const showToast = useCallback((message) => {
     setToast(message);
     window.clearTimeout(window.__lumoraToast);
     window.__lumoraToast = window.setTimeout(() => setToast(""), 2800);
-  }
+  }, []);
 
   const carregarDados = useCallback(async () => {
     try {
@@ -369,11 +374,62 @@ export default function DashboardPage() {
     } catch (erro) {
       showToast(erro.message || "Erro ao carregar indicadores.");
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
+
+  useEffect(() => {
+    if (!predioTarifaId && predios.length) {
+      setPredioTarifaId(String(predios[0].id_predio));
+    }
+  }, [predios, predioTarifaId]);
+
+  useEffect(() => {
+    if (!predioTarifaId) {
+      setTarifaAtual(null);
+      setValorTarifa("");
+      return;
+    }
+
+    let ativo = true;
+    setCarregandoTarifa(true);
+    requisicaoAPI(`/tarifa-energia/${predioTarifaId}`)
+      .then((resposta) => {
+        if (!ativo) return;
+        setTarifaAtual(resposta.dados || null);
+        setValorTarifa(resposta.dados?.valor_kwh ?? "");
+      })
+      .catch((erro) => {
+        if (ativo) showToast(erro.message || "Não foi possível carregar a tarifa.");
+      })
+      .finally(() => {
+        if (ativo) setCarregandoTarifa(false);
+      });
+
+    return () => { ativo = false; };
+  }, [predioTarifaId, showToast]);
+
+  async function salvarTarifa(event) {
+    event.preventDefault();
+    if (!predioTarifaId || valorTarifa === "") return;
+
+    try {
+      setSalvandoTarifa(true);
+      const resposta = await requisicaoAPI(`/tarifa-energia/${predioTarifaId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ valor_kwh: Number(String(valorTarifa).replace(",", ".")) }),
+      });
+      setTarifaAtual(resposta.dados || null);
+      setValorTarifa(resposta.dados?.valor_kwh ?? valorTarifa);
+      showToast("Tarifa de energia atualizada.");
+    } catch (erro) {
+      showToast(erro.message || "Não foi possível salvar a tarifa.");
+    } finally {
+      setSalvandoTarifa(false);
+    }
+  }
 
   const resumoIndicadores = useMemo(() => {
     const ativos = dispositivos.filter((d) => d.status_dispositivo === "ativo").length;
@@ -517,6 +573,48 @@ export default function DashboardPage() {
           color="orange"
           footer={<span>Temperatura média: {resumoIndicadores.mediaTemp} °C</span>}
         />
+      </section>
+
+      <section className="dash-panel dash-tarifa-panel">
+        <div className="dash-panel-heading">
+          <div>
+            <span className="dash-section-label">CONFIGURAÇÃO DO EDIFÍCIO</span>
+            <h2>Tarifa de energia</h2>
+            <p>Defina o valor cobrado por kWh para os cálculos de consumo.</p>
+          </div>
+          <span className="dash-tarifa-atual">
+            {carregandoTarifa
+              ? "Carregando tarifa..."
+              : tarifaAtual
+                ? `Vigente: ${Number(tarifaAtual.valor_kwh).toLocaleString("pt-BR", { minimumFractionDigits: 4, maximumFractionDigits: 4 })} R$/kWh`
+                : "Nenhuma tarifa cadastrada"}
+          </span>
+        </div>
+
+        {predios.length ? (
+          <form className="dash-tarifa-form" onSubmit={salvarTarifa}>
+            <label>
+              Prédio
+              <select value={predioTarifaId} onChange={(event) => setPredioTarifaId(event.target.value)} required>
+                {predios.map((predio) => (
+                  <option key={predio.id_predio} value={String(predio.id_predio)}>
+                    {predio.nome_predio}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Valor por kWh (R$)
+              <input type="number" min="0" step="0.0001" value={valorTarifa} onChange={(event) => setValorTarifa(event.target.value)} placeholder="Ex.: 0.7350" required />
+            </label>
+            <button type="submit" disabled={salvandoTarifa || carregandoTarifa}>
+              {salvandoTarifa ? "Salvando..." : "Salvar tarifa"}
+            </button>
+            <small>A nova tarifa passa a valer hoje e encerra a anterior.</small>
+          </form>
+        ) : (
+          <p className="dash-tarifa-empty">Cadastre um prédio antes de definir a tarifa.</p>
+        )}
       </section>
 
       <section className="dash-analytics">

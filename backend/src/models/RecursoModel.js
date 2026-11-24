@@ -413,6 +413,65 @@ export async function criar(config, dados) {
     return await buscar(config, resultado.insertId);
 }
 
+export async function criarAmbienteComLimites(config, dados, limites, idUsuario) {
+    const conexao = await pool.getConnection();
+
+    try {
+        await conexao.beginTransaction();
+
+        const campos = Object.keys(dados);
+        const colunas = campos.map(campo => `\`${campo}\``).join(', ');
+        const placeholders = campos.map(() => '?').join(', ');
+        const [resultado] = await conexao.query(
+            `INSERT INTO \`${config.tabela}\` (${colunas}) VALUES (${placeholders})`,
+            campos.map(campo => dados[campo])
+        );
+        const idAmbiente = resultado.insertId;
+
+        const configuracoes = [
+            {
+                chave: 'temperatura',
+                tabela: 'temperatura',
+                colunas: ['temperatura_minima', 'temperatura_maxima'],
+            },
+            {
+                chave: 'iluminacao',
+                tabela: 'iluminacao',
+                colunas: ['iluminacao_minima', 'iluminacao_maxima'],
+            },
+            {
+                chave: 'energia',
+                tabela: 'energia',
+                colunas: ['consumo_minimo', 'consumo_maximo', 'potencia_maxima'],
+            },
+        ];
+
+        for (const item of configuracoes) {
+            const valores = limites?.[item.chave];
+            if (!valores) continue;
+
+            const colunasLimite = ['id_ambiente', 'id_usuario_alteracao', ...item.colunas];
+            await conexao.query(
+                `INSERT INTO \`${item.tabela}\` (${colunasLimite.map(campo => `\`${campo}\``).join(', ')})
+                 VALUES (${colunasLimite.map(() => '?').join(', ')})`,
+                [idAmbiente, idUsuario ?? null, ...item.colunas.map(campo => valores[campo])]
+            );
+        }
+
+        const [ambientes] = await conexao.query(
+            `SELECT * FROM \`${config.tabela}\` WHERE \`${config.id}\` = ? LIMIT 1`,
+            [idAmbiente]
+        );
+        await conexao.commit();
+        return ambientes[0] || null;
+    } catch (erro) {
+        await conexao.rollback();
+        throw erro;
+    } finally {
+        conexao.release();
+    }
+}
+
 
 // ========================================
 // 10. ATUALIZAÃ‡ÃƒO

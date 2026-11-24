@@ -334,6 +334,18 @@ export default function Page() {
           <p>Gerencie as equipes e os funcionários vinculados ao edifício.</p>
         </div>
 
+        {/* <div className="tm-page-actions">
+          <button className="tm-primary-button tm-secondary-action" onClick={abrirCadastroEquipe}>
+            <Icon name="plus" size={17} />
+            Criar grupo
+          </button>
+          <button className="tm-primary-button" onClick={abrirCadastroUsuario}>
+            <Icon name="plus" size={17} />
+            Registrar usuário
+          </button>
+        </div>
+      </header> */}
+
         <button className="tm-primary-button" onClick={openNewMember} disabled={!team}>
           <Icon name="plus" size={17} />
           Adicionar integrante

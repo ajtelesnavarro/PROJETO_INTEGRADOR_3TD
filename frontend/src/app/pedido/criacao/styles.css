@@ -1,0 +1,12 @@
+.pedido-criacao-page {
+  min-height: 100vh;
+  background: var(--bg, #f4f7fa);
+}
+
+.pedido-criacao-erro {
+  color: #b42318 !important;
+}
+
+.loading-card .pedido-criacao-erro {
+  color: #b42318;
+}

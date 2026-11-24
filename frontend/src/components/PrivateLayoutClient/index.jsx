@@ -20,10 +20,10 @@ export default function PrivateLayoutClient({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("lumora_token");
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
+    // if (!token) {
+    //   router.replace("/login");
+    //   return;
+    // }
 
     try {
       const salvo = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
