@@ -29,6 +29,15 @@
   cursor: pointer;
 }
 
+.pa-current-building {
+  padding: 10px 14px;
+  border: 1px solid var(--pa-border);
+  border-radius: 10px;
+  background: var(--pa-surface);
+  color: var(--pa-text);
+  font-size: 12px;
+}
+
 .pa-background-glow {
   position: absolute;
   z-index: -1;

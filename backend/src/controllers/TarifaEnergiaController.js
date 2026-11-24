@@ -7,7 +7,7 @@ function responderErro(erro, res) {
 
 export async function buscarAtual(req, res) {
   try {
-    const dados = await TarifaEnergiaService.buscarAtual(req.params.idPredio);
+    const dados = await TarifaEnergiaService.buscarAtual(req.params.idPredio, req.usuario);
     return res.json({ sucesso: true, dados });
   } catch (erro) {
     return responderErro(erro, res);

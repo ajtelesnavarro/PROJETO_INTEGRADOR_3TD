@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./ambientes.css";
 
 const emptyForm = {
@@ -192,19 +193,24 @@ function AmbientesConteudo({ toast }) {
           requisicaoAPI("/dispositivos?limite=200"),
         ]);
 
-      setPredios(
-        deduplicarPor(resPredios.dados, "id_predio").sort(
-          (a, b) => a.id_predio - b.id_predio
-        )
-      );
-      setAndares(
-        deduplicarPor(resAndares.dados, "id_andar").sort(
-          (a, b) => a.numero_andar - b.numero_andar
-        )
-      );
-      setAmbientesBrutos(deduplicarPor(resAmbientes.dados, "id_ambiente"));
+      const predioAtual = obterPredioAtual();
+      const idPredioAtual = Number(predioAtual?.id_predio);
+      const prediosAtuais = deduplicarPor(resPredios.dados, "id_predio")
+        .filter((predio) => predio.id_predio === idPredioAtual);
+      const andaresAtuais = deduplicarPor(resAndares.dados, "id_andar")
+        .filter((andar) => andar.id_predio === idPredioAtual);
+      const idsAndares = new Set(andaresAtuais.map((andar) => andar.id_andar));
+      const ambientesAtuais = deduplicarPor(resAmbientes.dados, "id_ambiente")
+        .filter((ambiente) => idsAndares.has(ambiente.id_andar));
+      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => ambiente.id_ambiente));
+
+      setPredios(prediosAtuais);
+      setAndares(andaresAtuais);
+      setPredioFilter(idPredioAtual ? String(idPredioAtual) : "Todos");
+      setAmbientesBrutos(ambientesAtuais);
       setDispositivosBrutos(
         deduplicarPor(resDispositivos.dados, "id_dispositivo")
+          .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente))
       );
     } catch (erro) {
       notify(erro.message || "Erro ao carregar ambientes do banco de dados.");
@@ -581,7 +587,7 @@ function AmbientesConteudo({ toast }) {
 
   const limparFiltros = () => {
     setSearch("");
-    setPredioFilter("Todos");
+    setPredioFilter(String(predios[0]?.id_predio ?? "Todos"));
     setFloorFilter("Todos");
     setReservationFilter("Todos");
     router.replace("/private/ambientes");
@@ -677,23 +683,7 @@ function AmbientesConteudo({ toast }) {
           </div>
 
           <div className="amb-filters" style={{ flexWrap: "wrap" }}>
-            <label>
-              <Icon name="building" size={14} />
-              <select
-                value={predioFilter}
-                onChange={(event) => {
-                  setPredioFilter(event.target.value);
-                  setFloorFilter("Todos");
-                }}
-              >
-                <option value="Todos">Todos os prédios</option>
-                {predios.map((p) => (
-                  <option key={p.id_predio} value={String(p.id_predio)}>
-                    {p.nome_predio}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <span className="amb-current-building">{predios[0]?.nome_predio || "Nenhum prédio vinculado"}</span>
 
             <label>
               <Icon name="filter" size={14} />
@@ -721,8 +711,7 @@ function AmbientesConteudo({ toast }) {
               </select>
             )}
 
-            {(predioFilter !== "Todos" ||
-              floorFilter !== "Todos" ||
+            {(floorFilter !== "Todos" ||
               reservationFilter !== "Todos" ||
               search) && (
               <button

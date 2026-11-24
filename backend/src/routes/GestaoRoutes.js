@@ -7,10 +7,16 @@ export const gestaoRouter = express.Router();
 gestaoRouter.use(autenticar);
 
 const consulta = autorizarPerfis("administrador", "manutencao", "porteiro", "funcionario");
+const consultaAlertas = autorizarPerfis("administrador", "manutencao", "porteiro", "funcionario", "locador");
 const adminOuManutencao = autorizarPerfis("administrador", "manutencao");
 const adminOuPorteiro = autorizarPerfis("administrador", "porteiro");
 
 gestaoRouter.get("/equipes", consulta, GestaoController.listarEquipes);
+gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
+gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
+gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
+gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
+gestaoRouter.get("/alertas-limites", consultaAlertas, GestaoController.listarAlertasLimites);
 gestaoRouter.post("/equipes/:id/integrantes", adminOuManutencao, GestaoController.adicionarIntegrante);
 gestaoRouter.patch("/equipes/:id/integrantes/:idUsuario", adminOuManutencao, GestaoController.atualizarIntegrante);
 gestaoRouter.delete("/equipes/:id/integrantes/:idUsuario", adminOuManutencao, GestaoController.removerIntegrante);

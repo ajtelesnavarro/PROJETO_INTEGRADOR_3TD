@@ -53,8 +53,8 @@ CREATE TABLE usuario (
     'administrador',
     'manutencao',
     'porteiro',
-    'funcionario'
-     ) NOT NULL,
+    'locador'
+     ) NOT NULL default 'locador',
 
     cpf CHAR(11) NULL,
     foto VARCHAR(255) NULL,
@@ -160,7 +160,7 @@ CREATE TABLE equipe_usuario (
     id_equipe INT NOT NULL,
     id_usuario INT NOT NULL,
     id_predio INT NOT NULL,
-    data_entrada DATE NOT NULL,
+    data_entrada DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_saida DATE NULL,
 
     CONSTRAINT fk_equipe_usuario_equipe
@@ -315,7 +315,7 @@ CREATE TABLE tarifa_energia (
     id_usuario_alteracao INT NULL,
     id_predio INT NOT NULL,
     valor_kwh DECIMAL(10,4) NOT NULL,
-    data_inicio_vigencia DATE NOT NULL,
+    data_inicio_vigencia DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_fim_vigencia DATE NULL,
 
     CONSTRAINT fk_tarifa_energia_predio

@@ -107,6 +107,7 @@ function getInitials(name) {
 
 const emptyForm = {
   name: "",
+  id_usuario: "",
   role: "manutencao",
   email: "",
   phone: "",
@@ -116,11 +117,14 @@ const emptyForm = {
 
 export default function Page() {
   const [teams, setTeams] = useState([]);
+  const [usuariosDisponiveis, setUsuariosDisponiveis] = useState([]);
   const [activeTeam, setActiveTeam] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [modalOpen, setModalOpen] = useState(false);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [teamForm, setTeamForm] = useState({ nome_equipe: "", descricao: "" });
   const [editingMember, setEditingMember] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [feedback, setFeedback] = useState("");
@@ -128,6 +132,7 @@ export default function Page() {
   const carregarEquipes = useCallback(async () => {
     try {
       const res = await requisicaoAPI("/equipes");
+      setUsuariosDisponiveis(res.usuarios || []);
       const lista = (res.dados || []).map((eq, idx) => ({
         id: eq.id_equipe,
         name: eq.nome_equipe,
@@ -230,6 +235,7 @@ export default function Page() {
   function openEditMember(member) {
     setEditingMember(member.id);
     setForm({
+      id_usuario: String(member.id),
       name: member.name,
       role: member.perfilRaw || "funcionario",
       email: member.email,
@@ -264,9 +270,14 @@ export default function Page() {
         });
         setFeedback("Integrante atualizado com sucesso.");
       } else {
+        if (!form.id_usuario) {
+          setFeedback("Selecione um usuário já cadastrado no prédio.");
+          return;
+        }
         const res = await requisicaoAPI(`/equipes/${activeTeam}/integrantes`, {
           method: "POST",
           body: JSON.stringify({
+            id_usuario: Number(form.id_usuario),
             nome: form.name,
             perfil: form.role,
             email: form.email,
@@ -285,6 +296,22 @@ export default function Page() {
       carregarEquipes();
     } catch (erro) {
       setFeedback(erro.message || "Erro ao salvar integrante.");
+    }
+  }
+
+  async function criarEquipe(event) {
+    event.preventDefault();
+    try {
+      await requisicaoAPI("/equipes", {
+        method: "POST",
+        body: JSON.stringify(teamForm),
+      });
+      setTeamModalOpen(false);
+      setTeamForm({ nome_equipe: "", descricao: "" });
+      setFeedback("Equipe criada sem integrantes. Adicione usuários depois.");
+      await carregarEquipes();
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao criar equipe.");
     }
   }
 
@@ -346,10 +373,16 @@ export default function Page() {
         </div>
       </header> */}
 
-        <button className="tm-primary-button" onClick={openNewMember} disabled={!team}>
-          <Icon name="plus" size={17} />
-          Adicionar integrante
-        </button>
+        <div className="tm-page-actions">
+          <button className="tm-primary-button tm-secondary-action" onClick={() => setTeamModalOpen(true)}>
+            <Icon name="plus" size={17} />
+            Criar equipe
+          </button>
+          <button className="tm-primary-button" onClick={openNewMember} disabled={!team}>
+            <Icon name="plus" size={17} />
+            Adicionar integrante
+          </button>
+        </div>
       </header>
 
       {feedback && (
@@ -737,11 +770,39 @@ export default function Page() {
             <form onSubmit={saveMember}>
               <div className="tm-form-grid">
                 <label className="tm-form-full">
+                  Usuário já cadastrado no prédio
+                  <select
+                    name="id_usuario"
+                    value={form.id_usuario}
+                    disabled={Boolean(editingMember)}
+                    required={!editingMember}
+                    onChange={(event) => {
+                      const usuario = usuariosDisponiveis.find((item) => String(item.id_usuario) === event.target.value);
+                      setForm((atual) => ({
+                        ...atual,
+                        id_usuario: event.target.value,
+                        name: usuario?.nome || "",
+                        role: usuario?.perfil || "funcionario",
+                        email: usuario?.email || "",
+                        phone: usuario?.telefone || "",
+                      }));
+                    }}
+                  >
+                    <option value="">Selecione um usuário existente</option>
+                    {usuariosDisponiveis.map((usuario) => (
+                      <option key={usuario.id_usuario} value={String(usuario.id_usuario)}>
+                        {usuario.nome} · {usuario.email}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="tm-form-full">
                   Nome completo
                   <input
                     name="name"
                     value={form.name}
                     onChange={handleFormChange}
+                    readOnly
                     placeholder="Ex.: João da Silva"
                     required
                   />
@@ -753,6 +814,7 @@ export default function Page() {
                     name="role"
                     value={form.role}
                     onChange={handleFormChange}
+                    disabled
                   >
                     <option value="administrador">Administrador</option>
                     <option value="manutencao">Manutenção</option>
@@ -767,6 +829,7 @@ export default function Page() {
                     name="phone"
                     value={form.phone}
                     onChange={handleFormChange}
+                    readOnly
                     placeholder="(11) 99999-9999"
                   />
                 </label>
@@ -778,6 +841,7 @@ export default function Page() {
                     name="email"
                     value={form.email}
                     onChange={handleFormChange}
+                    readOnly
                     placeholder="funcionario@lumora.com"
                     required
                   />
@@ -819,6 +883,39 @@ export default function Page() {
                   <Icon name="check" size={16} />
                   {editingMember ? "Salvar alterações" : "Cadastrar integrante"}
                 </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {teamModalOpen && (
+        <div className="tm-modal-overlay" onMouseDown={() => setTeamModalOpen(false)}>
+          <section className="tm-modal" role="dialog" aria-modal="true" aria-labelledby="tm-team-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="tm-modal-header">
+              <div>
+                <span className="tm-section-label">CADASTRO DO PRÉDIO</span>
+                <h2 id="tm-team-modal-title">Criar equipe</h2>
+                <p>A equipe será criada vazia. Você poderá vincular usuários cadastrados depois.</p>
+              </div>
+              <button type="button" className="tm-modal-close" onClick={() => setTeamModalOpen(false)} aria-label="Fechar">
+                <Icon name="close" size={19} />
+              </button>
+            </div>
+            <form onSubmit={criarEquipe}>
+              <div className="tm-form-grid">
+                <label className="tm-form-full">
+                  Nome da equipe
+                  <input required maxLength={100} value={teamForm.nome_equipe} onChange={(event) => setTeamForm((atual) => ({ ...atual, nome_equipe: event.target.value }))} />
+                </label>
+                <label className="tm-form-full">
+                  Descrição
+                  <textarea maxLength={255} value={teamForm.descricao} onChange={(event) => setTeamForm((atual) => ({ ...atual, descricao: event.target.value }))} />
+                </label>
+              </div>
+              <div className="tm-modal-footer">
+                <button type="button" className="tm-cancel-button" onClick={() => setTeamModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Criar equipe</button>
               </div>
             </form>
           </section>

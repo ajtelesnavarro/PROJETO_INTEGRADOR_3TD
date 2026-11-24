@@ -185,6 +185,7 @@ export function preparar(
         'id_ambiente',
         'id_dispositivo',
         'id_usuario',
+        'id_usuario_responsavel',
         'id_credencial',
         'id_equipe_responsavel',
         'id_tecnico_responsavel'

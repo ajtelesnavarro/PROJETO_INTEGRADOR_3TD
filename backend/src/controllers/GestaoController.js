@@ -23,11 +23,37 @@ function normalizarPerfil(role) {
     return "funcionario";
 }
 
-export async function listarEquipes(_req, res, next) {
+async function obterPredioUsuario(idUsuario) {
+    const [[usuario]] = await pool.query(
+        'SELECT id_predio FROM usuario WHERE id_usuario = ? LIMIT 1',
+        [idUsuario]
+    );
+    return usuario?.id_predio ?? null;
+}
+
+export async function listarUsuarios(req, res, next) {
     try {
-        const [equipes] = await pool.query("SELECT * FROM equipe ORDER BY id_equipe ASC");
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!idPredio) return res.json({ sucesso: true, dados: [] });
+        const [dados] = await pool.query(
+            `SELECT id_usuario, id_predio, nome, email, telefone, perfil
+             FROM usuario WHERE id_predio = ? ORDER BY nome ASC`,
+            [idPredio]
+        );
+        return res.json({ sucesso: true, dados });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function listarEquipes(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!idPredio) return res.json({ sucesso: true, dados: [], usuarios: [] });
+        const [equipes] = await pool.query("SELECT * FROM equipe WHERE id_predio = ? ORDER BY id_equipe ASC", [idPredio]);
         const [usuarios] = await pool.query(
-            "SELECT id_usuario, id_predio, nome, email, telefone, perfil FROM usuario ORDER BY nome ASC"
+            "SELECT id_usuario, id_predio, nome, email, telefone, perfil FROM usuario WHERE id_predio = ? ORDER BY nome ASC",
+            [idPredio]
         );
         const [vinculos] = await pool.query(
             `SELECT eu.id_equipe_usuario, eu.id_equipe, eu.id_usuario, eu.id_predio,
@@ -35,7 +61,8 @@ export async function listarEquipes(_req, res, next) {
                     u.nome, u.email, u.telefone, u.perfil
              FROM equipe_usuario eu
              INNER JOIN usuario u ON u.id_usuario = eu.id_usuario
-             ORDER BY eu.id_equipe_usuario ASC`
+             WHERE eu.id_predio = ? ORDER BY eu.id_equipe_usuario ASC`,
+            [idPredio]
         );
 
         const dados = equipes.map((eq) => ({
@@ -44,6 +71,110 @@ export async function listarEquipes(_req, res, next) {
         }));
 
         return res.json({ sucesso: true, dados, usuarios });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function criarEquipe(req, res, next) {
+    try {
+        const nome = typeof req.body.nome_equipe === 'string' ? req.body.nome_equipe.trim() : '';
+        const descricao = typeof req.body.descricao === 'string' ? req.body.descricao.trim() : '';
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!nome) return res.status(400).json({ sucesso: false, erro: 'Informe o nome da equipe.' });
+        if (!idPredio) return res.status(409).json({ sucesso: false, erro: 'Vincule um prédio à conta antes de criar uma equipe.' });
+
+        const [resultado] = await pool.query(
+            'INSERT INTO equipe (id_predio, nome_equipe, descricao) VALUES (?, ?, ?)',
+            [idPredio, nome, descricao || null]
+        );
+        const [[equipe]] = await pool.query('SELECT * FROM equipe WHERE id_equipe = ?', [resultado.insertId]);
+        return res.status(201).json({ sucesso: true, dados: equipe });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function listarAlertasLimites(req, res, next) {
+    try {
+        const [leituras] = await pool.query(
+            `SELECT d.id_dispositivo, d.nome AS nome_dispositivo, a.nome AS nome_ambiente,
+                    'temperatura' AS tipo, h.temperatura_medida AS valor,
+                    t.temperatura_minima AS limite_minimo, t.temperatura_maxima AS limite_maximo,
+                    NULL AS potencia, NULL AS potencia_maxima, h.data_temperatura AS data_hora
+             FROM usuario u
+             INNER JOIN andar an ON an.id_predio = u.id_predio
+             INNER JOIN ambiente a ON a.id_andar = an.id_andar
+             INNER JOIN temperatura t ON t.id_ambiente = a.id_ambiente
+             INNER JOIN dispositivo d ON d.id_ambiente = a.id_ambiente AND d.tipo_dispositivo = 'temperatura'
+             INNER JOIN historico_temperatura h ON h.id_dispositivo = d.id_dispositivo
+             WHERE u.id_usuario = ?
+               AND NOT EXISTS (
+                   SELECT 1 FROM historico_temperatura h2
+                   WHERE h2.id_dispositivo = h.id_dispositivo
+                     AND h2.id_historico_temperatura > h.id_historico_temperatura
+               )
+             UNION ALL
+             SELECT d.id_dispositivo, d.nome, a.nome, 'iluminacao', h.iluminacao_medida,
+                    l.iluminacao_minima, l.iluminacao_maxima, NULL, NULL, h.data_iluminacao
+             FROM usuario u
+             INNER JOIN andar an ON an.id_predio = u.id_predio
+             INNER JOIN ambiente a ON a.id_andar = an.id_andar
+             INNER JOIN iluminacao l ON l.id_ambiente = a.id_ambiente
+             INNER JOIN dispositivo d ON d.id_ambiente = a.id_ambiente AND d.tipo_dispositivo = 'iluminacao'
+             INNER JOIN historico_iluminacao h ON h.id_dispositivo = d.id_dispositivo
+             WHERE u.id_usuario = ?
+               AND NOT EXISTS (
+                   SELECT 1 FROM historico_iluminacao h2
+                   WHERE h2.id_dispositivo = h.id_dispositivo
+                     AND h2.id_historico_iluminacao > h.id_historico_iluminacao
+               )
+             UNION ALL
+             SELECT d.id_dispositivo, d.nome, a.nome, 'energia', h.consumo_kwh,
+                    e.consumo_minimo, e.consumo_maximo, h.potencia_kw, e.potencia_maxima,
+                    h.data_historico_energia
+             FROM usuario u
+             INNER JOIN andar an ON an.id_predio = u.id_predio
+             INNER JOIN ambiente a ON a.id_andar = an.id_andar
+             INNER JOIN energia e ON e.id_ambiente = a.id_ambiente
+             INNER JOIN dispositivo d ON d.id_ambiente = a.id_ambiente AND d.tipo_dispositivo = 'energia'
+             INNER JOIN historico_energia h ON h.id_dispositivo = d.id_dispositivo
+             WHERE u.id_usuario = ?
+               AND NOT EXISTS (
+                   SELECT 1 FROM historico_energia h2
+                   WHERE h2.id_dispositivo = h.id_dispositivo
+                     AND h2.id_historico_energia > h.id_historico_energia
+               )`,
+            [req.usuario.id, req.usuario.id, req.usuario.id]
+        );
+
+        const alertas = leituras.reduce((lista, leitura) => {
+            const valor = Number(leitura.valor);
+            const minimo = Number(leitura.limite_minimo);
+            const maximo = Number(leitura.limite_maximo);
+            const potencia = Number(leitura.potencia);
+            const potenciaMaxima = Number(leitura.potencia_maxima);
+            const unidade = leitura.tipo === 'temperatura' ? '°C' : leitura.tipo === 'iluminacao' ? 'lux' : 'kWh';
+            const base = {
+                id_dispositivo: leitura.id_dispositivo,
+                dispositivo: leitura.nome_dispositivo,
+                ambiente: leitura.nome_ambiente,
+                tipo: leitura.tipo,
+                valor,
+                unidade,
+                data_hora: leitura.data_hora,
+            };
+
+            if (valor < minimo || valor > maximo) {
+                lista.push({ ...base, motivo: 'valor', limite_minimo: minimo, limite_maximo: maximo });
+            }
+            if (leitura.tipo === 'energia' && potencia > potenciaMaxima) {
+                lista.push({ ...base, motivo: 'potencia', valor: potencia, unidade: 'kW', limite_maximo: potenciaMaxima });
+            }
+            return lista;
+        }, []);
+
+        return res.json({ sucesso: true, dados: alertas });
     } catch (erro) {
         return next(erro);
     }

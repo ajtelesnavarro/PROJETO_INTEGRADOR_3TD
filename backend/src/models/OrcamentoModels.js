@@ -28,8 +28,8 @@ export function criarOrcamentoModel({ pool }) {
       }
 
       const [usuario] = await conexao.query(
-        `INSERT INTO usuario (nome, email, telefone, senha_hash, cpf)
-         VALUES (?, ?, ?, ?, NULL)`,
+        `INSERT INTO usuario (nome, email, telefone, senha_hash, perfil, cpf)
+         VALUES (?, ?, ?, ?, 'locador', NULL)`,
         [dados.nomeResponsavel, dados.email, dados.telefone || null, dados.senhaHash]
       );
       const idUsuario = usuario.insertId;

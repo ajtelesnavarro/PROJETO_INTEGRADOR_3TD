@@ -39,6 +39,21 @@ export const recursos = {
         ]
     },
 
+    setores: {
+        tabela: 'setor',
+        id: 'id_setor',
+        campos: [
+            'id_andar',
+            'nome_setor',
+            'descricao',
+            'id_usuario_responsavel'
+        ],
+        obrigatorios: [
+            'id_andar',
+            'nome_setor'
+        ]
+    },
+
     ambientes: {
         tabela: 'ambiente',
         id: 'id_ambiente',
@@ -71,14 +86,12 @@ export const recursos = {
             'unidade_medida',
             'potencia_nominal_kw',
             'data_dispositivo',
-            'identificador',
             'status_dispositivo'
         ],
         obrigatorios: [
             'id_ambiente',
             'nome',
-            'tipo_dispositivo',
-            'identificador'
+            'tipo_dispositivo'
         ]
     },
 

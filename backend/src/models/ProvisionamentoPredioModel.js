@@ -19,8 +19,7 @@ export function criarProvisionamentoPredioModel({ pool }) {
 
       const [pagamentos] = await conexao.query(
         `SELECT pg.status_pagamento, p.id_pedido, p.status_pedido,
-                o.id_usuario,
-                p.id_predio, o.quantidade_andares
+                o.id_usuario, p.id_predio
          FROM pagamento pg
          INNER JOIN pedido p ON p.id_pedido = pg.id_pedido
          INNER JOIN orcamento o ON o.id_orcamento = p.id_orcamento
@@ -68,14 +67,6 @@ export function criarProvisionamentoPredioModel({ pool }) {
       );
 
       const idPredio = resultadoPredio.insertId;
-      const quantidadeAndares = Math.min(Math.max(Number(pagamento.quantidade_andares) || 0, 0), 200);
-      for (let numeroAndar = 1; numeroAndar <= quantidadeAndares; numeroAndar += 1) {
-        await conexao.query(
-          `INSERT INTO andar (id_predio, numero_andar, descricao, data_cadastro)
-           VALUES (?, ?, ?, CURRENT_DATE)`,
-          [idPredio, numeroAndar, `Andar ${numeroAndar}`]
-        );
-      }
 
       await conexao.query(
         "UPDATE pedido SET id_predio = ? WHERE id_pedido = ?",
@@ -88,7 +79,7 @@ export function criarProvisionamentoPredioModel({ pool }) {
         );
       }
       await conexao.commit();
-      return { id_predio: idPredio, jaExistia: false, quantidade_andares: quantidadeAndares };
+      return { id_predio: idPredio, jaExistia: false };
     } catch (erro) {
       await conexao.rollback();
       throw erro;

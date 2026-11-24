@@ -3,12 +3,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { podeAcessar } from "@/components/RoleGuard";
 import "./sidebar.css";
 
 // PÁGINAS DO SISTEMA
 const nav = [
   { id: "dashboard", label: "Dashboard", meta: "Visão geral", icon: "grid", href: "/private/dashboard" },
-  { id: "buildings", label: "Prédios & Andares", meta: "Prédio · andar · setor", icon: "building", href: "/private/predios" },
+  { id: "buildings", label: "Setores & Andares", meta: "Andar · setor", icon: "building", href: "/private/andares" },
   { id: "rooms", label: "Ambientes & Climatização", meta: "Temperatura · energia", icon: "rooms", href: "/private/ambientes" },
   { id: "devices", label: "Dispositivos IoT", meta: "Dispositivo · histórico", icon: "cpu", href: "/private/dispositivos" },
   { id: "device-history", label: "Histórico de dispositivos", meta: "Status · ocorrências", icon: "cpu", href: "/private/historico-dispositivos" },
@@ -16,6 +17,9 @@ const nav = [
   { id: "tickets", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
   { id: "finance", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
   { id: "teams", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
+  { id: "perfil", label: "Minha Conta", meta: "Usuário", icon: "user-round", href: "/private/perfil" },
+ { id: "reclamacoes", label: "Reclamações", meta: "Atendimento", icon: "message-square-warning", href: "/private/reclamacoes"
+},
 ];
 
 const icons = {
@@ -47,6 +51,14 @@ const icons = {
   users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8m13 18v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
   close: <path d="m6 6 12 12M18 6 6 18" />,
   arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
+  'user-round': <>
+  <path d="M20 21a8 8 0 0 0-16 0" />
+  <circle cx="12" cy="8" r="4" />
+</>,
+'message-square-warning': <>
+  <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+  <path d="M12 8v4m0 3h.01" />
+</>,
 };
 
 function Icon({ name, size = 19 }) {
@@ -82,8 +94,9 @@ function Logo() {
   );
 }
 
-export default function Sidebar({ sidebar, setSidebar }) {
+export default function Sidebar({ sidebar, setSidebar, perfil }) {
   const pathname = usePathname();
+  const itensVisiveis = nav.filter((item) => podeAcessar(perfil, item.href));
 
   return (
     <>
@@ -106,7 +119,7 @@ export default function Sidebar({ sidebar, setSidebar }) {
         <nav className="lumora-navigation">
           <span className="lumora-nav-label">PLATAFORMA</span>
 
-          {nav.map((item, index) => {
+          {itensVisiveis.map((item, index) => {
             const active = pathname === item.href ||
               pathname.startsWith(`${item.href}/`);
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./historico-dispositivos.css";
 
 const statusOpcoes = [
@@ -40,12 +41,25 @@ export default function HistoricoDispositivosPage() {
     setCarregando(true);
     setErro("");
     try {
-      const [resDispositivos, resHistorico] = await Promise.all([
+      const [resDispositivos, resHistorico, resAmbientes, resAndares] = await Promise.all([
         requisicaoAPI("/dispositivos?limite=300"),
         requisicaoAPI("/historico-dispositivos"),
+        requisicaoAPI("/ambientes?limite=300"),
+        requisicaoAPI("/andares?limite=300"),
       ]);
-      setDispositivos(resDispositivos.dados || []);
-      setHistorico(resHistorico.dados || []);
+      const idPredioAtual = Number(obterPredioAtual()?.id_predio);
+      const idsAndares = new Set((resAndares.dados || [])
+        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+        .map((andar) => Number(andar.id_andar)));
+      const idsAmbientes = new Set((resAmbientes.dados || [])
+        .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)))
+        .map((ambiente) => Number(ambiente.id_ambiente)));
+      const dispositivosAtuais = (resDispositivos.dados || [])
+        .filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
+      const idsDispositivos = new Set(dispositivosAtuais.map((d) => Number(d.id_dispositivo)));
+      setDispositivos(dispositivosAtuais);
+      setHistorico((resHistorico.dados || [])
+        .filter((registro) => idsDispositivos.has(Number(registro.id_dispositivo))));
     } catch (e) {
       setErro(e.message || "Não foi possível carregar os dados.");
     } finally {

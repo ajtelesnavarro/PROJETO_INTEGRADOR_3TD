@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { requisicaoAPI } from "@/services/api";
 import "./header.css";
 
 function HeaderIcon({ name, size = 18 }) {
@@ -42,7 +43,8 @@ export default function Header({
   userRole = "Tanto faz",
   onLogout,
 }) {
-  const [alerts, setAlerts] = useState(false);
+  const [alertasAbertos, setAlertasAbertos] = useState(false);
+  const [alertas, setAlertas] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const searchRef = useRef(null);
 
@@ -61,6 +63,24 @@ export default function Header({
 
     return () => {
       window.removeEventListener("keydown", handleShortcut);
+    };
+  }, []);
+
+  useEffect(() => {
+    let ativo = true;
+    const carregarAlertas = async () => {
+      try {
+        const resposta = await requisicaoAPI("/alertas-limites");
+        if (ativo) setAlertas(resposta.dados || []);
+      } catch {
+        if (ativo) setAlertas([]);
+      }
+    };
+    carregarAlertas();
+    const intervalo = window.setInterval(carregarAlertas, 60_000);
+    return () => {
+      ativo = false;
+      window.clearInterval(intervalo);
     };
   }, []);
 
@@ -104,75 +124,35 @@ export default function Header({
 
         <div className="lumora-alert-wrapper">
           <button
-            className={`lumora-header-icon ${alerts ? "selected" : ""}`}
-            onClick={() => setAlerts(!alerts)}
+            className={`lumora-header-icon ${alertasAbertos ? "selected" : ""}`}
+            onClick={() => setAlertasAbertos(!alertasAbertos)}
             aria-label="Notificações"
-            aria-expanded={alerts}
+            aria-expanded={alertasAbertos}
           >
             <HeaderIcon name="bell" />
-            <i className="lumora-alert-count">3</i>
+            {alertas.length > 0 && <i className="lumora-alert-count">{alertas.length > 99 ? "99+" : alertas.length}</i>}
           </button>
 
-          {alerts && (
+          {alertasAbertos && (
             <>
-              <button
-                className="lumora-dropdown-overlay"
-                onClick={() => setAlerts(false)}
-                aria-label="Fechar notificações"
-              />
-
+              <button className="lumora-dropdown-overlay" onClick={() => setAlertasAbertos(false)} aria-label="Fechar notificações" />
               <div className="lumora-alert-dropdown">
                 <div className="lumora-alert-heading">
-                  <div>
-                    <b>Notificações</b>
-                    <span>Atividades recentes do sistema</span>
-                  </div>
-
-                  <span className="lumora-alert-new">3 novas</span>
+                  <div><b>Notificações</b><span>Leituras fora dos limites do prédio atual</span></div>
+                  {alertas.length > 0 && <span className="lumora-alert-new">{alertas.length} ativas</span>}
                 </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol danger">
-                    <HeaderIcon name="alert" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Dispositivo requer atenção</b>
-                    <p>Um dispositivo está com funcionamento irregular</p>
-                    <small>Há 4 minutos</small>
-                  </div>
-                </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol warning">
-                    <HeaderIcon name="alert" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Temperatura acima do limite</b>
-                    <p>Verifique as condições do ambiente monitorado</p>
-                    <small>Há 12 minutos</small>
-                  </div>
-                </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol info">
-                    <HeaderIcon name="building" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Atualização do sistema</b>
-                    <p>Os dados operacionais foram atualizados</p>
-                    <small>Há 25 minutos</small>
-                  </div>
-                </div>
-
-                <button
-                  className="lumora-alert-footer"
-                  onClick={() => setAlerts(false)}
-                >
-                  Fechar notificações
-                </button>
+                {alertas.length ? alertas.map((alerta, indice) => {
+                  const titulo = alerta.tipo === "temperatura" ? "Temperatura" : alerta.tipo === "iluminacao" ? "Iluminação" : alerta.motivo === "potencia" ? "Potência elétrica" : "Consumo de energia";
+                  const acima = Number(alerta.valor) > Number(alerta.limite_maximo);
+                  const limite = alerta.motivo === "potencia" ? "máximo " + Number(alerta.limite_maximo).toLocaleString("pt-BR") + " " + alerta.unidade : Number(alerta.limite_minimo).toLocaleString("pt-BR") + "–" + Number(alerta.limite_maximo).toLocaleString("pt-BR") + " " + alerta.unidade;
+                  return (
+                    <div className="lumora-alert-item" key={alerta.id_dispositivo + "-" + alerta.tipo + "-" + alerta.motivo + "-" + indice}>
+                      <span className="lumora-alert-symbol danger"><HeaderIcon name="alert" size={16} /></span>
+                      <div><b>{titulo} {acima ? "acima" : "abaixo"} do limite</b><p>{alerta.ambiente} · {alerta.dispositivo}: {Number(alerta.valor).toLocaleString("pt-BR")} {alerta.unidade} ({limite})</p><small>{alerta.data_hora ? new Date(alerta.data_hora).toLocaleString("pt-BR") : "Leitura recente"}</small></div>
+                    </div>
+                  );
+                }) : <p className="lumora-alert-empty">Nenhuma leitura fora dos limites configurados.</p>}
+                <button className="lumora-alert-footer" onClick={() => setAlertasAbertos(false)}>Fechar notificações</button>
               </div>
             </>
           )}

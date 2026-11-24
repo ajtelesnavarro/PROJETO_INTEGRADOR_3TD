@@ -1,25 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./reclamacoes.css";
-
-/*
-  API usada por esta página (resposta: { dados } | erro: { erro }):
-
-  GET   /auth/me                       usuário logado: id_usuario, nome, perfil
-  GET   /reclamacoes                   locador recebe só as dele (o backend filtra)
-  POST  /reclamacoes                   o id_usuario_abertura vem do token
-  PUT   /reclamacoes/:id               edita a reclamação
-  PATCH /reclamacoes/:id/status        corpo: { status_chamado }
-  PATCH /reclamacoes/:id/responsavel   corpo: { id_usuario_responsavel }
-  GET   /usuarios                      id_usuario, nome, perfil
-  GET   /ambientes                     id_ambiente, nome
-  GET   /dispositivos                  id_dispositivo, id_ambiente, nome
-
-  Os campos têm o mesmo nome das colunas do banco (ex.: status_chamado).
-*/
-
-/* ---------- Constantes (iguais aos ENUMs do banco) ---------- */
 
 const statusChamado = {
   aberto: { rotulo: "Aberto", cor: "amber" },
@@ -188,19 +171,30 @@ export default function Reclamacoes({ toast }) {
 
     async function carregarDados() {
       try {
-        const [eu, lista, pessoas, locais, aparelhos] = await Promise.all([
+        const [eu, lista, pessoas, locais, aparelhos, pavimentos] = await Promise.all([
           chamarApi("/auth/me"),
           chamarApi("/reclamacoes"),
           chamarApi("/usuarios"),
           chamarApi("/ambientes"),
           chamarApi("/dispositivos"),
+          chamarApi("/andares"),
         ]);
         if (!ativo) return;
+        const idPredioAtual = Number(obterPredioAtual()?.id_predio ?? eu?.id_predio);
+        const idsAndares = new Set(pavimentos
+          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+          .map((andar) => Number(andar.id_andar)));
+        const locaisAtuais = locais.filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)));
+        const idsAmbientes = new Set(locaisAtuais.map((ambiente) => Number(ambiente.id_ambiente)));
+        const aparelhosAtuais = aparelhos.filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
+        const idsDispositivos = new Set(aparelhosAtuais.map((dispositivo) => Number(dispositivo.id_dispositivo)));
         setUsuarioLogado(eu);
-        setReclamacoes(lista);
-        setUsuarios(pessoas);
-        setAmbientes(locais);
-        setDispositivos(aparelhos);
+        setReclamacoes(lista.filter((reclamacao) =>
+          idsAmbientes.has(Number(reclamacao.id_ambiente)) || idsDispositivos.has(Number(reclamacao.id_dispositivo))
+        ));
+        setUsuarios(pessoas.filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
+        setAmbientes(locaisAtuais);
+        setDispositivos(aparelhosAtuais);
       } catch (e) {
         if (ativo) setErro(mensagemDoErro(e));
       } finally {

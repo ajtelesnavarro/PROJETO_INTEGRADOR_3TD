@@ -1,8 +1,23 @@
 import { pool } from "../config/database.js";
 import { validarId, validarNumero } from "./recursos/validacaoService.js";
 
-export async function buscarAtual(idPredioRecebido) {
+async function validarPredioDoUsuario(idPredioRecebido, usuario) {
   const idPredio = validarId(idPredioRecebido, "ID do prédio");
+  const [usuarios] = await pool.query(
+    "SELECT id_predio FROM usuario WHERE id_usuario = ? LIMIT 1",
+    [usuario?.id]
+  );
+  const idPredioAtual = usuarios[0]?.id_predio;
+  if (!idPredioAtual || Number(idPredioAtual) !== idPredio) {
+    const erro = new Error("A tarifa só pode ser consultada ou alterada no prédio vinculado ao seu usuário.");
+    erro.status = 403;
+    throw erro;
+  }
+  return idPredio;
+}
+
+export async function buscarAtual(idPredioRecebido, usuario) {
+  const idPredio = await validarPredioDoUsuario(idPredioRecebido, usuario);
   const [linhas] = await pool.query(
     `SELECT *
      FROM tarifa_energia
@@ -17,7 +32,7 @@ export async function buscarAtual(idPredioRecebido) {
 }
 
 export async function definir(idPredioRecebido, dados, usuario) {
-  const idPredio = validarId(idPredioRecebido, "ID do prédio");
+  const idPredio = await validarPredioDoUsuario(idPredioRecebido, usuario);
   const valorKwh = validarNumero(dados?.valor_kwh, "valor por kWh");
   if (valorKwh < 0) throw new TypeError("A tarifa não pode ser negativa.");
 

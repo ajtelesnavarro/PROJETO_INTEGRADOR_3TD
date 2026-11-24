@@ -5,10 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, unwrap } from "@/components/lib/api";
 
 export const PERMISSOES_POR_PERFIL = {
-  administrador: ["dashboard", "predios", "ambientes", "dispositivos", "acessos", "ocorrencias", "equipes", "reclamacoes", "orcamentos", "historico", "versao", "perfil"],
-  manutencao: ["dashboard", "ambientes", "dispositivos", "ocorrencias", "historico", "versao", "perfil"],
-  porteiro: ["dashboard", "acessos", "ocorrencias", "historico", "versao", "perfil"],
-  locador: ["dashboard", "historico", "versao", "perfil"],
+  administrador: ["dashboard", "predios", "ambientes", "dispositivos", "acessos", "ocorrencias", "equipes", "reclamacoes", "orcamentos", "historico", "perfil"],
+  manutencao: ["dashboard", "ambientes", "dispositivos", "ocorrencias", "historico", "perfil"],
+  porteiro: ["dashboard", "acessos", "ocorrencias", "historico", "perfil"],
+  locador: ["dashboard", "historico", "perfil", "reclamacoes"],
 };
 
 export const ITEM_PERMISSAO = {
@@ -24,7 +24,7 @@ export const ITEM_PERMISSAO = {
   "/private/orcamentos": "orcamentos",
   "/private/historico": "historico",
   "/private/versao": "versao",
-  "/private/perfil": "perfil",
+  "/private/perfil": "perfil"
 };
 
 export function podeAcessar(perfil, pathname) {
@@ -40,10 +40,10 @@ export default function RoleGuard({ children }) {
   useEffect(() => {
     let ativo = true;
     const token = localStorage.getItem("lumora_token");
-    if (!token) {
-      router.replace("/public/login");
-      return;
-    }
+    // if (!token) {
+    //   router.replace("/login");
+    //   return;
+    // }
     apiFetch("/auth/me")
       .then((data) => {
         const usuario = unwrap(data);
@@ -56,7 +56,7 @@ export default function RoleGuard({ children }) {
       })
       .catch(() => {
         localStorage.removeItem("lumora_token");
-        router.replace("/public/login");
+        router.replace("/login");
       });
     return () => { ativo = false; };
   }, [pathname, router]);

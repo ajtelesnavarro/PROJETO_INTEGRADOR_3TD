@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./ocorrencias.css";
 
 function Icon({ name, size = 18 }) {
@@ -116,22 +117,30 @@ export default function Ocorrencias() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resOc, resDisp, resAmb, resEq] = await Promise.all([
+      const [resOc, resDisp, resAmb, resAndares, resEq] = await Promise.all([
         requisicaoAPI("/ocorrencias?limite=200"),
         requisicaoAPI("/dispositivos?limite=200"),
         requisicaoAPI("/ambientes?limite=200"),
+        requisicaoAPI("/andares?limite=200"),
         requisicaoAPI("/equipes"),
       ]);
 
       const listaOc = resOc.dados || [];
-      const listaDisp = resDisp.dados || [];
-      const listaEq = resEq.dados || [];
+      const idPredioAtual = Number(obterPredioAtual()?.id_predio);
+      const idsAndares = new Set((resAndares.dados || [])
+        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+        .map((andar) => Number(andar.id_andar)));
+      const listaAmb = (resAmb.dados || []).filter((amb) => idsAndares.has(Number(amb.id_andar)));
+      const idsAmbientes = new Set(listaAmb.map((amb) => Number(amb.id_ambiente)));
+      const listaDisp = (resDisp.dados || []).filter((disp) => idsAmbientes.has(Number(disp.id_ambiente)));
+      const idsDispositivos = new Set(listaDisp.map((disp) => Number(disp.id_dispositivo)));
+      const listaEq = (resEq.dados || []).filter((eq) => Number(eq.id_predio) === idPredioAtual);
 
-      setRawOccurrences(listaOc);
+      setRawOccurrences(listaOc.filter((oc) => idsDispositivos.has(Number(oc.id_dispositivo))));
       setDispositivos(listaDisp);
-      setAmbientes(resAmb.dados || []);
+      setAmbientes(listaAmb);
       setEquipes(listaEq);
-      setUsuarios(resEq.usuarios || []);
+      setUsuarios((resEq.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
 
       setForm((prev) => ({
         ...prev,

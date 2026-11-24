@@ -43,6 +43,12 @@ const rotas = [
         permiteExcluir: true
     },
     {
+        nome: 'setores',
+        escrita: escritaPredios,
+        permiteAtualizar: true,
+        permiteExcluir: true
+    },
+    {
         nome: 'ambientes',
         escrita: escritaPredios,
         permiteAtualizar: true,

@@ -2,6 +2,7 @@
 import * as PredioService from '../services/recursos/predioService.js';
 import * as DispositivoService from '../services/recursos/dispositivoService.js';
 import * as AndarService from '../services/recursos/andarService.js';
+import * as SetorService from '../services/recursos/setorService.js';
 import * as AmbienteService from '../services/recursos/ambienteService.js';
 import * as OcorrenciaService from '../services/recursos/ocorrenciaService.js';
 import * as AcessoService from '../services/recursos/acessoService.js';
@@ -12,6 +13,7 @@ import * as LeituraService from '../services/recursos/leituraService.js';
 const servicos = {
     predios: PredioService,
     andares: AndarService,
+    setores: SetorService,
     ambientes: AmbienteService,
     dispositivos: DispositivoService,
     ocorrencias: OcorrenciaService,

@@ -380,6 +380,14 @@
   font-size: 9px;
 }
 
+.lumora-alert-empty {
+  margin: 0;
+  padding: 18px 4px 6px;
+  color: #7D8AA0;
+  font-size: 11px;
+  text-align: center;
+}
+
 .lumora-alert-footer {
   width: 100%;
   margin-top: 13px;

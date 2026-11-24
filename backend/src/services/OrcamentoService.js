@@ -9,6 +9,7 @@ const STATUS_VALIDOS = [
   "recusado",
   "expirado",
 ];
+const REGEX_EMAIL = /^[^\s@]+@[^\s@]+$/;
 
 export function criarOrcamentoService({ orcamentoModel }) {
   async function criar(dados) {
@@ -36,7 +37,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
     if (
       !nomeResponsavel ||
       !nomeEmpresa ||
-      !email ||
+      !REGEX_EMAIL.test(email) ||
       quantidadeAndares <= 0 ||
       quantidadeAmbientes <= 0
     ) {

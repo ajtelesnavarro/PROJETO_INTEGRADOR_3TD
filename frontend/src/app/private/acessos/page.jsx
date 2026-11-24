@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./acessos.css";
 
 function AccessIcon({ name, size = 18 }) {
@@ -131,14 +132,29 @@ export default function Acessos() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resEventos, resCredenciais] = await Promise.all([
+      const [resEventos, resCredenciais, resAmbientes, resAndares, resUsuarios] = await Promise.all([
         requisicaoAPI("/acessos-detalhados"),
         requisicaoAPI("/credenciais"),
+        requisicaoAPI("/ambientes?limite=300"),
+        requisicaoAPI("/andares?limite=300"),
+        requisicaoAPI("/usuarios?limite=300"),
       ]);
 
-      const listaEv = resEventos.dados || [];
+      const idPredioAtual = Number(obterPredioAtual()?.id_predio);
+      const idsAndares = new Set((resAndares.dados || [])
+        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+        .map((andar) => Number(andar.id_andar)));
+      const idsAmbientes = new Set((resAmbientes.dados || [])
+        .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)))
+        .map((ambiente) => Number(ambiente.id_ambiente)));
+      const idsUsuarios = new Set((resUsuarios.dados || [])
+        .filter((usuario) => Number(usuario.id_predio) === idPredioAtual)
+        .map((usuario) => Number(usuario.id_usuario)));
+      const listaEv = (resEventos.dados || [])
+        .filter((evento) => idsAmbientes.has(Number(evento.id_ambiente)));
       setRawEvents(listaEv);
-      setRawTokens(resCredenciais.dados || []);
+      setRawTokens((resCredenciais.dados || [])
+        .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
 
       if (listaEv.length > 0) {
         setSelected((prev) => prev ?? listaEv[0].id_evento);

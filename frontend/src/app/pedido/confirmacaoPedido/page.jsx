@@ -118,12 +118,12 @@ export default function ConfirmacaoPedidoPage() {
                         <div className="confirmacao-predio-sucesso">
                             <h3>Prédio cadastrado!</h3>
                             <p><strong>{predioCriado.nome_predio || dadosPredio.nome_predio}</strong> foi vinculado ao pedido #{pagamento.id_pedido}.</p>
-                            <p>{predioCriado.quantidade_andares ?? orcamento?.quantidade_andares ?? 0} andares foram criados.</p>
+                            <p>Agora você pode cadastrar manualmente os andares, ambientes e dispositivos do prédio.</p>
                         </div>
                     ) : (
                         <form className="confirmacao-predio-form" onSubmit={cadastrarPredio}>
                             <h3>Cadastre o prédio do pedido</h3>
-                            <p>Informe o endereço para criar o prédio e os {orcamento?.quantidade_andares ?? ""} andares contratados.</p>
+                            <p>Informe os dados do prédio. Os andares, ambientes e dispositivos serão cadastrados manualmente depois.</p>
                             {erroPredio && <p className="confirmacao-erro">{erroPredio}</p>}
                             <label>Nome do prédio<input name="nome_predio" value={dadosPredio.nome_predio} onChange={atualizarCampoPredio} required maxLength={100} /></label>
                             <label>CEP<input name="cep" value={dadosPredio.cep} onChange={atualizarCampoPredio} required maxLength={9} placeholder="00000-000" /></label>

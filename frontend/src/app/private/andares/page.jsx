@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./predios.css";
 
 function Icon({ children }) {
@@ -57,13 +58,17 @@ export default function PrediosAndares() {
   const [predioSelecionadoId, setPredioSelecionadoId] = useState(null);
   const [andaresBrutos, setAndaresBrutos] = useState([]);
   const [ambientesBrutos, setAmbientesBrutos] = useState([]);
+  const [setoresBrutos, setSetoresBrutos] = useState([]);
   const [dispositivosBrutos, setDispositivosBrutos] = useState([]);
+  const [usuariosPredio, setUsuariosPredio] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
   const [pesquisa, setPesquisa] = useState("");
   const [selecionado, setSelecionado] = useState(null);
   const [modalNovoAndar, setModalNovoAndar] = useState(false);
+  const [modalNovoSetor, setModalNovoSetor] = useState(false);
+  const [novoSetor, setNovoSetor] = useState({ id_andar: "", nome_setor: "", descricao: "", id_usuario_responsavel: "" });
   const [modalEditarAndar, setModalEditarAndar] = useState(null);
   const [modalPredio, setModalPredio] = useState(null);
   const [mensagem, setMensagem] = useState("");
@@ -82,30 +87,39 @@ export default function PrediosAndares() {
   const carregarDados = useCallback(async () => {
     try {
       setCarregando(true);
-      const [resPredios, resAndares, resAmbientes, resDispositivos] =
+      const [resPredios, resAndares, resAmbientes, resDispositivos, resSetores, resUsuarios] =
         await Promise.all([
           requisicaoAPI("/predios?limite=200"),
           requisicaoAPI("/andares?limite=200"),
           requisicaoAPI("/ambientes?limite=200"),
           requisicaoAPI("/dispositivos?limite=200"),
+          requisicaoAPI("/setores?limite=200"),
+          requisicaoAPI("/usuarios?limite=200"),
         ]);
 
-      const listaPredios = deduplicarPor(resPredios.dados, "id_predio").sort(
-        (a, b) => a.id_predio - b.id_predio
-      );
+      const predioDoUsuario = obterPredioAtual();
+      const idPredioAtual = Number(predioDoUsuario?.id_predio);
+      const listaPredios = deduplicarPor(resPredios.dados, "id_predio")
+        .filter((predio) => predio.id_predio === idPredioAtual);
+      const listaAndares = deduplicarPor(resAndares.dados, "id_andar")
+        .filter((andar) => andar.id_predio === idPredioAtual);
+      const idsAndares = new Set(listaAndares.map((andar) => andar.id_andar));
+      const listaSetores = deduplicarPor(resSetores.dados, "id_setor")
+        .filter((setor) => idsAndares.has(setor.id_andar));
+      const listaAmbientes = deduplicarPor(resAmbientes.dados, "id_ambiente")
+        .filter((ambiente) => idsAndares.has(ambiente.id_andar));
+      const idsAmbientes = new Set(listaAmbientes.map((ambiente) => ambiente.id_ambiente));
       setPredios(listaPredios);
-      setAndaresBrutos(deduplicarPor(resAndares.dados, "id_andar"));
-      setAmbientesBrutos(deduplicarPor(resAmbientes.dados, "id_ambiente"));
+      setAndaresBrutos(listaAndares);
+      setSetoresBrutos(listaSetores);
+      setAmbientesBrutos(listaAmbientes);
+      setUsuariosPredio(resUsuarios.dados || []);
       setDispositivosBrutos(
         deduplicarPor(resDispositivos.dados, "id_dispositivo")
+          .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente))
       );
 
-      setPredioSelecionadoId((atual) => {
-        if (atual && listaPredios.some((p) => p.id_predio === atual)) {
-          return atual;
-        }
-        return listaPredios[0]?.id_predio ?? null;
-      });
+      setPredioSelecionadoId(listaPredios[0]?.id_predio ?? null);
     } catch (erro) {
       mostrarMensagem(
         erro.message || "Erro ao carregar dados do edifício."
@@ -134,6 +148,7 @@ export default function PrediosAndares() {
       .filter((a) => a.id_predio === predioAtual.id_predio)
       .sort((a, b) => a.numero_andar - b.numero_andar)
       .map((andar) => {
+        const setoresDoAndar = setoresBrutos.filter((setor) => setor.id_andar === andar.id_andar);
         const ambientesDoAndar = ambientesBrutos.filter(
           (amb) => amb.id_andar === andar.id_andar
         );
@@ -171,9 +186,10 @@ export default function PrediosAndares() {
             capacidade: capacidadeAndar,
           },
           ambientesLista: ambientesDoAndar,
+          setoresLista: setoresDoAndar,
         };
       });
-  }, [predioAtual, andaresBrutos, ambientesBrutos, dispositivosBrutos]);
+  }, [predioAtual, andaresBrutos, setoresBrutos, ambientesBrutos, dispositivosBrutos]);
 
   const indicadoresGerais = useMemo(() => {
     return andaresDoPredio.reduce(
@@ -218,7 +234,6 @@ export default function PrediosAndares() {
       ...predioAtual,
       codigo: `LUM-${String(predioAtual.id_predio).padStart(3, "0")}`,
       nome: predioAtual.nome_predio,
-      tipo: predioAtual.tipo_empreendimento || "Corporativo",
       logradouroDetalhado,
       cidadeUf: `${predioAtual.cidade}, ${predioAtual.estado}`,
       andaresCadastrados: andaresDoPredio.length,
@@ -242,7 +257,6 @@ export default function PrediosAndares() {
       modo: "criar",
       id_predio: null,
       nome_predio: "",
-      tipo_empreendimento: "Corporativo",
       cep: "",
       rua: "",
       numero: "",
@@ -259,7 +273,6 @@ export default function PrediosAndares() {
       modo: "editar",
       id_predio: predio.id_predio,
       nome_predio: predio.nome_predio || "",
-      tipo_empreendimento: predio.tipo_empreendimento || "Corporativo",
       cep: predio.cep || "",
       rua: predio.rua || "",
       numero: predio.numero || "",
@@ -305,6 +318,34 @@ export default function PrediosAndares() {
       mostrarMensagem("Andar cadastrado com sucesso!");
     } catch (erro) {
       mostrarMensagem(erro.message || "Erro ao cadastrar andar.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  function abrirModalNovoSetor(andar) {
+    setNovoSetor({ id_andar: String(andar.id_andar), nome_setor: "", descricao: "", id_usuario_responsavel: "" });
+    setModalNovoSetor(true);
+  }
+
+  async function salvarSetor(event) {
+    event.preventDefault();
+    try {
+      setSalvando(true);
+      await requisicaoAPI("/setores", {
+        method: "POST",
+        body: JSON.stringify({
+          id_andar: Number(novoSetor.id_andar),
+          nome_setor: novoSetor.nome_setor.trim(),
+          descricao: novoSetor.descricao.trim() || null,
+          id_usuario_responsavel: novoSetor.id_usuario_responsavel ? Number(novoSetor.id_usuario_responsavel) : null,
+        }),
+      });
+      setModalNovoSetor(false);
+      await carregarDados();
+      mostrarMensagem("Setor cadastrado com sucesso!");
+    } catch (erro) {
+      mostrarMensagem(erro.message || "Erro ao cadastrar setor.");
     } finally {
       setSalvando(false);
     }
@@ -414,7 +455,6 @@ export default function PrediosAndares() {
 
     const payload = {
       nome_predio: modalPredio.nome_predio.trim(),
-      tipo_empreendimento: modalPredio.tipo_empreendimento.trim(),
       cep: modalPredio.cep.trim(),
       rua: modalPredio.rua.trim(),
       numero: modalPredio.numero.trim(),
@@ -433,6 +473,11 @@ export default function PrediosAndares() {
         });
         if (criado?.dados?.id_predio) {
           setPredioSelecionadoId(criado.dados.id_predio);
+          const predio = {
+            id_predio: criado.dados.id_predio,
+            nome_predio: criado.dados.nome_predio,
+          };
+          sessionStorage.setItem("lumora_predio_atual", JSON.stringify(predio));
         }
         mostrarMensagem("Novo edifício cadastrado!");
       } else {
@@ -466,7 +511,7 @@ export default function PrediosAndares() {
       <header className="pa-heading">
         <div>
           <span className="pa-eyebrow">ESTRUTURA PREDIAL</span>
-          <h1>Prédios & Andares</h1>
+          <h1>Setores & Andares</h1>
           <p>
             Gerencie edifícios, pavimentos e navegue diretamente para os
             ambientes, dispositivos e ocorrências vinculados.
@@ -481,33 +526,9 @@ export default function PrediosAndares() {
             flexWrap: "wrap",
           }}
         >
-          {predios.length > 0 && (
-            <select
-              aria-label="Selecionar edifício"
-              value={predioSelecionadoId ?? ""}
-              onChange={(e) => {
-                setPredioSelecionadoId(Number(e.target.value));
-                setSelecionado(null);
-              }}
-              style={{
-                minHeight: "42px",
-                padding: "0 14px",
-                borderRadius: "10px",
-                border: "1px solid #dce3f1",
-                background: "#fff",
-                color: "#182747",
-                fontWeight: 700,
-                fontSize: "12px",
-              }}
-            >
-              {predios.map((p) => (
-                <option key={p.id_predio} value={p.id_predio}>
-                  {p.nome_predio}
-                </option>
-              ))}
-            </select>
-          )}
+          {predioAtual && <strong className="pa-current-building">{predioAtual.nome_predio}</strong>}
 
+          {!predioAtual && !carregando && (
           <button
             type="button"
             className="pa-detail-secondary"
@@ -516,6 +537,7 @@ export default function PrediosAndares() {
             <span>＋</span>
             Novo prédio
           </button>
+          )}
 
           <button
             type="button"
@@ -914,11 +936,6 @@ export default function PrediosAndares() {
                 <>
                   <div className="pa-detail-info-grid">
                     <div>
-                      <span>Tipo de empreendimento</span>
-                      <strong>{selecionado.dados.tipo}</strong>
-                    </div>
-
-                    <div>
                       <span>Andares cadastrados</span>
                       <strong>{selecionado.dados.andaresCadastrados}</strong>
                     </div>
@@ -1046,6 +1063,24 @@ export default function PrediosAndares() {
                         {selecionado.dados.indicadores.dispositivos}
                       </strong>
                     </div>
+                  </div>
+
+                  <div className="pa-detail-list">
+                    <div className="pa-detail-list-heading">
+                      <span>SETORES DESTE ANDAR</span>
+                      <b>{selecionado.dados.setoresLista.length}</b>
+                    </div>
+                    {selecionado.dados.setoresLista.length ? (
+                      selecionado.dados.setoresLista.map((setor) => (
+                        <div className="pa-detail-sector" key={setor.id_setor}>
+                          <span className="pa-sector-icon">▦</span>
+                          <span><strong>{setor.nome_setor}</strong><small>{setor.descricao || "Sem descrição"}</small></span>
+                        </div>
+                      ))
+                    ) : <p className="pa-no-sectors">Nenhum setor cadastrado neste andar.</p>}
+                    <button type="button" className="pa-detail-secondary" style={{ width: "100%", marginTop: "10px" }} onClick={() => abrirModalNovoSetor(selecionado.dados)}>
+                      Adicionar setor
+                    </button>
                   </div>
 
                   <div className="pa-detail-list">
@@ -1240,6 +1275,29 @@ export default function PrediosAndares() {
         </div>
       )}
 
+      {modalNovoSetor && (
+        <div className="pa-modal-layer" onMouseDown={() => setModalNovoSetor(false)}>
+          <form className="pa-modal" onSubmit={salvarSetor} onMouseDown={(event) => event.stopPropagation()}>
+            <div className="pa-modal-header">
+              <div><span className="pa-eyebrow">ESTRUTURA PREDIAL</span><h2>Novo setor</h2><p>Cadastre o setor no andar selecionado.</p></div>
+              <button type="button" className="pa-close-button" onClick={() => setModalNovoSetor(false)}>×</button>
+            </div>
+            <label>Nome do setor<input required maxLength={100} value={novoSetor.nome_setor} onChange={(event) => setNovoSetor((atual) => ({ ...atual, nome_setor: event.target.value }))} /></label>
+            <label>Descrição<textarea maxLength={255} rows={3} value={novoSetor.descricao} onChange={(event) => setNovoSetor((atual) => ({ ...atual, descricao: event.target.value }))} /></label>
+            <label>Responsável (opcional)
+              <select value={novoSetor.id_usuario_responsavel} onChange={(event) => setNovoSetor((atual) => ({ ...atual, id_usuario_responsavel: event.target.value }))}>
+                <option value="">Sem responsável</option>
+                {usuariosPredio.map((usuario) => <option key={usuario.id_usuario} value={String(usuario.id_usuario)}>{usuario.nome}</option>)}
+              </select>
+            </label>
+            <div className="pa-modal-actions">
+              <button type="button" className="pa-detail-secondary" onClick={() => setModalNovoSetor(false)}>Cancelar</button>
+              <button type="submit" className="pa-detail-primary" disabled={salvando}>{salvando ? "Salvando..." : "Cadastrar setor"}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* Modal para editar andar */}
       {modalEditarAndar && (
         <div
@@ -1380,24 +1438,10 @@ export default function PrediosAndares() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: "1fr",
                 gap: "10px",
               }}
             >
-              <label>
-                Tipo de empreendimento
-                <input
-                  value={modalPredio.tipo_empreendimento}
-                  onChange={(e) =>
-                    setModalPredio((a) => ({
-                      ...a,
-                      tipo_empreendimento: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </label>
-
               <label>
                 CEP
                 <input

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { requisicaoAPI } from "@/services/api";
+import { obterPredioAtual } from "@/services/predioAtual";
 import "./dashboard.css";
 
 function Icon({ name, size = 18 }) {
@@ -341,6 +342,7 @@ export default function DashboardPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [leituras, setLeituras] = useState([]);
   const [predioTarifaId, setPredioTarifaId] = useState("");
+  const [predioTarifaNome, setPredioTarifaNome] = useState("");
   const [tarifaAtual, setTarifaAtual] = useState(null);
   const [valorTarifa, setValorTarifa] = useState("");
   const [carregandoTarifa, setCarregandoTarifa] = useState(false);
@@ -354,9 +356,10 @@ export default function DashboardPage() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resPredios, resAmbientes, resDispositivos, resOcorrencias, resEquipes, resLeituras] =
+      const [resPredios, resAndares, resAmbientes, resDispositivos, resOcorrencias, resEquipes, resLeituras] =
         await Promise.all([
           requisicaoAPI("/predios?limite=200"),
+          requisicaoAPI("/andares?limite=200"),
           requisicaoAPI("/ambientes?limite=200"),
           requisicaoAPI("/dispositivos?limite=200"),
           requisicaoAPI("/ocorrencias?limite=50"),
@@ -364,13 +367,30 @@ export default function DashboardPage() {
           requisicaoAPI("/leituras?limite=200"),
         ]);
 
-      setPredios(resPredios.dados || []);
-      setAmbientes(resAmbientes.dados || []);
-      setDispositivos(resDispositivos.dados || []);
-      setOcorrencias(resOcorrencias.dados || []);
-      setEquipes(resEquipes.dados || []);
-      setUsuarios(resEquipes.usuarios || []);
-      setLeituras(resLeituras.dados || []);
+      const idPredioAtual = Number(obterPredioAtual()?.id_predio);
+      const prediosAtuais = (resPredios.dados || [])
+        .filter((predio) => predio.id_predio === idPredioAtual);
+      const idsAndares = new Set((resAndares.dados || [])
+        .filter((andar) => andar.id_predio === idPredioAtual)
+        .map((andar) => andar.id_andar));
+      const ambientesAtuais = (resAmbientes.dados || [])
+        .filter((ambiente) => idsAndares.has(ambiente.id_andar));
+      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => ambiente.id_ambiente));
+      const dispositivosAtuais = (resDispositivos.dados || [])
+        .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente));
+      const idsDispositivos = new Set(dispositivosAtuais.map((dispositivo) => dispositivo.id_dispositivo));
+
+      setPredios(prediosAtuais);
+      setAmbientes(ambientesAtuais);
+      setDispositivos(dispositivosAtuais);
+      setOcorrencias((resOcorrencias.dados || [])
+        .filter((ocorrencia) => idsDispositivos.has(ocorrencia.id_dispositivo)));
+      setEquipes((resEquipes.dados || [])
+        .filter((equipe) => equipe.id_predio === idPredioAtual));
+      setUsuarios((resEquipes.usuarios || [])
+        .filter((usuario) => usuario.id_predio === idPredioAtual));
+      setLeituras((resLeituras.dados || [])
+        .filter((leitura) => idsDispositivos.has(leitura.dispositivo_id)));
     } catch (erro) {
       showToast(erro.message || "Erro ao carregar indicadores.");
     }
@@ -381,10 +401,15 @@ export default function DashboardPage() {
   }, [carregarDados]);
 
   useEffect(() => {
-    if (!predioTarifaId && predios.length) {
-      setPredioTarifaId(String(predios[0].id_predio));
+    try {
+      const predio = JSON.parse(sessionStorage.getItem("lumora_predio_atual") || "null");
+      setPredioTarifaId(predio?.id_predio ? String(predio.id_predio) : "");
+      setPredioTarifaNome(predio?.nome_predio || "");
+    } catch {
+      setPredioTarifaId("");
+      setPredioTarifaNome("");
     }
-  }, [predios, predioTarifaId]);
+  }, []);
 
   useEffect(() => {
     if (!predioTarifaId) {
@@ -531,9 +556,9 @@ export default function DashboardPage() {
       <section className="dash-metrics">
         <MetricCard
           icon="building"
-          label="Edifícios"
-          value={String(predios.length).padStart(2, "0")}
-          description="Unidades cadastradas"
+          label="Prédio atual"
+          value={predios.length ? "01" : "00"}
+          description="Edifício vinculado à conta"
           color="blue"
           footer={
             <span>
@@ -591,17 +616,11 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        {predios.length ? (
+        {predioTarifaId ? (
           <form className="dash-tarifa-form" onSubmit={salvarTarifa}>
             <label>
-              Prédio
-              <select value={predioTarifaId} onChange={(event) => setPredioTarifaId(event.target.value)} required>
-                {predios.map((predio) => (
-                  <option key={predio.id_predio} value={String(predio.id_predio)}>
-                    {predio.nome_predio}
-                  </option>
-                ))}
-              </select>
+              Prédio atual
+              <input value={predioTarifaNome || `Prédio #${predioTarifaId}`} readOnly />
             </label>
             <label>
               Valor por kWh (R$)
@@ -613,7 +632,7 @@ export default function DashboardPage() {
             <small>A nova tarifa passa a valer hoje e encerra a anterior.</small>
           </form>
         ) : (
-          <p className="dash-tarifa-empty">Cadastre um prédio antes de definir a tarifa.</p>
+          <p className="dash-tarifa-empty">Seu usuário ainda não está vinculado a um prédio.</p>
         )}
       </section>
 
