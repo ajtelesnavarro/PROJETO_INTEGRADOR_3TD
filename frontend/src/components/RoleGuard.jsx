@@ -40,10 +40,10 @@ export default function RoleGuard({ children }) {
   useEffect(() => {
     let ativo = true;
     const token = localStorage.getItem("lumora_token");
-    // if (!token) {
-    //   router.replace("/login");
-    //   return;
-    // }
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
     apiFetch("/auth/me")
       .then((data) => {
         const usuario = unwrap(data);
