@@ -156,6 +156,8 @@ app.use("/api/v1", gestaoRouter);
 // TRATAMENTO DE ERROS
 // ==========================================
 
+// SLA
+
 app.use((_req, res) => {
     return res.status(404).json({
         sucesso: false,
