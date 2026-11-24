@@ -1,3 +1,6 @@
+import { randomBytes } from "node:crypto";
+import bcrypt from "bcryptjs";
+
 const STATUS_VALIDOS = [
   "solicitado",
   "em_analise",
@@ -9,9 +12,10 @@ const STATUS_VALIDOS = [
 
 export function criarOrcamentoService({ orcamentoModel }) {
   async function criar(dados) {
-    const nomeResponsavel = dados.nomeResponsavel || dados.nome_responsavel;
+    const nomeRecebido = dados.nomeResponsavel || dados.nome_responsavel;
+    const nomeResponsavel = typeof nomeRecebido === "string" ? nomeRecebido.trim() : "";
     const nomeEmpresa = dados.nomeEmpresa || dados.nome_empresa;
-    const email = dados.email;
+    const email = typeof dados.email === "string" ? dados.email.trim().toLowerCase() : "";
     const telefone = dados.telefone || "";
     const quantidadeAndares = Number(
       dados.quantidadeAndares ?? dados.quantidade_andares ?? 0
@@ -39,6 +43,10 @@ export function criarOrcamentoService({ orcamentoModel }) {
       throw new Error(
         "Preencha todos os campos obrigatórios (empresa, responsável, e-mail, andares e ambientes)."
       );
+    }
+
+    if (nomeResponsavel.length > 100) {
+      throw new Error("O nome do responsável deve ter no máximo 100 caracteres.");
     }
 
     const servicosDetalhes = await orcamentoModel.buscarServicosPorNome(servicosLista);
@@ -89,13 +97,16 @@ export function criarOrcamentoService({ orcamentoModel }) {
 
     const descricaoBase = (dados.descricao || "").trim();
     const descricaoFinal = descricaoBase || null;
+    const senhaTemporaria = `Lumora@${randomBytes(12).toString("hex")}`;
+    const senhaHashBcrypt = await bcrypt.hash(senhaTemporaria, 12);
+    const senhaHash = senhaHashBcrypt.replace(/^\$2b\$/, () => "$2y$");
 
     const idOrcamento = await orcamentoModel.criar({
-      idUsuario: dados.idUsuario ?? null,
       nomeResponsavel,
       nomeEmpresa,
       email,
       telefone,
+      senhaHash,
       quantidadeAndares,
       quantidadeAmbientes,
       quantidadeDispositivos: quantidadeDispositivos || null,
@@ -109,7 +120,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
     });
 
     const criado = await orcamentoModel.buscarPorId(idOrcamento);
-    return { idOrcamento, dados: criado };
+    return { idOrcamento, dados: criado, senhaTemporaria };
   }
 
   async function listar() {

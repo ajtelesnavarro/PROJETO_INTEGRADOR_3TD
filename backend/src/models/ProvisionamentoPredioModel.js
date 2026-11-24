@@ -19,6 +19,7 @@ export function criarProvisionamentoPredioModel({ pool }) {
 
       const [pagamentos] = await conexao.query(
         `SELECT pg.status_pagamento, p.id_pedido, p.status_pedido,
+                o.id_usuario,
                 p.id_predio, o.quantidade_andares
          FROM pagamento pg
          INNER JOIN pedido p ON p.id_pedido = pg.id_pedido
@@ -40,15 +41,20 @@ export function criarProvisionamentoPredioModel({ pool }) {
         throw erro;
       }
       if (pagamento.id_predio) {
+        if (pagamento.id_usuario) {
+          await conexao.query(
+            "UPDATE usuario SET id_predio = ? WHERE id_usuario = ?",
+            [pagamento.id_predio, pagamento.id_usuario]
+          );
+        }
         await conexao.commit();
         return { id_predio: pagamento.id_predio, jaExistia: true };
       }
 
       const [resultadoPredio] = await conexao.query(
         `INSERT INTO predio (
-           nome_predio, cep, rua, numero, complemento, bairro, cidade, estado,
-           tipo_empreendimento
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           nome_predio, cep, rua, numero, complemento, bairro, cidade, estado
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           dadosPredio.nome_predio,
           dadosPredio.cep,
@@ -58,7 +64,6 @@ export function criarProvisionamentoPredioModel({ pool }) {
           dadosPredio.bairro,
           dadosPredio.cidade,
           dadosPredio.estado,
-          dadosPredio.tipo_empreendimento || "Outro",
         ]
       );
 
@@ -76,6 +81,12 @@ export function criarProvisionamentoPredioModel({ pool }) {
         "UPDATE pedido SET id_predio = ? WHERE id_pedido = ?",
         [idPredio, pagamento.id_pedido]
       );
+      if (pagamento.id_usuario) {
+        await conexao.query(
+          "UPDATE usuario SET id_predio = ? WHERE id_usuario = ?",
+          [idPredio, pagamento.id_usuario]
+        );
+      }
       await conexao.commit();
       return { id_predio: idPredio, jaExistia: false, quantidade_andares: quantidadeAndares };
     } catch (erro) {

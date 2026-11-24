@@ -14,7 +14,26 @@ export function criarOrcamentoModel({ pool }) {
   }
 
   async function criar(dados) {
-    const [resultado] = await pool.query(
+    const conexao = await pool.getConnection();
+    try {
+      await conexao.beginTransaction();
+      const [usuarios] = await conexao.query(
+        "SELECT id_usuario FROM usuario WHERE email = ? LIMIT 1 FOR UPDATE",
+        [dados.email]
+      );
+      if (usuarios.length) {
+        const erro = new Error("Este e-mail já está cadastrado. Informe um e-mail ainda não utilizado.");
+        erro.status = 409;
+        throw erro;
+      }
+
+      const [usuario] = await conexao.query(
+        `INSERT INTO usuario (nome, email, telefone, senha_hash, cpf)
+         VALUES (?, ?, ?, ?, NULL)`,
+        [dados.nomeResponsavel, dados.email, dados.telefone || null, dados.senhaHash]
+      );
+      const idUsuario = usuario.insertId;
+      const [resultado] = await conexao.query(
       `INSERT INTO orcamento (
         id_usuario, nome_responsavel, nome_empresa, email, telefone,
         quantidade_andares, quantidade_ambientes, quantidade_dispositivos,
@@ -22,7 +41,7 @@ export function criarOrcamentoModel({ pool }) {
         prazo_estimado_dias, data_validade, status_orcamento
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        dados.idUsuario ?? null,
+        idUsuario,
         dados.nomeResponsavel,
         dados.nomeEmpresa,
         dados.email,
@@ -38,17 +57,28 @@ export function criarOrcamentoModel({ pool }) {
         dados.dataValidade ?? null,
         dados.statusOrcamento || "solicitado",
       ]
-    );
-
-    const idOrcamento = resultado.insertId;
-    for (const item of dados.servicosDetalhes || []) {
-      await pool.query(
-        `INSERT INTO orcamento_servico (id_orcamento, id_servico, valor_servico)
-         VALUES (?, ?, ?)`,
-        [idOrcamento, item.idServico, item.preco]
       );
+
+      const idOrcamento = resultado.insertId;
+      for (const item of dados.servicosDetalhes || []) {
+        await conexao.query(
+          `INSERT INTO orcamento_servico (id_orcamento, id_servico, valor_servico)
+           VALUES (?, ?, ?)`,
+          [idOrcamento, item.idServico, item.preco]
+        );
+      }
+      await conexao.commit();
+      return idOrcamento;
+    } catch (erro) {
+      await conexao.rollback();
+      if (erro.code === "ER_DUP_ENTRY") {
+        erro.status = 409;
+        erro.message = "Este e-mail já está cadastrado. Informe um e-mail ainda não utilizado.";
+      }
+      throw erro;
+    } finally {
+      conexao.release();
     }
-    return idOrcamento;
   }
 
   async function listar() {

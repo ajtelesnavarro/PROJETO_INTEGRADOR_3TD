@@ -15,7 +15,6 @@ export default function ConfirmacaoPedidoPage() {
     const [predioCriado, setPredioCriado] = useState(null);
     const [dadosPredio, setDadosPredio] = useState({
         nome_predio: "",
-        tipo_empreendimento: "Outro",
         cep: "",
         rua: "",
         numero: "",
@@ -133,7 +132,26 @@ export default function ConfirmacaoPedidoPage() {
                             <label>Complemento (opcional)<input name="complemento" value={dadosPredio.complemento} onChange={atualizarCampoPredio} maxLength={100} /></label>
                             <label>Bairro<input name="bairro" value={dadosPredio.bairro} onChange={atualizarCampoPredio} required maxLength={100} /></label>
                             <label>Cidade<input name="cidade" value={dadosPredio.cidade} onChange={atualizarCampoPredio} required maxLength={100} /></label>
-                            <label>Estado (UF)<input name="estado" value={dadosPredio.estado} onChange={atualizarCampoPredio} required minLength={2} maxLength={2} /></label>
+                            <label>Estado (UF)
+                                <select
+                                    name="estado"
+                                    value={dadosPredio.estado}
+                                    onChange={atualizarCampoPredio}
+                                    required
+                                >
+                                    <option value="">Selecione o estado</option>
+                                    {[
+                                        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES",
+                                        "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR",
+                                        "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC",
+                                        "SP", "SE", "TO"
+                                    ].map((estado) => (
+                                        <option key={estado} value={estado}>
+                                            {estado}
+                                        </option>
+                                    ))}
+                                    </select>
+                            </label>
                             <button type="submit" disabled={salvandoPredio}>{salvandoPredio ? "Cadastrando..." : "Criar prédio"}</button>
                         </form>
                     )}

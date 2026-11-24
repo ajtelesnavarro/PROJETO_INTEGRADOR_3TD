@@ -11,6 +11,7 @@ export default function ResumoOrcamentoPage() {
   const id = searchParams.get("id");
 
   const [orcamento, setOrcamento] = useState(null);
+  const [senhaTemporaria, setSenhaTemporaria] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(false);
@@ -20,6 +21,13 @@ export default function ResumoOrcamentoPage() {
       setErro("Identificador do orçamento não informado.");
       setCarregando(false);
       return;
+    }
+
+    const chaveSenha = `lumora_senha_orcamento_${id}`;
+    const senhaRecebida = sessionStorage.getItem(chaveSenha);
+    if (senhaRecebida) {
+      setSenhaTemporaria(senhaRecebida);
+      sessionStorage.removeItem(chaveSenha);
     }
 
     requisicaoAPI(`/orcamentos/${id}`)
@@ -143,6 +151,16 @@ export default function ResumoOrcamentoPage() {
 
           <span className="resumo-id">ORÇAMENTO Nº {id}</span>
         </header>
+
+        {senhaTemporaria && (
+          <section className="resumo-card" aria-live="polite">
+            <span className="resumo-label">ACESSO À PLATAFORMA</span>
+            <h2>Sua senha temporária</h2>
+            <p>Guarde esta senha agora: por segurança, ela é exibida uma única vez.</p>
+            <p><strong>E-mail:</strong> {orcamento.email}</p>
+            <p><strong>Senha:</strong> <code>{senhaTemporaria}</code></p>
+          </section>
+        )}
 
         {erro && <div className="resumo-alerta">{erro}</div>}
 

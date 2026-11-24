@@ -64,6 +64,13 @@ export default function Orcamento() {
                 body: JSON.stringify(dadosEnvio)
             });
 
+            if (dados.senhaTemporaria) {
+                sessionStorage.setItem(
+                    `lumora_senha_orcamento_${dados.idOrcamento}`,
+                    dados.senhaTemporaria
+                );
+            }
+
             router.push(
                 `/orcamento/resumoOrcamento?id=${dados.idOrcamento}`
             );

@@ -56,10 +56,18 @@ export function criarPagamentoService({
 
         const cep = String(dados.cep).replace(/\D/g, "");
         const estado = String(dados.estado).trim().toUpperCase();
-        const tiposValidos = ["Comercial", "Corporativo", "Residencial", "Outro"];
-        const tipo = dados.tipo_empreendimento || "Outro";
-        if (cep.length !== 8 || estado.length !== 2 || !tiposValidos.includes(tipo)) {
-            const erro = new Error("Confira o CEP, o estado e o tipo do empreendimento.");
+        const estadosValidos = new Set([
+            "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+            "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+            "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+        ]);
+        if (cep.length !== 8) {
+            const erro = new Error("Informe um CEP válido com 8 dígitos.");
+            erro.status = 400;
+            throw erro;
+        }
+        if (!estadosValidos.has(estado)) {
+            const erro = new Error("Selecione uma UF válida.");
             erro.status = 400;
             throw erro;
         }
@@ -73,7 +81,6 @@ export function criarPagamentoService({
             bairro: String(dados.bairro).trim(),
             cidade: String(dados.cidade).trim(),
             estado,
-            tipo_empreendimento: tipo,
         });
     }
 
