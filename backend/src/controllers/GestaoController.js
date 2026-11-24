@@ -235,3 +235,78 @@ export async function listarAcessosDetalhado(_req, res, next) {
         return next(erro);
     }
 }
+
+export async function listarHistoricoDispositivos(_req, res, next) {
+    try {
+        const [dados] = await pool.query(
+            `SELECT h.*, d.nome AS nome_dispositivo, d.tipo_dispositivo
+             FROM historico_dispositivo h
+             INNER JOIN dispositivo d ON d.id_dispositivo = h.id_dispositivo
+             ORDER BY h.data_historico_dispositivo DESC, h.id_historico_dispositivo DESC
+             LIMIT 300`
+        );
+        return res.json({ sucesso: true, dados });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function criarHistoricoDispositivo(req, res, next) {
+    const {
+        id_dispositivo,
+        status_dispositivo,
+        data_inicio_status,
+        data_fim_status,
+        motivo,
+        consumo_estimado_kwh,
+        custo_estimado,
+        observacao,
+    } = req.body;
+    const statusValidos = ["ativo", "instavel", "manutencao", "inativo", "offline"];
+    const idDispositivo = Number(id_dispositivo);
+
+    if (!Number.isInteger(idDispositivo) || idDispositivo <= 0 || !statusValidos.includes(status_dispositivo) || !data_inicio_status) {
+        return res.status(400).json({ sucesso: false, erro: "Informe dispositivo, status e data de início válidos." });
+    }
+
+    const conexao = await pool.getConnection();
+    try {
+        await conexao.beginTransaction();
+        const [dispositivos] = await conexao.query(
+            "SELECT id_dispositivo FROM dispositivo WHERE id_dispositivo = ? FOR UPDATE",
+            [idDispositivo]
+        );
+        if (!dispositivos.length) {
+            await conexao.rollback();
+            return res.status(404).json({ sucesso: false, erro: "Dispositivo não encontrado." });
+        }
+
+        await conexao.query(
+            `INSERT INTO historico_dispositivo (
+                id_dispositivo, status_dispositivo, data_inicio_status, data_fim_status,
+                motivo, consumo_estimado_kwh, custo_estimado, observacao
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                idDispositivo,
+                status_dispositivo,
+                String(data_inicio_status).replace("T", " "),
+                data_fim_status ? String(data_fim_status).replace("T", " ") : null,
+                motivo?.trim() || null,
+                consumo_estimado_kwh === "" || consumo_estimado_kwh == null ? null : Number(consumo_estimado_kwh),
+                custo_estimado === "" || custo_estimado == null ? null : Number(custo_estimado),
+                observacao?.trim() || null,
+            ]
+        );
+        await conexao.query(
+            "UPDATE dispositivo SET status_dispositivo = ? WHERE id_dispositivo = ?",
+            [status_dispositivo, idDispositivo]
+        );
+        await conexao.commit();
+        return res.status(201).json({ sucesso: true, mensagem: "Histórico registrado." });
+    } catch (erro) {
+        await conexao.rollback();
+        return next(erro);
+    } finally {
+        conexao.release();
+    }
+}

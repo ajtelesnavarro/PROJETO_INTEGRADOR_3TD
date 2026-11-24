@@ -51,7 +51,19 @@
 .confirmacao-carregando,
 .confirmacao-erro { padding: 20px; border-radius: 12px; background: #fff; }
 .confirmacao-erro { color: #b42318; }
+.confirmacao-predio-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 26px; padding: 20px; border: 1px solid #ece6f2; border-radius: 14px; text-align: left; }
+.confirmacao-predio-form h3, .confirmacao-predio-form > p, .confirmacao-predio-form button { grid-column: 1 / -1; }
+.confirmacao-predio-form h3 { margin: 0; color: #352b43; }
+.confirmacao-predio-form > p { margin: 0; color: #625b6d; font-size: 13px; line-height: 1.5; }
+.confirmacao-predio-form label { display: grid; gap: 6px; color: #625b6d; font-size: 12px; font-weight: 700; }
+.confirmacao-predio-form input, .confirmacao-predio-form select { width: 100%; min-width: 0; padding: 10px; border: 1px solid #ded8e8; border-radius: 8px; color: #352b43; background: #fff; font: inherit; }
+.confirmacao-predio-form button { padding: 12px; border: 0; border-radius: 9px; color: #fff; background: #6247aa; font-weight: 750; cursor: pointer; }
+.confirmacao-predio-form button:disabled { opacity: .6; cursor: wait; }
+.confirmacao-predio-sucesso { margin-top: 24px; padding: 18px; border-radius: 12px; background: #eaf8f0; color: #245d3b; }
+.confirmacao-predio-sucesso h3 { margin-top: 0; }
+.confirmacao-predio-sucesso p { margin-bottom: 0; }
 
 @media (max-width: 520px) {
   .confirmacao-dados { grid-template-columns: 1fr; }
+  .confirmacao-predio-form { grid-template-columns: 1fr; padding: 16px; }
 }

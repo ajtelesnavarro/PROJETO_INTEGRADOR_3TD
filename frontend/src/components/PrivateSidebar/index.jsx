@@ -11,6 +11,7 @@ const nav = [
   { id: "buildings", label: "Prédios & Andares", meta: "Prédio · andar · setor", icon: "building", href: "/private/predios" },
   { id: "rooms", label: "Ambientes & Climatização", meta: "Temperatura · energia", icon: "rooms", href: "/private/ambientes" },
   { id: "devices", label: "Dispositivos IoT", meta: "Dispositivo · histórico", icon: "cpu", href: "/private/dispositivos" },
+  { id: "device-history", label: "Histórico de dispositivos", meta: "Status · ocorrências", icon: "cpu", href: "/private/historico-dispositivos" },
   { id: "access", label: "Controle de Acesso", meta: "Credenciais · eventos", icon: "shield", href: "/private/acessos" },
   { id: "tickets", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
   { id: "finance", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },

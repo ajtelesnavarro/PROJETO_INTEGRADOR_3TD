@@ -1141,7 +1141,6 @@ function DispositivosConteudo() {
                   alignItems: "center",
                 }}
               >
-                <small>Alterações salvas diretamente no banco.</small>
                 <button
                   type="button"
                   onClick={() => deleteDevice(selected)}

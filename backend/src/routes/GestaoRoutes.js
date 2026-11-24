@@ -19,3 +19,5 @@ gestaoRouter.get("/credenciais", consulta, GestaoController.listarCredenciais);
 gestaoRouter.patch("/credenciais/:id", adminOuPorteiro, GestaoController.atualizarCredencial);
 
 gestaoRouter.get("/acessos-detalhados", consulta, GestaoController.listarAcessosDetalhado);
+gestaoRouter.get("/historico-dispositivos", consulta, GestaoController.listarHistoricoDispositivos);
+gestaoRouter.post("/historico-dispositivos", adminOuManutencao, GestaoController.criarHistoricoDispositivo);

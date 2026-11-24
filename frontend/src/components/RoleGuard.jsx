@@ -16,6 +16,7 @@ export const ITEM_PERMISSAO = {
   "/private/predios": "predios",
   "/private/ambientes": "ambientes",
   "/private/dispositivos": "dispositivos",
+  "/private/historico-dispositivos": "dispositivos",
   "/private/acessos": "acessos",
   "/private/ocorrencias": "ocorrencias",
   "/private/equipes": "equipes",

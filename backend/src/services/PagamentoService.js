@@ -1,7 +1,8 @@
 export function criarPagamentoService({
     pagamentoModel,
     pedidoModel,
-    orcamentoModel
+    orcamentoModel,
+    provisionamentoPredioModel
 }) {
 
     async function buscarPorId(id) {
@@ -41,6 +42,54 @@ export function criarPagamentoService({
         }
 
         return buscarOrcamentoPorPedido(pagamento.id_pedido);
+    }
+
+    async function criarPredioDoPagamento(idPagamento, dados) {
+        const camposObrigatorios = ["nome_predio", "cep", "rua", "numero", "bairro", "cidade", "estado"];
+        for (const campo of camposObrigatorios) {
+            if (!String(dados?.[campo] ?? "").trim()) {
+                const erro = new Error(`O campo ${campo} é obrigatório.`);
+                erro.status = 400;
+                throw erro;
+            }
+        }
+
+        const cep = String(dados.cep).replace(/\D/g, "");
+        const estado = String(dados.estado).trim().toUpperCase();
+        const tiposValidos = ["Comercial", "Corporativo", "Residencial", "Outro"];
+        const tipo = dados.tipo_empreendimento || "Outro";
+        if (cep.length !== 8 || estado.length !== 2 || !tiposValidos.includes(tipo)) {
+            const erro = new Error("Confira o CEP, o estado e o tipo do empreendimento.");
+            erro.status = 400;
+            throw erro;
+        }
+
+        return provisionamentoPredioModel.criarParaPagamento(idPagamento, {
+            nome_predio: String(dados.nome_predio).trim(),
+            cep: `${cep.slice(0, 5)}-${cep.slice(5)}`,
+            rua: String(dados.rua).trim(),
+            numero: String(dados.numero).trim(),
+            complemento: String(dados.complemento || "").trim() || null,
+            bairro: String(dados.bairro).trim(),
+            cidade: String(dados.cidade).trim(),
+            estado,
+            tipo_empreendimento: tipo,
+        });
+    }
+
+    async function buscarPredioDoPagamento(idPagamento) {
+        const pagamento = await pagamentoModel.buscarPorId(idPagamento);
+        if (!pagamento) {
+            const erro = new Error("Pagamento não encontrado.");
+            erro.status = 404;
+            throw erro;
+        }
+        if (pagamento.status_pagamento !== "aprovado") {
+            const erro = new Error("O pagamento ainda não foi confirmado.");
+            erro.status = 409;
+            throw erro;
+        }
+        return provisionamentoPredioModel.buscarPorPagamento(idPagamento);
     }
 
     async function criar(dados) {
@@ -127,6 +176,8 @@ export function criarPagamentoService({
         criar,
         buscarPorId,
         buscarOrcamentoPorPedido,
-        buscarOrcamentoPorPagamento
+        buscarOrcamentoPorPagamento,
+        criarPredioDoPagamento,
+        buscarPredioDoPagamento
     };
 }

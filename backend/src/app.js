@@ -22,6 +22,7 @@ import { tarifaEnergiaRouter } from "./routes/TarifaEnergiaRoutes.js";
 import { criarOrcamentoModel } from "./models/OrcamentoModels.js";
 import { criarPedidoModel } from "./models/PedidoModels.js";
 import { criarPagamentoModel } from "./models/PagamentoModels.js";
+import { criarProvisionamentoPredioModel } from "./models/ProvisionamentoPredioModel.js";
 
 // Services
 import { criarOrcamentoService } from "./services/OrcamentoService.js";
@@ -97,6 +98,7 @@ app.use("/api/v1/auth", authRouter);
 const orcamentoModel = criarOrcamentoModel({ pool });
 const pedidoModel = criarPedidoModel({ pool });
 const pagamentoModel = criarPagamentoModel({ pool });
+const provisionamentoPredioModel = criarProvisionamentoPredioModel({ pool });
 
 // Services
 const orcamentoService = criarOrcamentoService({
@@ -111,7 +113,8 @@ const pedidoService = criarPedidoService({
 const pagamentoService = criarPagamentoService({
     pagamentoModel,
     pedidoModel,
-    orcamentoModel
+    orcamentoModel,
+    provisionamentoPredioModel
 });
 
 // Controllers

@@ -16,6 +16,7 @@ CREATE TABLE predio (
     bairro VARCHAR(100) NOT NULL,
     cidade VARCHAR(100) NOT NULL,
     estado CHAR(2) NOT NULL,
+    tipo_empreendimento ENUM('Comercial', 'Corporativo', 'Residencial', 'Outro') NOT NULL DEFAULT 'Outro',
 
     INDEX idx_cep (cep)
 ) ENGINE=InnoDB;
@@ -849,6 +850,7 @@ CREATE TABLE orcamento_servico (
 CREATE TABLE pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
     id_orcamento INT NOT NULL UNIQUE,
+    id_predio INT NULL UNIQUE,
     data_pedido DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     valor_contratado DECIMAL(12,2) NOT NULL,
 
@@ -864,6 +866,10 @@ CREATE TABLE pedido (
     CONSTRAINT fk_pedido_orcamento
         FOREIGN KEY (id_orcamento)
         REFERENCES orcamento(id_orcamento),
+
+    CONSTRAINT fk_pedido_predio
+        FOREIGN KEY (id_predio)
+        REFERENCES predio(id_predio),
 
     CONSTRAINT chk_valor_contratado
         CHECK (valor_contratado >= 0)
