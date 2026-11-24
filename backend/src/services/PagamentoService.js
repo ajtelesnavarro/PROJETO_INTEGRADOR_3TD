@@ -1,6 +1,7 @@
 export function criarPagamentoService({
     pagamentoModel,
-    pedidoModel
+    pedidoModel,
+    orcamentoModel
 }) {
 
     async function buscarPorId(id) {
@@ -11,6 +12,35 @@ export function criarPagamentoService({
         }
     
         return pagamento;
+    }
+
+    async function buscarOrcamentoPorPedido(idPedido) {
+        const pedido = await pedidoModel.buscarPorId(idPedido);
+
+        if (!pedido) {
+            throw new Error("Pedido não encontrado.");
+        }
+
+        const orcamento = await orcamentoModel.buscarPorId(pedido.id_orcamento);
+
+        if (!orcamento) {
+            throw new Error("Orçamento não encontrado.");
+        }
+
+        return orcamento;
+    }
+
+    async function buscarOrcamentoPorPagamento(idPagamento) {
+        const pagamento = await pagamentoModel.buscarPorId(idPagamento);
+
+        if (!pagamento) {
+            throw new Error("Pagamento não encontrado.");
+        }
+        if (pagamento.status_pagamento !== "aprovado") {
+            throw new Error("O pagamento ainda não foi aprovado.");
+        }
+
+        return buscarOrcamentoPorPedido(pagamento.id_pedido);
     }
 
     async function criar(dados) {
@@ -95,6 +125,8 @@ export function criarPagamentoService({
 
     return {
         criar,
-        buscarPorId
+        buscarPorId,
+        buscarOrcamentoPorPedido,
+        buscarOrcamentoPorPagamento
     };
 }

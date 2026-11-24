@@ -39,7 +39,7 @@ export default function Header({
   sidebar,
   buildingName = "Edifício cadastrado",
   userName = "Usuário",
-  userRole = "Administrador",
+  userRole = "Tanto faz",
   onLogout,
 }) {
   const [alerts, setAlerts] = useState(false);

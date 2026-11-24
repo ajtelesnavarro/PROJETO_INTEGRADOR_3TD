@@ -110,7 +110,8 @@ const pedidoService = criarPedidoService({
 
 const pagamentoService = criarPagamentoService({
     pagamentoModel,
-    pedidoModel
+    pedidoModel,
+    orcamentoModel
 });
 
 // Controllers

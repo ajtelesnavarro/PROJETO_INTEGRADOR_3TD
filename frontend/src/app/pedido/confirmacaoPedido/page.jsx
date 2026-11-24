@@ -11,15 +11,34 @@ export default function ConfirmacaoPedidoPage() {
     const idPagamento = searchParams.get("idPagamento");
 
     const [pagamento, setPagamento] = useState(null);
+    const [orcamento, setOrcamento] = useState(null);
     const [erro, setErro] = useState("");
 
     useEffect(() => {
-        if (!idPagamento) return;
+  if (!idPagamento) return;
 
-        requisicaoAPI(`/pagamentos/${idPagamento}`)
-            .then(setPagamento)
-            .catch((erro) => setErro(erro.message));
-    }, [idPagamento]);
+  async function carregarConfirmacao() {
+    try {
+      const dadosPagamento = await requisicaoAPI(
+        `/pagamentos/${idPagamento}`
+      );
+      setPagamento(dadosPagamento);
+
+      if (dadosPagamento.status_pagamento === "aprovado") {
+        const dadosOrcamento = await requisicaoAPI(
+          `/pagamentos/${idPagamento}/orcamento`
+        );
+        setOrcamento(dadosOrcamento);
+
+        console.log("Orçamento:", dadosOrcamento);
+      }
+    } catch (erro) {
+      setErro(erro.message);
+    }
+  }
+
+  carregarConfirmacao();
+}, [idPagamento]);
 
     if (!pagamento) {
         return (
@@ -51,6 +70,7 @@ export default function ConfirmacaoPedidoPage() {
                     <h2>Pedido confirmado!</h2>
                     <p>Pagamento aprovado na simulação. Nenhum valor real foi cobrado.</p>
                     <p>Código da transação: {pagamento.codigo_transacao}</p>
+                    {orcamento && <p>Orçamento: {orcamento.nome_empresa}</p>}
                 </>
             ) : pagamento.status_pagamento === "recusado" ? (
                 <>
