@@ -127,9 +127,6 @@ export default function ConfirmacaoPedidoPage() {
                             <p>Informe o endereço para criar o prédio e os {orcamento?.quantidade_andares ?? ""} andares contratados.</p>
                             {erroPredio && <p className="confirmacao-erro">{erroPredio}</p>}
                             <label>Nome do prédio<input name="nome_predio" value={dadosPredio.nome_predio} onChange={atualizarCampoPredio} required maxLength={100} /></label>
-                            <label>Tipo de empreendimento<select name="tipo_empreendimento" value={dadosPredio.tipo_empreendimento} onChange={atualizarCampoPredio}>
-                                <option value="Comercial">Comercial</option><option value="Corporativo">Corporativo</option><option value="Residencial">Residencial</option><option value="Outro">Outro</option>
-                            </select></label>
                             <label>CEP<input name="cep" value={dadosPredio.cep} onChange={atualizarCampoPredio} required maxLength={9} placeholder="00000-000" /></label>
                             <label>Rua<input name="rua" value={dadosPredio.rua} onChange={atualizarCampoPredio} required maxLength={100} /></label>
                             <label>Número<input name="numero" value={dadosPredio.numero} onChange={atualizarCampoPredio} required maxLength={10} /></label>
@@ -144,7 +141,7 @@ export default function ConfirmacaoPedidoPage() {
             ) : pagamento.status_pagamento === "recusado" ? (
                 <>
                     <h2>Pagamento recusado</h2>
-                    <p>N├úo foi possível confirmar seu pedido.</p>
+                    <p>Não foi possível confirmar seu pedido.</p>
                 </>
             ) : (
                 <>
