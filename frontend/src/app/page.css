@@ -1,6 +1,76 @@
 
 /* HERO */
 
+/* ARQUITETURA — TEXTOS MAIORES E SEM FLECHAS */
+
+.architecture .layers .layer {
+    grid-template-columns: 55px 1fr;
+    gap: 20px;
+    padding: 30px 20px;
+    min-height: 115px;
+}
+
+/* Numeração */
+.architecture .layer > span {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Títulos */
+.architecture .layer b {
+    display: block;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* Descrições */
+.architecture .layer small {
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-top: 9px;
+}
+
+/* Primeiro bloco azul */
+.architecture .layers .layer.active {
+    background: linear-gradient(110deg, #172B5E, #2563EB) !important;
+    color: #fff !important;
+    border-left: 3px solid #60A5FA;
+    margin: 0 -15px;
+    padding-left: 32px;
+}
+
+/* Texto branco no primeiro bloco */
+.architecture .layers .layer.active > span,
+.architecture .layers .layer.active b,
+.architecture .layers .layer.active small {
+    color: #fff !important;
+}
+
+/* Remove flechas */
+.architecture .layer i {
+    display: none !important;
+}
+
+/* Responsividade */
+@media (max-width: 560px) {
+    .architecture .layers .layer {
+        grid-template-columns: 38px 1fr;
+        gap: 12px;
+        padding: 24px 12px;
+    }
+
+    .architecture .layer b {
+        font-size: 18px;
+    }
+
+    .architecture .layer small {
+        font-size: 13px;
+    }
+}
+
 .hero {
     position: relative;
     overflow: hidden;
@@ -780,11 +850,19 @@
     color: #a5b1b8;
 }
 
-.layer.active {
-    background: #f4f9f9;
+.architecture .layers .layer.active {
+    background: linear-gradient(110deg, #172B5E, #2563EB) !important;
+    color: #fff !important;
+    border-left: 3px solid #60A5FA;
     margin: 0 -15px;
     padding-left: 15px;
-    border-left: 3px solid var(--aqua);
+}
+
+.architecture .layers .layer.active > span,
+.architecture .layers .layer.active b,
+.architecture .layers .layer.active small,
+.architecture .layers .layer.active i {
+    color: #fff !important;
 }
 
 /* MÉTRICAS */
