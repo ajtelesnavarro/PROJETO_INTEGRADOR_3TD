@@ -1418,8 +1418,10 @@
 .orc-quantity > div { margin-top: 4px; }
 .orc-quantity > div button { width: 30px; height: 30px; }
 .orc-services-grid { gap: 6px; }
-.orc-service-option { min-height: 50px; padding: 6px 9px; }
-.orc-service-symbol { width: 34px; height: 34px; }
+.orc-service-option { min-height: 42px; gap: 8px; padding: 2px 8px; }
+.orc-service-symbol { width: 30px; height: 30px; }
+.orc-service-option > div strong { font-size: 13px; }
+.orc-service-option > div small { font-size: 11px; }
 .orc-price-summary { gap: 5px; margin: 7px 0 0; padding: 8px 10px; }
 .orc-price-summary > div { font-size: 12px; }
 .orc-price-summary .orc-total-line { padding-top: 5px; }

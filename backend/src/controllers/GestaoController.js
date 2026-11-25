@@ -1092,17 +1092,29 @@ export async function editarCredencial(req, res, next) {
         if (bloqueio && !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/.test(bloqueio)) return res.status(400).json({ sucesso: false, erro: "Data de bloqueio inválida." });
         const novoHash = String(novo_token || "").trim();
         if (novoHash.length > 255) return res.status(400).json({ sucesso: false, erro: "O código da credencial é muito longo." });
-        const valores = [idUsuario, tipo_credencial, status, bloqueio];
-        let sql = "UPDATE credenciais_acesso c INNER JOIN usuario u ON u.id_usuario = c.id_usuario SET c.id_usuario = ?, c.tipo_credencial = ?, c.status = ?, c.bloqueado_ate = ?";
-        if (novoHash) {
-            sql += ", c.token_hash = ?";
-            valores.push(createHash("sha256").update(novoHash).digest("hex"));
+        const tokenHash = novoHash ? createHash("sha256").update(novoHash).digest("hex") : null;
+        if (tokenHash) {
+            const [[duplicada]] = await pool.query(
+                "SELECT id_credencial FROM credenciais_acesso WHERE token_hash = ? AND id_credencial <> ? LIMIT 1",
+                [tokenHash, idCredencial]
+            );
+            if (duplicada) return res.status(409).json({ sucesso: false, erro: "Este código de credencial já está cadastrado. Informe outro código." });
         }
-        sql += " WHERE c.id_credencial = ? AND u.id_predio = ?";
+        const valores = [idUsuario, tipo_credencial, status, bloqueio];
+        let sql = "UPDATE credenciais_acesso SET id_usuario = ?, tipo_credencial = ?, status = ?, bloqueado_ate = ?";
+        if (novoHash) {
+            sql += ", token_hash = ?";
+            valores.push(tokenHash);
+        }
+        sql += " WHERE id_credencial = ? AND id_usuario IN (SELECT id_usuario FROM usuario WHERE id_predio = ?)";
         valores.push(idCredencial, idPredio);
         await pool.query(sql, valores);
         return res.json({ sucesso: true, mensagem: "Credencial atualizada." });
-    } catch (erro) { return next(erro); }
+    } catch (erro) {
+        if (erro.code === "ER_DUP_ENTRY") return res.status(409).json({ sucesso: false, erro: "Este código de credencial já está cadastrado. Informe outro código." });
+        if (["ER_NO_REFERENCED_ROW_2", "ER_TRUNCATED_WRONG_VALUE", "ER_DATA_TOO_LONG"].includes(erro.code)) return res.status(400).json({ sucesso: false, erro: "Confira os dados informados para a credencial." });
+        return next(erro);
+    }
 }
 
 export async function atualizarPermissaoAcesso(req, res, next) {

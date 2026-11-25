@@ -327,8 +327,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    height: 39px;
-    padding: 0 10px;
+    min-height: 46px;
+    padding: 0 13px;
     border: 1px solid #E6EAF2;
     border-radius: 8px;
     background: #fff;
@@ -336,20 +336,20 @@
 }
 
 .oc-filter select {
-    max-width: 150px;
+    max-width: 190px;
     border: 0;
     outline: 0;
     background: transparent;
     color: #53627C;
     font-family: inherit;
-    font-size: 11px;
+    font-size: 14px;
     cursor: pointer;
 }
 
 .oc-result-count {
     margin-left: auto;
     color: #98A3B5;
-    font-size: 10px;
+    font-size: 12px;
     white-space: nowrap;
 }
 
