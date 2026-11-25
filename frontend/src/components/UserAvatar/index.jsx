@@ -5,7 +5,7 @@ import "./user-avatar.css";
 
 function montarUrlFoto(foto) {
   if (!foto || /^(https?:|data:|blob:)/i.test(foto)) return foto || "";
-  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "");
+  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1").replace(/\/+$/, "");
   const origem = base.replace(/\/api(?:\/v1)?$/, "");
   return `${origem}${foto.startsWith("/") ? "" : "/"}${foto}`;
 }

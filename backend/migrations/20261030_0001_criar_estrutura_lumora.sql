@@ -1,9 +1,9 @@
 
-CREATE DATABASE IF NOT EXISTS db_lumora
+CREATE DATABASE IF NOT EXISTS app_db
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE db_lumora;
+USE app_db;
 
 -- 1. PREDIO
 

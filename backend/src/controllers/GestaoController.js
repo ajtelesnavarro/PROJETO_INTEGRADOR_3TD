@@ -74,7 +74,8 @@ export async function listarUsuarios(req, res, next) {
                 nome,
                 email,
                 telefone,
-                perfil
+                perfil,
+                ativo
              FROM usuario
              WHERE id_predio = ?
              ORDER BY nome ASC`,

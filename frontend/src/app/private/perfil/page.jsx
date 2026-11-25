@@ -24,7 +24,7 @@ const camposPerfil = [
 ];
 
 function obterUrlApi() {
-  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "");
+  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1").replace(/\/+$/, "");
   if (base.endsWith("/api/v1")) return base;
   if (base.endsWith("/api")) return `${base}/v1`;
   return `${base}/api/v1`;
@@ -131,6 +131,10 @@ export default function PerfilUsuario() {
       setFormulario(normalizarPerfil({ ...formulario, ...dados }));
       if (dados.foto) {
         setImagem(dados.foto);
+        try {
+          const usuarioSalvo = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
+          localStorage.setItem("lumora_usuario", JSON.stringify({ ...usuarioSalvo, ...dados }));
+        } catch {}
         window.dispatchEvent(new CustomEvent("lumora:profile-photo-updated", { detail: dados.foto }));
       }
       setArquivo(null);

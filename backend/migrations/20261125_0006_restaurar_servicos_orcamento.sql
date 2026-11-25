@@ -1,6 +1,8 @@
 -- Sincroniza o catálogo de serviços do banco existente com
 -- database/init/01-schema.sql sem sobrescrever preços já cadastrados.
 
+USE app_db;
+
 CREATE TABLE IF NOT EXISTS servico (
     id_servico INT AUTO_INCREMENT PRIMARY KEY,
     nome_servico ENUM(
