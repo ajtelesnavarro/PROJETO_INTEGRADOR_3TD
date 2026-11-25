@@ -2129,3 +2129,65 @@
     transition-duration: .01ms !important;
   }
 }
+
+/* Tipografia ampliada no resumo da rede e no inventário. */
+.dv-page .dv-eyebrow,
+.dv-page .dv-section-kicker { font-size: 13px; }
+.dv-page .dv-heading h1 { font-size: clamp(36px, 4vw, 50px); }
+.dv-page .dv-heading p { font-size: 16px; }
+.dv-page .dv-add-button { min-height: 50px; font-size: 15px; }
+.dv-page .dv-command-bar { min-height: 82px; padding: 18px 22px; }
+.dv-page .dv-command-title b { font-size: 13px; }
+.dv-page .dv-command-title small { font-size: 14px; }
+.dv-page .dv-metric { min-height: 155px; padding: 21px; }
+.dv-page .dv-metric-top > span:first-child { font-size: 12px; }
+.dv-page .dv-metric > strong { font-size: 38px; }
+.dv-page .dv-metric-bottom { font-size: 12px; }
+.dv-page .dv-metric-tag { font-size: 11px; }
+.dv-page .dv-network-panel { min-height: 185px; padding: 28px; }
+.dv-page .dv-network-copy h2 { font-size: 24px; }
+.dv-page .dv-network-copy p,
+.dv-page .dv-inventory-heading p { font-size: 14px; }
+.dv-page .dv-network-ring { width: 122px; height: 122px; }
+.dv-page .dv-network-ring-inner { width: 96px; height: 96px; }
+.dv-page .dv-network-ring-inner strong { font-size: 27px; }
+.dv-page .dv-network-ring-inner span { font-size: 10px; }
+.dv-page .dv-network-legend span { font-size: 13px; }
+.dv-page .dv-network-legend b { font-size: 14px; }
+.dv-page .dv-inventory-heading h2 { font-size: 26px; }
+.dv-page .dv-view-switch button { width: 38px; height: 36px; }
+.dv-page .dv-search,
+.dv-page .dv-filters select { height: 48px; }
+.dv-page .dv-search input,
+.dv-page .dv-filters select { font-size: 13px; }
+.dv-page .dv-results { font-size: 12px; }
+.dv-page .dv-device-card { min-height: 250px; padding: 22px; }
+.dv-page .dv-status { padding: 7px 10px; font-size: 12px; }
+.dv-page .dv-card-identity > span { font-size: 11px; }
+.dv-page .dv-card-identity h3 { font-size: 17px; }
+.dv-page .dv-card-identity p { font-size: 13px; }
+.dv-page .dv-card-reading > span { font-size: 11px; }
+.dv-page .dv-card-reading strong { font-size: 28px; }
+.dv-page .dv-card-reading small,
+.dv-page .dv-signal span,
+.dv-page .dv-card-footer { font-size: 12px; }
+
+@media (max-width: 760px) {
+  .dv-page { padding: 24px 18px; }
+  .dv-page .dv-network-panel { padding: 22px; }
+  .dv-page .dv-network-visual { gap: 14px; }
+  .dv-page .dv-network-legend { min-width: 145px; }
+}
+
+@media (max-width: 480px) {
+  .dv-page { padding: 20px 14px; }
+  .dv-page .dv-heading h1 { font-size: 36px; }
+  .dv-page .dv-heading p { font-size: 14px; }
+  .dv-page .dv-metric { padding: 16px; }
+  .dv-page .dv-metric > strong { font-size: 32px; }
+  .dv-page .dv-network-panel { align-items: flex-start; flex-direction: column; }
+  .dv-page .dv-network-visual { width: 100%; justify-content: space-between; }
+  .dv-page .dv-network-ring { width: 105px; height: 105px; }
+  .dv-page .dv-network-ring-inner { width: 83px; height: 83px; }
+  .dv-page .dv-network-legend { min-width: 0; }
+}

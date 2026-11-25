@@ -998,3 +998,43 @@
     flex-direction: column;
   }
 }
+
+/* Mais contraste e tamanho para os dados do ambiente selecionado. */
+.amb-page .amb-eyebrow,
+.amb-page .amb-section-label { font-size: 12px; }
+.amb-page .amb-heading h1 { font-size: 36px; }
+.amb-page .amb-heading p { font-size: 15px; line-height: 1.6; }
+.amb-page .amb-primary { min-height: 48px; font-size: 14px; }
+.amb-page .amb-summary-item strong { font-size: 28px; }
+.amb-page .amb-summary-item span:not(.amb-summary-icon) { font-size: 13px; }
+.amb-page .amb-list-heading h2,
+.amb-page .amb-device-heading h3 { font-size: 19px; }
+.amb-page .amb-count,
+.amb-page .amb-device-count,
+.amb-page .amb-search input,
+.amb-page .amb-filters label,
+.amb-page .amb-filters select { font-size: 13px; }
+.amb-page .amb-search { height: 46px; }
+.amb-page .amb-list-item { padding: 16px 12px; }
+.amb-page .amb-list-copy strong { font-size: 15px; }
+.amb-page .amb-list-copy small,
+.amb-page .amb-list-meta { color: #68758d; font-size: 12px; }
+.amb-page .amb-list-footer { font-size: 12px; }
+.amb-page .amb-detail-panel { padding: 28px; }
+.amb-page .amb-detail-title { font-size: 30px; }
+.amb-page .amb-detail-description,
+.amb-page .amb-location-box strong,
+.amb-page .amb-info-box strong,
+.amb-page .amb-device-row strong { font-size: 15px; }
+.amb-page .amb-location-box small,
+.amb-page .amb-info-box small { color: #68758d; font-size: 12px; }
+.amb-page .amb-location-box p,
+.amb-page .amb-device-row small,
+.amb-page .amb-note p { color: #68758d; font-size: 13px; }
+.amb-page .amb-info-box { min-height: 100px; padding: 16px; }
+.amb-page .amb-device-row { padding: 14px; }
+
+@media (max-width: 480px) {
+  .amb-page .amb-detail-panel { padding: 19px; }
+  .amb-page .amb-summary-item span:not(.amb-summary-icon) { font-size: 12px; }
+}

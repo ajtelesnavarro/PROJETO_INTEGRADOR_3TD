@@ -136,11 +136,11 @@ export default function HistoricoDispositivosPage() {
         <div className="dh-list-heading"><h2>Registros recentes</h2><span>{historico.length} registros</span></div>
         {erro && <p className="dh-alert error">{erro}</p>}
         {carregando ? <p>Carregando histórico...</p> : dispositivos.length === 0 ? <p>Nenhum dispositivo cadastrado no prédio atual foi encontrado.</p> : historico.length === 0 ? <p>Nenhum histórico registrado.</p> : (
-          <div className="dh-table-wrap"><table><thead><tr><th>Data</th><th>Dispositivo</th><th>Status</th><th>Motivo</th><th>Observação</th></tr></thead>
+          <div className="dh-table-wrap"><table className="dh-table"><thead><tr><th>Data</th><th>Dispositivo</th><th>Status</th><th>Motivo</th><th>Observação</th></tr></thead>
             <tbody>{historico.map((item) => <tr key={item.id_historico_dispositivo}>
               <td>{new Date(item.data_historico_dispositivo).toLocaleString("pt-BR")}</td>
               <td>{item.nome_dispositivo} · #{item.id_dispositivo}</td>
-              <td>{statusOpcoes.find(([v]) => v === item.status_dispositivo)?.[1] || item.status_dispositivo}</td>
+              <td><span className={`dh-status ${item.status_dispositivo}`}>{statusOpcoes.find(([v]) => v === item.status_dispositivo)?.[1] || item.status_dispositivo}</span></td>
               <td>{item.motivo || "—"}</td><td>{item.observacao || "—"}</td>
             </tr>)}</tbody></table></div>
         )}

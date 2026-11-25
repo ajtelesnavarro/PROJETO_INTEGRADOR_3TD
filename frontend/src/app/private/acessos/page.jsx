@@ -135,9 +135,9 @@ export default function Acessos() {
       const [resEventos, resCredenciais, resAmbientes, resAndares, resUsuarios] = await Promise.all([
         requisicaoAPI("/acessos-detalhados"),
         requisicaoAPI("/credenciais"),
-        requisicaoAPI("/ambientes?limite=300"),
-        requisicaoAPI("/andares?limite=300"),
-        requisicaoAPI("/usuarios?limite=300"),
+        requisicaoAPI("/ambientes?limite=200"),
+        requisicaoAPI("/andares?limite=200"),
+        requisicaoAPI("/usuarios?limite=200"),
       ]);
 
       const idPredioAtual = Number(obterPredioAtual()?.id_predio);
@@ -282,18 +282,7 @@ export default function Acessos() {
       </div>
 
       {toast && (
-        <div
-          style={{
-            background: "#16213e",
-            color: "#fff",
-            padding: "10px 16px",
-            borderRadius: "10px",
-            marginBottom: "16px",
-            fontSize: "14px",
-          }}
-        >
-          {toast}
-        </div>
+        <div className="ac-toast" role="status">{toast}</div>
       )}
 
       <section className="ac-overview">

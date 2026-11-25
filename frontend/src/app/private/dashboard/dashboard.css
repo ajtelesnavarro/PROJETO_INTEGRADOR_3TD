@@ -967,17 +967,18 @@
 .lumora-dashboard .dash-chart-legend strong,
 .lumora-dashboard .dash-health-legend strong { font-size: 13px; }
 .lumora-dashboard .dash-panel-heading h2 { font-size: 20px; }
-.lumora-dashboard .dash-chart-y,
-.lumora-dashboard .dash-chart-x,
-.lumora-dashboard .dash-ring-center span { font-size: 12px; }
 .lumora-dashboard .dash-count,
 .lumora-dashboard .dash-link,
 .lumora-dashboard .dash-status,
 .lumora-dashboard .dash-resolve { font-size: 12px; }
-.lumora-dashboard .dash-table th { padding: 15px 14px; font-size: 11px; }
-.lumora-dashboard .dash-table td { padding: 18px 14px; font-size: 13px; }
-.lumora-dashboard .dash-table td strong { font-size: 14px; }
-.lumora-dashboard .dash-table td small { font-size: 12px; }
+.lumora-dashboard .dash-chart-y,
+.lumora-dashboard .dash-chart-x,
+.lumora-dashboard .dash-ring-center span { font-size: 13px; }
+.lumora-dashboard .dash-table th { padding: 16px 14px; font-size: 12px; }
+.lumora-dashboard .dash-table td { padding: 19px 14px; font-size: 15px; }
+.lumora-dashboard .dash-table td strong { font-size: 16px; }
+.lumora-dashboard .dash-table td small { color: #718099; font-size: 13px; }
+.lumora-dashboard .dash-table tr.is-resolved { opacity: .85; }
 .lumora-dashboard .maintenance-device-card strong,
 .lumora-dashboard .maintenance-device-label { font-size: 14px; }
 .lumora-dashboard .maintenance-device-card small,

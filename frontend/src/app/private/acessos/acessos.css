@@ -999,3 +999,108 @@
     padding: 15px;
   }
 }
+
+/* Leitura ampliada em eventos, detalhes e credenciais. */
+.ac-page .ac-eyebrow,
+.ac-page .ac-welcome > div > span,
+.ac-page .ac-section-heading > div > span,
+.ac-page .ac-side-heading > div > span,
+.ac-page .ac-credentials-title > div > span { font-size: 12px; }
+.ac-page-heading h1 { font-size: 38px; }
+.ac-page-heading p { font-size: 16px; line-height: 1.6; }
+.ac-page .ac-live { font-size: 14px; }
+.ac-page .ac-overview { gap: 24px; padding: 28px; }
+.ac-page .ac-welcome h2 { font-size: 24px; }
+.ac-page .ac-welcome p { font-size: 14px; }
+.ac-page .ac-summary-item { gap: 14px; padding: 10px 20px; }
+.ac-page .ac-summary-item b { font-size: 30px; }
+.ac-page .ac-summary-item small { font-size: 13px; }
+.ac-page .ac-section-heading,
+.ac-page .ac-side-heading { padding: 24px 26px 18px; }
+.ac-page .ac-section-heading h2,
+.ac-page .ac-side-heading h2 { font-size: 20px; }
+.ac-page .ac-section-heading p { font-size: 13px; }
+.ac-page .ac-event-counter { font-size: 13px; }
+.ac-page .ac-toolbar { padding: 0 26px 16px; }
+.ac-page .ac-search { height: 48px; }
+.ac-page .ac-search input { font-size: 14px; }
+.ac-page .ac-filter-list { gap: 8px; padding: 0 26px 17px; }
+.ac-page .ac-filter-list button { padding: 9px 14px; font-size: 13px; }
+.ac-page .ac-filter-list button span { min-width: 20px; height: 20px; font-size: 11px; }
+.ac-page .ac-event-row {
+  grid-template-columns: 42px minmax(150px, 1fr) 82px 92px auto 18px;
+  gap: 14px;
+  min-height: 88px;
+  padding: 15px 24px;
+}
+.ac-page .ac-event-symbol { width: 40px; height: 40px; }
+.ac-page .ac-event-person b { font-size: 14px; }
+.ac-page .ac-event-person small,
+.ac-page .ac-event-action small,
+.ac-page .ac-event-time small { font-size: 12px; }
+.ac-page .ac-event-action b,
+.ac-page .ac-event-time b { font-size: 13px; }
+.ac-page .ac-result { padding: 7px 10px; font-size: 12px; }
+.ac-page .ac-list-footer { padding: 15px 24px; font-size: 12px; }
+.ac-page .ac-no-results { min-height: 250px; }
+.ac-page .ac-no-results b { font-size: 16px; }
+.ac-page .ac-no-results span { font-size: 13px; }
+.ac-page .ac-no-results button { padding: 10px 15px; font-size: 12px; }
+.ac-page .ac-detail-status { padding: 15px; }
+.ac-page .ac-detail-status b { font-size: 14px; }
+.ac-page .ac-detail-status small { font-size: 12px; }
+.ac-page .ac-detail-person b { font-size: 15px; }
+.ac-page .ac-detail-person small { font-size: 13px; }
+.ac-page .ac-detail-info span,
+.ac-page .ac-detail-message span { font-size: 11px; }
+.ac-page .ac-detail-info b { font-size: 13px; }
+.ac-page .ac-detail-message p,
+.ac-page .ac-detail-empty p { font-size: 13px; }
+.ac-page .ac-security-tip b { font-size: 14px; }
+.ac-page .ac-security-tip p { font-size: 13px; }
+.ac-page .ac-credentials-heading { padding: 22px 26px; }
+.ac-page .ac-credentials-title h2 { font-size: 18px; }
+.ac-page .ac-credentials-title p,
+.ac-page .ac-credentials-action { font-size: 13px; }
+.ac-page .ac-token { gap: 15px; padding: 18px 24px; }
+.ac-page .ac-token-person b { font-size: 14px; }
+.ac-page .ac-token-person small,
+.ac-page .ac-token-code span,
+.ac-page .ac-token-expiry span { font-size: 12px; }
+.ac-page .ac-token-code b,
+.ac-page .ac-token-expiry b,
+.ac-page .ac-token-status { font-size: 13px; }
+.ac-page .ac-token-button { padding: 10px 12px; font-size: 12px; }
+.ac-toast {
+  padding: 13px 17px;
+  border: 1px solid #cbdcf7;
+  border-radius: 10px;
+  color: #294b80;
+  background: #eef4ff;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .ac-page .ac-overview { padding: 20px; }
+  .ac-page .ac-summary-item { padding: 0; }
+  .ac-page .ac-event-row {
+    grid-template-columns: 38px minmax(100px, 1fr) 75px 18px;
+    gap: 10px;
+    padding: 14px;
+  }
+  .ac-page .ac-section-heading,
+  .ac-page .ac-side-heading { padding-right: 17px; padding-left: 17px; }
+  .ac-page .ac-toolbar,
+  .ac-page .ac-filter-list { padding-right: 17px; padding-left: 17px; }
+  .ac-page .ac-token { padding: 15px; }
+  .ac-page .ac-credentials-heading { padding: 18px; }
+}
+
+@media (max-width: 420px) {
+  .ac-page-heading h1 { font-size: 32px; }
+  .ac-page .ac-welcome h2 { font-size: 20px; }
+  .ac-page .ac-section-heading h2,
+  .ac-page .ac-side-heading h2 { font-size: 18px; }
+  .ac-page .ac-token { grid-template-columns: 36px minmax(80px, 1fr) auto; }
+}
