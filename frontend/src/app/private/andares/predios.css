@@ -1486,3 +1486,32 @@
   background: #e9efff;
   border-color: #b9c9fb;
 }
+
+/* Elementos da lista de andares com texto e controles maiores. */
+.pa-page .pa-eyebrow { font-size: 13px; }
+.pa-page .pa-heading h1 { font-size: clamp(32px, 3vw, 40px); }
+.pa-page .pa-heading p,
+.pa-page .pa-section-heading p { font-size: 16px; }
+.pa-page .pa-floor-count,
+.pa-page .pa-search input,
+.pa-page .pa-filters button,
+.pa-page .pa-status,
+.pa-page .pa-building-meta span { font-size: 13px; }
+.pa-page .pa-search { height: 48px; width: min(100%, 430px); }
+.pa-page .pa-floor-card { padding: 26px; }
+.pa-page .pa-floor-title h3 { font-size: 23px; }
+.pa-page .pa-floor-title p { min-height: 40px; font-size: 14px; }
+.pa-page .pa-floor-data { gap: 12px; margin-top: 20px; padding: 17px 0; }
+.pa-page .pa-floor-data strong { font-size: 24px; }
+.pa-page .pa-floor-data span,
+.pa-page .pa-sector-preview > span { font-size: 12px; }
+.pa-page .pa-sector-preview button,
+.pa-page .pa-floor-details,
+.pa-page .pa-sector-preview p { font-size: 13px; }
+
+@media (max-width: 560px) {
+  .pa-page { padding: 22px 16px; }
+  .pa-page .pa-floor-card { padding: 22px; }
+  .pa-page .pa-heading p,
+  .pa-page .pa-section-heading p { font-size: 14px; }
+}

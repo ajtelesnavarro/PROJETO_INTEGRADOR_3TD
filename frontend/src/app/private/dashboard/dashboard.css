@@ -942,3 +942,48 @@
 .maintenance-empty { padding: 20px; color: #78859a; font-size: 13px; }
 .maintenance-dashboard-note { margin: 16px 2px 0; color: #718096; font-size: 12px; line-height: 1.6; }
 @media (max-width: 760px) { .maintenance-device-grid { grid-template-columns: 1fr; } .maintenance-device-card { flex-wrap: wrap; } }
+
+/* Tipografia ampliada para leitura rápida do painel. */
+.lumora-dashboard .dash-eyebrow,
+.lumora-dashboard .dash-section-label { font-size: 12px; }
+.lumora-dashboard .dash-title h1 { font-size: clamp(30px, 3vw, 38px); }
+.lumora-dashboard .dash-title p,
+.lumora-dashboard .dash-demo-notice p,
+.lumora-dashboard .dash-metric-description,
+.lumora-dashboard .dash-panel-heading p { font-size: 14px; }
+.lumora-dashboard .dash-demo,
+.lumora-dashboard .dash-date,
+.lumora-dashboard .dash-metric-label,
+.lumora-dashboard .dash-tarifa-atual,
+.lumora-dashboard .dash-tarifa-form label,
+.lumora-dashboard .dash-range button,
+.lumora-dashboard .dash-chart-legend > div,
+.lumora-dashboard .dash-health-legend > div { font-size: 13px; }
+.lumora-dashboard .dash-metric-value { font-size: 36px; }
+.lumora-dashboard .dash-metric-footer,
+.lumora-dashboard .dash-tarifa-form button,
+.lumora-dashboard .dash-tarifa-form small,
+.lumora-dashboard .dash-tarifa-empty,
+.lumora-dashboard .dash-chart-legend strong,
+.lumora-dashboard .dash-health-legend strong { font-size: 13px; }
+.lumora-dashboard .dash-panel-heading h2 { font-size: 20px; }
+.lumora-dashboard .dash-chart-y,
+.lumora-dashboard .dash-chart-x,
+.lumora-dashboard .dash-ring-center span { font-size: 12px; }
+.lumora-dashboard .dash-count,
+.lumora-dashboard .dash-link,
+.lumora-dashboard .dash-status,
+.lumora-dashboard .dash-resolve { font-size: 12px; }
+.lumora-dashboard .dash-table th { padding: 15px 14px; font-size: 11px; }
+.lumora-dashboard .dash-table td { padding: 18px 14px; font-size: 13px; }
+.lumora-dashboard .dash-table td strong { font-size: 14px; }
+.lumora-dashboard .dash-table td small { font-size: 12px; }
+.lumora-dashboard .maintenance-device-card strong,
+.lumora-dashboard .maintenance-device-label { font-size: 14px; }
+.lumora-dashboard .maintenance-device-card small,
+.lumora-dashboard .maintenance-dashboard-note { font-size: 13px; }
+
+@media (max-width: 600px) {
+  .lumora-dashboard .dash-metric-label { font-size: 12px; }
+  .lumora-dashboard .dash-metric-value { font-size: 30px; }
+}
