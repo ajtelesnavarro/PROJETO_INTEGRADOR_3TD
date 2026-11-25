@@ -366,7 +366,7 @@ export default function Reclamacoes({ toast }) {
   const dispositivo = acharPorId(dispositivos, "id_dispositivo", selecionada?.id_dispositivo);
 
   const etapaAtual = etapas.findIndex((e) => e.status === selecionada?.status_chamado);
-  const equipe = usuarios.filter((u) => u.perfil !== "locador");
+  const equipe = usuarios.filter((u) => ["manutencao", "porteiro"].includes(u.perfil));
   const dispositivosDoAmbiente = dispositivos.filter(
     (d) => !formulario.id_ambiente || d.id_ambiente === Number(formulario.id_ambiente)
   );

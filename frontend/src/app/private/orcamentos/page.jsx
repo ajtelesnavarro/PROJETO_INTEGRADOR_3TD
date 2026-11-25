@@ -4,12 +4,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
 import "./orcamentos.css";
 
-const services = [
-  { id: "monitoramento_temperatura", name: "Monitoramento de temperatura", description: "Sensores e acompanhamento térmico", price: 480, icon: "◉" },
-  { id: "controle_iluminacao", name: "Controle de iluminação", description: "Automação e eficiência luminosa", price: 620, icon: "✳" },
-  { id: "monitoramento_energia", name: "Monitoramento de energia", description: "Medição e análise de consumo", price: 750, icon: "ϟ" },
-  { id: "controle_acesso", name: "Controle de acesso", description: "Credenciais e registros de entrada", price: 890, icon: "⌑" },
-  { id: "monitoramento_dispositivos", name: "Monitoramento de dispositivos", description: "Acompanhamento da rede IoT", price: 540, icon: "⌘" },
+const serviceLabels = {
+  monitoramento_temperatura: "Monitoramento de temperatura",
+  controle_iluminacao: "Controle de iluminação",
+  monitoramento_energia: "Monitoramento de energia",
+  controle_acesso: "Controle de acesso",
+  monitoramento_dispositivos: "Monitoramento de dispositivos",
+};
+
+const serviceIcons = {
+  monitoramento_temperatura: "◉",
+  controle_iluminacao: "✳",
+  monitoramento_energia: "ϟ",
+  controle_acesso: "⌑",
+  monitoramento_dispositivos: "⌘",
+};
+
+const defaultServices = [
+  { id: "monitoramento_temperatura", name: serviceLabels.monitoramento_temperatura, description: "Monitoramento de temperatura dos ambientes.", price: 1500, icon: serviceIcons.monitoramento_temperatura },
+  { id: "controle_iluminacao", name: serviceLabels.controle_iluminacao, description: "Monitoramento dos níveis de iluminação.", price: 2000, icon: serviceIcons.controle_iluminacao },
+  { id: "monitoramento_energia", name: serviceLabels.monitoramento_energia, description: "Acompanhamento do consumo e da potência elétrica.", price: 1800, icon: serviceIcons.monitoramento_energia },
+  { id: "controle_acesso", name: serviceLabels.controle_acesso, description: "Gerenciamento de credenciais e permissões.", price: 2500, icon: serviceIcons.controle_acesso },
+  { id: "monitoramento_dispositivos", name: serviceLabels.monitoramento_dispositivos, description: "Acompanhamento do funcionamento dos dispositivos.", price: 1200, icon: serviceIcons.monitoramento_dispositivos },
 ];
 
 const STATUS_DB_TO_UI = {
@@ -74,6 +90,7 @@ function Status({ value }) {
 
 export default function Orcamentos() {
   const [quotes, setQuotes] = useState([]);
+  const [services, setServices] = useState(defaultServices);
   const [selectedId, setSelectedId] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("Todos");
@@ -152,6 +169,21 @@ export default function Orcamentos() {
   useEffect(() => {
     carregarOrcamentos();
   }, [carregarOrcamentos]);
+
+  useEffect(() => {
+    requisicaoAPI("/orcamentos/servicos")
+      .then((res) => {
+        if (!Array.isArray(res.dados) || res.dados.length === 0) return;
+        setServices(res.dados.map((service) => ({
+          id: service.nome_servico,
+          name: serviceLabels[service.nome_servico] || service.nome_servico,
+          description: service.descricao || "Serviço disponível para orçamento.",
+          price: Number(service.valor_base) || 0,
+          icon: serviceIcons[service.nome_servico] || "⌘",
+        })));
+      })
+      .catch((erro) => setToast(erro.message || "Não foi possível carregar o catálogo de serviços."));
+  }, []);
 
   const selected = quotes.find((quote) => quote.id === selectedId) || quotes[0] || null;
 

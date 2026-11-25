@@ -133,6 +133,7 @@ export async function validarResponsavel(idResponsavel, idPredio) {
         `SELECT id_usuario FROM usuario
          WHERE id_usuario = ? AND ativo = 'ativo'
            AND id_predio = ?
+           AND perfil IN ('manutencao', 'porteiro')
          LIMIT 1`,
         [idResponsavel, idPredio]
     );

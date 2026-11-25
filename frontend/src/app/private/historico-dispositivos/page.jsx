@@ -19,7 +19,17 @@ function agoraLocal() {
 }
 
 function dataHoraInput(valor) {
-  return valor ? String(valor).replace(" ", "T").slice(0, 16) : "";
+  if (!valor) return "";
+  if (!(valor instanceof Date)) {
+    const texto = String(valor);
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(texto)) {
+      return texto.replace(" ", "T").slice(0, 16);
+    }
+  }
+  const data = valor instanceof Date ? valor : new Date(valor);
+  if (Number.isNaN(data.getTime())) return "";
+  const local = new Date(data.getTime() - data.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
 }
 
 function formatarLeitura(item) {
@@ -121,6 +131,7 @@ export default function HistoricoDispositivosPage() {
       setEditingId(null);
       setForm({ id_dispositivo: "", status_dispositivo: "ativo", data_inicio_status: agoraLocal(), data_fim_status: "", motivo: "", consumo_estimado_kwh: "", custo_estimado: "", consumo_kwh: "", potencia_kw: "", qualidade_medicao: "", temperatura_medida: "", umidade: "", iluminacao_medida: "", observacao: "" });
       await carregarDados();
+      window.dispatchEvent(new Event("lumora:device-status-updated"));
     } catch (e) {
       setErro(e.message || "Não foi possível registrar o histórico.");
     } finally {

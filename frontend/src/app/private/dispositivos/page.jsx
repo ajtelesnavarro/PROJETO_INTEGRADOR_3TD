@@ -12,21 +12,18 @@ const TIPO_CONFIG = {
     slug: "energia",
     unit: "kWh",
     symbol: "⚡",
-    defaultHistory: [42, 48, 45, 58, 52, 64, 59, 68, 63, 72, 69, 76],
   },
   temperatura: {
     label: "Temperatura",
     slug: "temperatura",
     unit: "°C",
     symbol: "°",
-    defaultHistory: [48, 50, 49, 53, 52, 55, 54, 56, 55, 58, 57, 59],
   },
   iluminacao: {
     label: "Iluminação",
     slug: "iluminacao",
     unit: "lux",
     symbol: "☼",
-    defaultHistory: [35, 45, 62, 68, 72, 70, 74, 71, 65, 52, 44, 40],
   },
 };
 
@@ -97,7 +94,12 @@ function Signal({ value }) {
 }
 
 function MiniChart({ values, gradientId = "dv-chart-fill" }) {
-  const safeValues = values?.length > 1 ? values : [40, 45, 50, 48, 55, 60];
+  if (!values || values.length < 2) return null;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const safeValues = values.map((value) =>
+    max === min ? 50 : 20 + ((value - min) / (max - min)) * 60
+  );
   const points = safeValues
     .map(
       (value, index) =>
@@ -141,6 +143,7 @@ function DispositivosConteudo() {
   const [andares, setAndares] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
   const [dispositivosBrutos, setDispositivosBrutos] = useState([]);
+  const [leituras, setLeituras] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
@@ -171,7 +174,7 @@ function DispositivosConteudo() {
   const carregarDados = useCallback(async () => {
     try {
       setCarregando(true);
-      const [resPerfil, resPredios, resAndares, resAmbientes, resDispositivos, resUsuarios] =
+      const [resPerfil, resPredios, resAndares, resAmbientes, resDispositivos, resUsuarios, resLeituras] =
         await Promise.all([
           requisicaoAPI("/auth/me"),
           requisicaoAPI("/predios?limite=200"),
@@ -179,6 +182,7 @@ function DispositivosConteudo() {
           requisicaoAPI("/ambientes?limite=200"),
           requisicaoAPI("/dispositivos?limite=200"),
           requisicaoAPI("/usuarios?limite=200"),
+          requisicaoAPI("/leituras?limite=200"),
         ]);
 
       const usuarioAtual = resPerfil.dados || resPerfil;
@@ -196,6 +200,7 @@ function DispositivosConteudo() {
 
       setPredios(prediosAtuais);
       setUsuarios(resUsuarios.dados || []);
+      setLeituras(resLeituras.dados || []);
       setAndares(andaresAtuais);
       setAmbientes(ambientesAtuais);
       setPredioFilter(idPredioAtual ? String(idPredioAtual) : "Todos");
@@ -230,6 +235,12 @@ function DispositivosConteudo() {
     const mapaPredios = new Map(predios.map((p) => [p.id_predio, p]));
     const mapaAndares = new Map(andares.map((a) => [a.id_andar, a]));
     const mapaAmbientes = new Map(ambientes.map((amb) => [amb.id_ambiente, amb]));
+    const ultimaLeituraPorDispositivo = new Map();
+    for (const leitura of leituras) {
+      if (!ultimaLeituraPorDispositivo.has(Number(leitura.dispositivo_id))) {
+        ultimaLeituraPorDispositivo.set(Number(leitura.dispositivo_id), leitura);
+      }
+    }
 
     return dispositivosBrutos.map((dev) => {
       const amb = mapaAmbientes.get(dev.id_ambiente);
@@ -246,20 +257,18 @@ function DispositivosConteudo() {
           ? Number(dev.potencia_nominal_kw)
           : null;
 
-      let reading = 0;
-      if (statusKey === "ativo" || statusKey === "instavel") {
-        if (tipoKey === "energia") {
-          reading = potenciaNum ? Number((potenciaNum * 1.45).toFixed(1)) : 12.4;
-        } else if (tipoKey === "temperatura") {
-          reading = Number((22.5 + (dev.id_dispositivo % 4) * 0.6).toFixed(1));
-        } else {
-          reading = 450 + (dev.id_dispositivo % 5) * 40;
-        }
-      }
+      const ultimaLeitura = ultimaLeituraPorDispositivo.get(Number(dev.id_dispositivo));
+      const leituraCompativel = ultimaLeitura?.tipo === tipoKey ? ultimaLeitura : null;
+      const reading = leituraCompativel && Number.isFinite(Number(leituraCompativel.valor))
+        ? Number(leituraCompativel.valor)
+        : null;
 
-      const dataFmt = dev.data_dispositivo
-        ? new Date(dev.data_dispositivo).toLocaleDateString("pt-BR")
-        : "Sincronizado";
+      const historicoLeituras = leituras
+        .filter((leitura) => Number(leitura.dispositivo_id) === Number(dev.id_dispositivo) && leitura.tipo === tipoKey)
+        .slice(0, 12)
+        .reverse()
+        .map((leitura) => Number(leitura.valor))
+        .filter(Number.isFinite);
 
       return {
         id: dev.id_dispositivo,
@@ -268,7 +277,7 @@ function DispositivosConteudo() {
         code: `DIS-${String(dev.id_dispositivo).padStart(3, "0")}`,
         tipoKey,
         type: tipoCfg.label,
-        unit: dev.unidade_medida || tipoCfg.unit,
+        unit: tipoCfg.unit,
         statusKey,
         status: statusCfg.label,
         signal: statusCfg.signal,
@@ -288,16 +297,15 @@ function DispositivosConteudo() {
             ? `${potenciaNum.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kW`
             : "Não informado",
         reading,
-        updated: dataFmt,
+        updated: leituraCompativel?.data_hora
+          ? new Date(leituraCompativel.data_hora).toLocaleString("pt-BR")
+          : "Sem leitura registrada",
         serial: `LUM-${String(dev.id_dispositivo).padStart(5, "0")}`,
         description: `Equipamento de monitoramento de ${tipoCfg.label.toLowerCase()} instalado em ${amb?.nome || "ambiente corporativo"}.`,
-        history:
-          statusKey === "offline" || statusKey === "inativo"
-            ? [45, 38, 32, 26, 20, 15, 10, 8, 5, 5, 5, 5]
-            : tipoCfg.defaultHistory,
+        history: historicoLeituras,
       };
     });
-  }, [dispositivosBrutos, ambientes, andares, predios]);
+  }, [dispositivosBrutos, ambientes, andares, predios, leituras]);
 
   // Aplica filtros vindos da URL (?predio=...&andar=...&ambiente=...&dispositivo=...)
   useEffect(() => {
@@ -563,6 +571,7 @@ function DispositivosConteudo() {
         body: JSON.stringify({ status_dispositivo: newStatusKey }),
       });
       await carregarDados();
+      window.dispatchEvent(new Event("lumora:device-status-updated"));
       notify("Status do dispositivo atualizado no banco de dados!");
     } catch (erro) {
       notify(erro.message || "Erro ao atualizar status do dispositivo.");
@@ -609,6 +618,7 @@ function DispositivosConteudo() {
           body: JSON.stringify(payload),
         });
         await carregarDados();
+        window.dispatchEvent(new Event("lumora:device-status-updated"));
         setSelectedId(editingId);
         notify("Dispositivo atualizado no banco de dados!");
       } else {
@@ -617,6 +627,7 @@ function DispositivosConteudo() {
           body: JSON.stringify(payload),
         });
         await carregarDados();
+        window.dispatchEvent(new Event("lumora:device-status-updated"));
         if (criado?.dados?.id_dispositivo) {
           setSelectedId(criado.dados.id_dispositivo);
         }
@@ -957,10 +968,10 @@ function DispositivosConteudo() {
                 <div className="dv-card-reading">
                   <span>LEITURA ATUAL</span>
                   <strong>
-                    {device.reading.toLocaleString("pt-BR", {
-                      maximumFractionDigits: 1,
-                    })}
-                    <small>{device.unit}</small>
+                    {device.reading == null
+                      ? "Sem leitura"
+                      : device.reading.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}
+                    {device.reading != null && <small>{device.unit}</small>}
                   </strong>
                 </div>
 
@@ -1027,22 +1038,24 @@ function DispositivosConteudo() {
             <div className="dv-drawer-reading">
               <span>LEITURA REGISTRADA</span>
               <div>
-                {selected.reading.toLocaleString("pt-BR", {
-                  maximumFractionDigits: 1,
-                })}
-                <small>{selected.unit}</small>
+                {selected.reading == null
+                  ? "Sem leitura"
+                  : selected.reading.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}
+                {selected.reading != null && <small>{selected.unit}</small>}
               </div>
               <p>
-                <i /> Cadastro: {selected.updated}
+                <i /> Leitura: {selected.updated}
               </p>
-              <MiniChart
-                values={selected.history}
-                gradientId={`dv-chart-${selected.id}`}
-              />
-              <div className="dv-chart-labels">
-                <span>HÁ 12 HORAS</span>
-                <span>AGORA</span>
-              </div>
+              {selected.history.length > 1 && <>
+                <MiniChart
+                  values={selected.history}
+                  gradientId={`dv-chart-${selected.id}`}
+                />
+                <div className="dv-chart-labels">
+                  <span>LEITURAS ANTERIORES</span>
+                  <span>ATUAL</span>
+                </div>
+              </>}
             </div>
 
             <div className="dv-drawer-section">
