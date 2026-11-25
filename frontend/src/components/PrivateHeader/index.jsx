@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+import UserAvatar from "@/components/UserAvatar";
 import "./header.css";
 
 function HeaderIcon({ name, size = 18 }) {
@@ -57,13 +58,7 @@ export default function Header({
   const [alertasAbertos, setAlertasAbertos] = useState(false);
   const [alertas, setAlertas] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [photoFailed, setPhotoFailed] = useState(false);
   const searchRef = useRef(null);
-
-  useEffect(() => setPhotoFailed(false), [userPhoto]);
-  const photoUrl = userPhoto && !/^(https?:|data:|blob:)/i.test(userPhoto)
-    ? `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "").replace(/\/api\/v1$/, "")}${userPhoto.startsWith("/") ? "" : "/"}${userPhoto}`
-    : userPhoto;
 
   // Atalho Ctrl + K
   useEffect(() => {
@@ -112,14 +107,6 @@ export default function Header({
       window.clearInterval(intervalo);
     };
   }, []);
-
-  const initials = userName
-    .trim()
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join("");
 
   return (
     <header className="lumora-header">
@@ -339,12 +326,7 @@ export default function Header({
               cursor: "pointer",
             }}
           >
-            <span className="lumora-profile-avatar">
-              {photoUrl && !photoFailed ? (
-                <img src={photoUrl} alt={`Foto de ${userName}`} onError={() => setPhotoFailed(true)} />
-              ) : (initials || "U")}
-              <i />
-            </span>
+            <UserAvatar name={userName} photo={userPhoto} size={38} online />
 
             <span className="lumora-profile-info">
               <b>{userName}</b>

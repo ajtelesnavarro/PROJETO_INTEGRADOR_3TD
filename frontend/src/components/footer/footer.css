@@ -4,8 +4,9 @@
     padding: 62px 0 22px;
     /* background: linear-gradient(120deg, #241B50 0%, #35206A 55%, #4B267A 100%); */
     background-color: whitesmoke;
-    color: black;
+    color: #111827;
     border: 0;
+    border-top: 1px solid #d7deeb;
 }
 
 .footer-main {
@@ -19,7 +20,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #FFFFFF;
+    color: #111827;
 }
 
 .footer .logo-simbolo {
@@ -38,7 +39,7 @@
 .footer-note p {
     font-size: 12px;
     line-height: 1.9;
-    color: #D0DCE8;
+    color: #475569;
     margin-top: 18px;
 }
 
@@ -50,14 +51,14 @@
 
 .footer-column b {
     font-size: 11px;
-    color: #FFFFFF;
+    color: #111827;
     margin-bottom: 7px;
 }
 
 .footer-column a,
 .footer-note > a {
     font-size: 11px;
-    color: #D0DCE8;
+    color: #334155;
     transition: color .2s;
 }
 
@@ -83,17 +84,17 @@
 
 .footer-note > a {
     display: inline-block;
-    color: #FFFFFF;
+    color: #111827;
     font-weight: 800;
     margin-top: 5px;
 }
 
 .footer-bottom {
-    border-top: 1px solid rgba(244, 247, 250, .2);
+    border-top: 1px solid #d7deeb;
     padding-top: 19px;
     display: flex;
     justify-content: space-between;
-    color: #C0CEDD;
+    color: #475569;
     font-size: 9px;
 }
 

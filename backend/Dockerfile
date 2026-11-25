@@ -14,6 +14,7 @@ ENV NODE_ENV=production
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY package*.json ./
 COPY src ./src
+COPY uploads ./uploads
 
 EXPOSE 8080
 

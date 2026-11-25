@@ -4,7 +4,7 @@ import "dotenv/config";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
-import { resolve } from "node:path";
+import { UPLOADS_DIR } from "./config/uploadPaths.js";
 
 // Rotas existentes
 import { authRouter } from "./routes/AuthRoutes.js";
@@ -71,7 +71,14 @@ app.use(express.json({ limit: "4mb" }));
 // ARQUIVOS ESTÁTICOS
 // ==========================================
 
-app.use("/uploads", express.static(resolve("uploads")));
+app.use(
+    "/uploads",
+    (_req, res, next) => {
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        next();
+    },
+    express.static(UPLOADS_DIR)
+);
 
 // ==========================================
 // VERIFICAÇÃO DA API

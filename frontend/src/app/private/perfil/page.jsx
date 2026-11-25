@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import UserAvatar from "@/components/UserAvatar";
 import "./pefil.css?v=1";
 
 const perfilVazio = {
@@ -29,13 +30,6 @@ function obterUrlApi() {
   return `${base}/api/v1`;
 }
 
-function obterUrlFoto(foto) {
-  if (!foto) return "/images/logo.png";
-  if (/^(https?:|data:|blob:)/i.test(foto)) return foto;
-  const origem = obterUrlApi().replace(/\/api\/v1$/, "");
-  return `${origem}${foto.startsWith("/") ? "" : "/"}${foto}`;
-}
-
 function lerImagem(arquivo) {
   return new Promise((resolve, reject) => {
     const leitor = new FileReader();
@@ -59,7 +53,7 @@ function normalizarPerfil(dados = {}) {
 
 export default function PerfilUsuario() {
   const [formulario, setFormulario] = useState(perfilVazio);
-  const [imagem, setImagem] = useState("/images/logo.png");
+  const [imagem, setImagem] = useState("");
   const [arquivo, setArquivo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -85,7 +79,7 @@ export default function PerfilUsuario() {
         if (!ativo) return;
         const dados = resultado.dados || {};
         setFormulario(normalizarPerfil(dados));
-        setImagem(obterUrlFoto(dados.foto));
+        setImagem(dados.foto || "");
       } catch (e) {
         if (ativo) setErro(e.message === "Failed to fetch" ? "Não foi possível conectar à API." : e.message);
       } finally {
@@ -135,7 +129,10 @@ export default function PerfilUsuario() {
       if (!resposta.ok) throw new Error(resultado.erro || "Não foi possível salvar o perfil.");
       const dados = resultado.dados || {};
       setFormulario(normalizarPerfil({ ...formulario, ...dados }));
-      if (dados.foto) setImagem(obterUrlFoto(dados.foto));
+      if (dados.foto) {
+        setImagem(dados.foto);
+        window.dispatchEvent(new CustomEvent("lumora:profile-photo-updated", { detail: dados.foto }));
+      }
       setArquivo(null);
       setAviso("Perfil atualizado com sucesso.");
     } catch (e) {
@@ -158,7 +155,7 @@ export default function PerfilUsuario() {
           <form className="perfil-form" onSubmit={salvarPerfil}>
             <div className="perfil-foto-area">
               <div className="perfil-foto">
-                <img src={imagem} alt="Foto de perfil" />
+                <UserAvatar name={formulario.nome} photo={imagem} size={85} className="perfil-avatar" />
                 <label htmlFor="foto" title="Alterar foto" aria-label="Alterar foto"><i className="bi bi-camera-fill" /></label>
                 <input hidden id="foto" name="foto" type="file" accept="image/png,image/jpeg,image/webp" onChange={selecionarFoto} />
               </div>

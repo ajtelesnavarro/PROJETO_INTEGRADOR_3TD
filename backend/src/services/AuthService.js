@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
+import { PROFILE_UPLOADS_DIR } from "../config/uploadPaths.js";
 import * as UsuarioModel from "../models/UsuarioModel.js";
 
 // Aceita domínios locais sem ponto (por exemplo, nome@servidor) usados em testes e redes internas.
@@ -113,9 +114,8 @@ export async function atualizarPerfil(idUsuario, dados = {}) {
         const imagem = Buffer.from(correspondencia[2], 'base64');
         if (!imagem.length || imagem.length > 2 * 1024 * 1024) throw new TypeError('A foto deve ter no máximo 2 MB.');
         const nomeArquivo = `${randomUUID()}${extensao}`;
-        const pasta = resolve('uploads', 'perfis');
-        await mkdir(pasta, { recursive: true });
-        await writeFile(resolve(pasta, nomeArquivo), imagem);
+        await mkdir(PROFILE_UPLOADS_DIR, { recursive: true });
+        await writeFile(resolve(PROFILE_UPLOADS_DIR, nomeArquivo), imagem);
         atualizacao.foto = `/uploads/perfis/${nomeArquivo}`;
     }
 

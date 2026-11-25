@@ -426,42 +426,6 @@
   padding-left: 2px;
 }
 
-.lumora-profile-avatar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-  border: 1px solid #DCE4F5;
-  border-radius: 11px;
-  color: #FFFFFF;
-  background: linear-gradient(145deg, #3568D4, #7956D8);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .3px;
-  overflow: hidden;
-}
-
-.lumora-profile-avatar > img {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
-
-.lumora-profile-avatar i {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 9px;
-  height: 9px;
-  border: 2px solid #FFFFFF;
-  border-radius: 50%;
-  background: #48B99B;
-}
-
 .lumora-profile-info {
   display: flex;
   flex-direction: column;
@@ -563,7 +527,8 @@
     height: 36px;
   }
 
-  .lumora-profile-avatar {
+  .lumora-profile .user-avatar {
+    flex-basis: 35px;
     width: 35px;
     height: 35px;
   }

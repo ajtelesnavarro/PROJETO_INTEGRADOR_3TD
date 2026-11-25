@@ -80,6 +80,12 @@ export default function PrivateLayoutClient({ children }) {
     return () => { ativo = false; };
   }, []);
 
+  useEffect(() => {
+    const atualizarFoto = (evento) => setFotoUsuario(evento.detail || "");
+    window.addEventListener("lumora:profile-photo-updated", atualizarFoto);
+    return () => window.removeEventListener("lumora:profile-photo-updated", atualizarFoto);
+  }, []);
+
   function handleLogout() {
     localStorage.removeItem("lumora_token");
     localStorage.removeItem("lumora_usuario");

@@ -2,12 +2,12 @@
 .orc-page {
   width: 100%;
   color: #18243b;
-  animation: orcEnter .35s ease both;
+  animation: orcEnter .35s ease;
 }
 
 @keyframes orcEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .orc-page * {
@@ -1380,8 +1380,9 @@
 .orc-modal {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  width: min(1060px, calc(100vw - 24px));
-  height: min(860px, calc(100dvh - 24px));
+  width: min(1000px, calc(100vw - 32px));
+  height: min(780px, calc(100dvh - 40px));
+  min-height: 0;
   max-height: none;
   overflow: hidden;
 }
@@ -1448,6 +1449,40 @@
   .orc-price-summary { display: none; }
   .orc-modal-footer { min-height: 50px; flex-direction: row; align-items: center; padding: 6px 13px; }
   .orc-modal-footer > button { min-height: 38px; padding: 0 10px; font-size: 12px; }
+}
+
+@media (max-height: 760px) and (min-width: 701px) {
+  .orc-modal { height: calc(100dvh - 28px); }
+  .orc-modal-header { padding-top: 8px; padding-bottom: 8px; }
+  .orc-modal-footer { min-height: 48px; padding-top: 5px; padding-bottom: 5px; }
+  .orc-form-section { padding-top: 5px; padding-bottom: 5px; }
+  .orc-form-title { margin-bottom: 5px; }
+  .orc-form-title small { display: none; }
+  .orc-form-grid { gap: 5px 8px; }
+  .orc-field input { min-height: 34px; }
+  .orc-field textarea { min-height: 34px; height: 34px; }
+  .orc-service-option { min-height: 42px; }
+  .orc-service-symbol { width: 28px; height: 28px; }
+  .orc-quantity { padding: 6px; }
+  .orc-price-summary { padding: 5px 8px; }
+}
+
+@media (max-height: 650px) and (min-width: 701px) {
+  .orc-form-content { gap: 0 14px; padding-right: 16px; padding-left: 16px; }
+  .orc-form-section { padding-top: 3px; padding-bottom: 3px; }
+  .orc-form-title > span { width: 21px; height: 21px; }
+  .orc-form-title strong { font-size: 12px; }
+  .orc-form-grid { gap: 3px 6px; }
+  .orc-field { font-size: 10px; }
+  .orc-field input, .orc-field select { min-height: 30px; padding: 4px 7px; font-size: 12px; }
+  .orc-field textarea { min-height: 30px; height: 30px; padding: 4px 7px; font-size: 12px; }
+  .orc-service-option { grid-template-columns: 25px minmax(0, 1fr) auto; min-height: 34px; gap: 5px; padding: 3px 5px; }
+  .orc-service-symbol { width: 23px; height: 23px; font-size: 13px; }
+  .orc-service-option > div strong { font-size: 11px; }
+  .orc-service-option > div small { display: none; }
+  .orc-service-option > b { font-size: 11px; }
+  .orc-price-summary > div { font-size: 10px; }
+  .orc-price-summary .orc-total-line strong { font-size: 13px; }
 }
 
 @media (max-width: 600px) {

@@ -121,6 +121,40 @@ const STATUS_PERMISSAO_LABEL = {
   expirada: "Expirada",
 };
 
+const MOTIVOS_EVENTO = [
+  ["acesso_autorizado", "Acesso autorizado"],
+  ["acesso_de_manutencao", "Acesso de manutenção"],
+  ["saida_registrada", "Saída registrada"],
+  ["credencial_bloqueada", "Credencial bloqueada"],
+  ["credencial_expirada", "Credencial expirada"],
+  ["token_nao_reconhecido", "Token não reconhecido"],
+  ["sem_permissao", "Sem permissão"],
+  ["fora_do_horario_permitido", "Fora do horário permitido"],
+  ["ambiente_restrito", "Ambiente restrito"],
+  ["falha_na_validacao", "Falha na validação"],
+  ["falha_de_comunicacao", "Falha de comunicação"],
+];
+
+function agoraLocal() {
+  const data = new Date();
+  data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
+  return data.toISOString().slice(0, 16);
+}
+
+function novoEventoVazio() {
+  return {
+    id_credencial: "",
+    id_ambiente: "",
+    tipo_acesso: "entrada",
+    decisao_acesso: "permitido",
+    status_evento: "concluido",
+    data_expiracao: "",
+    data_utilizacao: agoraLocal(),
+    motivo: "acesso_autorizado",
+    token_tentado: "",
+  };
+}
+
 function iniciais(nome) {
   return String(nome || "?")
     .split(" ")
@@ -148,13 +182,40 @@ export default function Acessos() {
   const [rawEvents, setRawEvents] = useState([]);
   const [rawTokens, setRawTokens] = useState([]);
   const [rawPermissions, setRawPermissions] = useState([]);
+  const [rawEnvironments, setRawEnvironments] = useState([]);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [eventForm, setEventForm] = useState(novoEventoVazio);
+  const [savingEvent, setSavingEvent] = useState(false);
+  const [eventError, setEventError] = useState("");
+  const [canRegisterEvent, setCanRegisterEvent] = useState(false);
   const [toast, setToast] = useState("");
+
+  useEffect(() => {
+    try {
+      const usuario = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
+      setCanRegisterEvent(["administrador", "porteiro"].includes(usuario.perfil));
+    } catch {}
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(""), 2800);
     return () => clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (!eventModalOpen) return;
+    const overflowAnterior = document.body.style.overflow;
+    const fecharNoEscape = (evento) => {
+      if (evento.key === "Escape") setEventModalOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", fecharNoEscape);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      window.removeEventListener("keydown", fecharNoEscape);
+    };
+  }, [eventModalOpen]);
 
   const carregarDados = useCallback(async () => {
     try {
@@ -182,12 +243,15 @@ export default function Acessos() {
       setRawEvents(listaEv);
       setRawTokens((resCredenciais.dados || [])
         .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
+      setRawEnvironments((resAmbientes.dados || [])
+        .filter((ambiente) => idsAmbientes.has(Number(ambiente.id_ambiente))));
       setRawPermissions((resPermissoes.dados || [])
         .filter((permissao) => idsUsuarios.has(Number(permissao.id_usuario)) && idsAmbientes.has(Number(permissao.id_ambiente))));
 
       if (listaEv.length > 0) {
         setSelected((prev) => prev ?? listaEv[0].id_evento);
       }
+      return listaEv;
     } catch (erro) {
       setToast(erro.message || "Erro ao carregar dados de acesso.");
     }
@@ -317,6 +381,31 @@ export default function Acessos() {
     }
   };
 
+  async function registrarEvento(evento) {
+    evento.preventDefault();
+    setSavingEvent(true);
+    setEventError("");
+    try {
+      const resposta = await requisicaoAPI("/eventos-acesso", {
+        method: "POST",
+        body: JSON.stringify({
+          ...eventForm,
+          id_credencial: eventForm.id_credencial || null,
+          token_tentado: eventForm.id_credencial ? "" : eventForm.token_tentado,
+        }),
+      });
+      setEventModalOpen(false);
+      setEventForm(novoEventoVazio());
+      setToast(resposta.mensagem || "Evento de acesso registrado.");
+      await carregarDados();
+      setSelected(Number(resposta.id_evento));
+    } catch (erro) {
+      setEventError(erro.message || "Não foi possível registrar o evento.");
+    } finally {
+      setSavingEvent(false);
+    }
+  }
+
   return (
     <div className="ac-page">
       <div className="ac-page-heading">
@@ -328,9 +417,15 @@ export default function Acessos() {
           </p>
         </div>
 
-        <div className="ac-live">
-          <i />
-          <span>Monitoramento ativo</span>
+        <div className="ac-heading-actions">
+          <div className="ac-live">
+            <i />
+            <span>Monitoramento ativo</span>
+          </div>
+          {canRegisterEvent && <button className="ac-register-event-button" onClick={() => {
+            setEventError("");
+            setEventModalOpen(true);
+          }}>Registrar evento</button>}
         </div>
       </div>
 
@@ -740,6 +835,76 @@ export default function Acessos() {
           )) : <p className="ac-permission-empty">Nenhuma permissão de acesso cadastrada.</p>}
         </div>
       </section>
+
+      {eventModalOpen && (
+        <div className="ac-event-modal-overlay" onMouseDown={(evento) => {
+          if (evento.target === evento.currentTarget) setEventModalOpen(false);
+        }}>
+          <section className="ac-event-modal" role="dialog" aria-modal="true" aria-labelledby="ac-event-modal-title">
+            <header className="ac-event-modal-header">
+              <div>
+                <span>REGISTRO DE MOVIMENTAÇÃO</span>
+                <h2 id="ac-event-modal-title">Registrar evento de acesso</h2>
+                <p>Selecione o ambiente e, se houver, a credencial usada.</p>
+              </div>
+              <button type="button" onClick={() => setEventModalOpen(false)} aria-label="Fechar formulário">×</button>
+            </header>
+
+            <form onSubmit={registrarEvento}>
+              {eventError && <p className="ac-event-form-error" role="alert">{eventError}</p>}
+              <div className="ac-event-form-grid">
+                <label className="ac-event-form-wide">Ambiente
+                  <select required value={eventForm.id_ambiente} onChange={(evento) => setEventForm((atual) => ({ ...atual, id_ambiente: evento.target.value }))}>
+                    <option value="">Selecione um ambiente</option>
+                    {rawEnvironments.map((ambiente) => <option key={ambiente.id_ambiente} value={ambiente.id_ambiente}>{ambiente.nome}{ambiente.localizacao ? ` · ${ambiente.localizacao}` : ""}</option>)}
+                  </select>
+                </label>
+                <label className="ac-event-form-wide">Credencial
+                  <select value={eventForm.id_credencial} onChange={(evento) => setEventForm((atual) => ({ ...atual, id_credencial: evento.target.value }))}>
+                    <option value="">Tentativa sem credencial reconhecida</option>
+                    {rawTokens.map((credencial) => <option key={credencial.id_credencial} value={credencial.id_credencial}>#{credencial.id_credencial} · {credencial.nome_usuario} · {METODO_LABEL[credencial.tipo_credencial] || credencial.tipo_credencial} · {credencial.status}</option>)}
+                  </select>
+                  <small>O código da credencial será consultado e armazenado somente como hash.</small>
+                </label>
+                {!eventForm.id_credencial && <label className="ac-event-form-wide">Código tentado (opcional)
+                  <input autoComplete="off" value={eventForm.token_tentado} onChange={(evento) => setEventForm((atual) => ({ ...atual, token_tentado: evento.target.value }))} placeholder="Código apresentado no leitor" />
+                  <small>Se informado, o código será convertido em SHA-256 antes de salvar.</small>
+                </label>}
+                <label>Movimentação
+                  <select required value={eventForm.tipo_acesso} onChange={(evento) => setEventForm((atual) => ({ ...atual, tipo_acesso: evento.target.value }))}>
+                    <option value="entrada">Entrada</option><option value="saida">Saída</option>
+                  </select>
+                </label>
+                <label>Decisão
+                  <select required value={eventForm.decisao_acesso} onChange={(evento) => setEventForm((atual) => ({ ...atual, decisao_acesso: evento.target.value }))}>
+                    <option value="permitido">Permitido</option><option value="negado">Negado</option>
+                  </select>
+                </label>
+                <label>Status do evento
+                  <select required value={eventForm.status_evento} onChange={(evento) => setEventForm((atual) => ({ ...atual, status_evento: evento.target.value }))}>
+                    <option value="processando">Processando</option><option value="concluido">Concluído</option><option value="pendente">Pendente</option><option value="falha_comunicacao">Falha de comunicação</option><option value="bloqueado">Bloqueado</option><option value="falha">Falha</option>
+                  </select>
+                </label>
+                <label>Motivo
+                  <select required value={eventForm.motivo} onChange={(evento) => setEventForm((atual) => ({ ...atual, motivo: evento.target.value }))}>
+                    {MOTIVOS_EVENTO.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}
+                  </select>
+                </label>
+                <label>Data e hora do evento
+                  <input required type="datetime-local" value={eventForm.data_utilizacao} onChange={(evento) => setEventForm((atual) => ({ ...atual, data_utilizacao: evento.target.value }))} />
+                </label>
+                <label>Expiração (opcional)
+                  <input type="datetime-local" value={eventForm.data_expiracao} onChange={(evento) => setEventForm((atual) => ({ ...atual, data_expiracao: evento.target.value }))} />
+                </label>
+              </div>
+              <footer className="ac-event-modal-footer">
+                <button type="button" className="ac-event-cancel" onClick={() => setEventModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="ac-event-submit" disabled={savingEvent || !rawEnvironments.length}>{savingEvent ? "Salvando…" : "Salvar evento"}</button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

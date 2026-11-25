@@ -1071,6 +1071,76 @@ export async function atualizarCredencial(
    ACESSOS DETALHADOS
 ========================================================= */
 
+export async function registrarEventoAcesso(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        const idCredencial = req.body.id_credencial ? Number(req.body.id_credencial) : null;
+        const idAmbiente = Number(req.body.id_ambiente);
+        const { tipo_acesso, decisao_acesso, status_evento, data_expiracao, data_utilizacao, motivo } = req.body;
+        const tokenTentado = String(req.body.token_tentado || "").trim();
+        const tiposAcesso = ["entrada", "saida"];
+        const decisoes = ["permitido", "negado"];
+        const statusValidos = ["processando", "concluido", "pendente", "falha_comunicacao", "bloqueado", "falha"];
+        const motivosValidos = [
+            "acesso_autorizado", "acesso_de_manutencao", "saida_registrada",
+            "credencial_bloqueada", "credencial_expirada", "token_nao_reconhecido",
+            "sem_permissao", "fora_do_horario_permitido", "ambiente_restrito",
+            "falha_na_validacao", "falha_de_comunicacao"
+        ];
+
+        if (!idPredio) return res.status(400).json({ sucesso: false, erro: "O usuário não está vinculado a um prédio." });
+        if (!Number.isInteger(idAmbiente) || idAmbiente <= 0) return res.status(400).json({ sucesso: false, erro: "Selecione um ambiente válido." });
+        if (idCredencial !== null && (!Number.isInteger(idCredencial) || idCredencial <= 0)) return res.status(400).json({ sucesso: false, erro: "Selecione uma credencial válida." });
+        if (!tiposAcesso.includes(tipo_acesso) || !decisoes.includes(decisao_acesso) || !statusValidos.includes(status_evento) || !motivosValidos.includes(motivo)) {
+            return res.status(400).json({ sucesso: false, erro: "Confira o tipo, decisão, status e motivo do evento." });
+        }
+        if (tokenTentado.length > 255) return res.status(400).json({ sucesso: false, erro: "O código tentado é muito longo." });
+
+        const [ambientes] = await pool.query(
+            `SELECT a.id_ambiente FROM ambiente a
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE a.id_ambiente = ? AND an.id_predio = ? LIMIT 1`,
+            [idAmbiente, idPredio]
+        );
+        if (!ambientes.length) return res.status(404).json({ sucesso: false, erro: "Ambiente não encontrado no prédio atual." });
+
+        let tokenHash = null;
+        if (idCredencial !== null) {
+            const [credenciais] = await pool.query(
+                `SELECT c.token_hash FROM credenciais_acesso c
+                 INNER JOIN usuario u ON u.id_usuario = c.id_usuario
+                 WHERE c.id_credencial = ? AND u.id_predio = ? LIMIT 1`,
+                [idCredencial, idPredio]
+            );
+            if (!credenciais.length) return res.status(404).json({ sucesso: false, erro: "Credencial não encontrada no prédio atual." });
+            tokenHash = credenciais[0].token_hash;
+        } else if (tokenTentado) {
+            tokenHash = createHash("sha256").update(tokenTentado).digest("hex");
+        }
+
+        const normalizarDataHora = (valor) => valor ? String(valor).replace("T", " ") : null;
+        const dataUtilizacao = normalizarDataHora(data_utilizacao);
+        const dataExpiracao = normalizarDataHora(data_expiracao);
+        const formatoDataHora = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/;
+        if (!dataUtilizacao || !formatoDataHora.test(dataUtilizacao) || (dataExpiracao && !formatoDataHora.test(dataExpiracao))) {
+            return res.status(400).json({ sucesso: false, erro: "Informe datas válidas para o evento." });
+        }
+
+        const [resultado] = await pool.query(
+            `INSERT INTO eventos_acessos
+                (id_credencial, id_ambiente, tipo_acesso, decisao_acesso, token_tentado,
+                 status_evento, data_expiracao, data_utilizacao, motivo)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [idCredencial, idAmbiente, tipo_acesso, decisao_acesso, tokenHash,
+                status_evento, dataExpiracao, dataUtilizacao, motivo]
+        );
+
+        return res.status(201).json({ sucesso: true, id_evento: resultado.insertId, mensagem: "Evento de acesso registrado." });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
 export async function listarAcessosDetalhado(
     req,
     res,

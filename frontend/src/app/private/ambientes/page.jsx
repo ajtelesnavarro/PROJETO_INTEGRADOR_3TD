@@ -1069,24 +1069,6 @@ function AmbientesConteudo({ toast }) {
                 </div>
               )}
 
-              {suportaReserva ? (
-                <label className="amb-checkbox-field">
-                  <input
-                    type="checkbox"
-                    checked={form.reservation}
-                    onChange={(event) =>
-                      updateForm("reservation", event.target.checked)
-                    }
-                  />
-                  <span>
-                    <strong>Permitir reservas</strong>
-                    <small>Este ambiente poderá ser reservado.</small>
-                  </span>
-                </label>
-              ) : (
-                <div />
-              )}
-
               <label>
                 Horário de abertura *
                 <input
