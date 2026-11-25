@@ -218,7 +218,6 @@ export default function PrediosAndares() {
       ...predioAtual,
       codigo: `LUM-${String(predioAtual.id_predio).padStart(3, "0")}`,
       nome: predioAtual.nome_predio,
-      tipo: predioAtual.tipo_empreendimento || "Corporativo",
       logradouroDetalhado,
       cidadeUf: `${predioAtual.cidade}, ${predioAtual.estado}`,
       andaresCadastrados: andaresDoPredio.length,
@@ -242,7 +241,6 @@ export default function PrediosAndares() {
       modo: "criar",
       id_predio: null,
       nome_predio: "",
-      tipo_empreendimento: "Corporativo",
       cep: "",
       rua: "",
       numero: "",
@@ -259,7 +257,6 @@ export default function PrediosAndares() {
       modo: "editar",
       id_predio: predio.id_predio,
       nome_predio: predio.nome_predio || "",
-      tipo_empreendimento: predio.tipo_empreendimento || "Corporativo",
       cep: predio.cep || "",
       rua: predio.rua || "",
       numero: predio.numero || "",
@@ -414,7 +411,6 @@ export default function PrediosAndares() {
 
     const payload = {
       nome_predio: modalPredio.nome_predio.trim(),
-      tipo_empreendimento: modalPredio.tipo_empreendimento.trim(),
       cep: modalPredio.cep.trim(),
       rua: modalPredio.rua.trim(),
       numero: modalPredio.numero.trim(),
@@ -1384,19 +1380,6 @@ export default function PrediosAndares() {
                 gap: "10px",
               }}
             >
-              <label>
-                Tipo de empreendimento
-                <input
-                  value={modalPredio.tipo_empreendimento}
-                  onChange={(e) =>
-                    setModalPredio((a) => ({
-                      ...a,
-                      tipo_empreendimento: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </label>
 
               <label>
                 CEP

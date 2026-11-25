@@ -11,8 +11,7 @@ export const recursos = {
             'complemento',
             'bairro',
             'cidade',
-            'estado',
-            'tipo_empreendimento'
+            'estado'
         ],
         obrigatorios: [
             'nome_predio',
