@@ -1067,6 +1067,96 @@ export async function atualizarCredencial(
 }
 
 
+export async function editarCredencial(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        const idCredencial = Number(req.params.id);
+        if (!idPredio || !Number.isInteger(idCredencial) || idCredencial <= 0) return res.status(400).json({ sucesso: false, erro: "Credencial inválida." });
+        const { id_usuario, tipo_credencial, status, bloqueado_ate, novo_token } = req.body;
+        const tipos = ["cartao_rfid", "tag_nfc", "qr_code"];
+        const estados = ["ativa", "bloqueada", "expirada"];
+        const idUsuario = Number(id_usuario);
+        if (!Number.isInteger(idUsuario) || idUsuario <= 0 || !tipos.includes(tipo_credencial) || !estados.includes(status)) {
+            return res.status(400).json({ sucesso: false, erro: "Confira usuário, tipo e status da credencial." });
+        }
+        const [[usuario]] = await pool.query("SELECT id_usuario FROM usuario WHERE id_usuario = ? AND id_predio = ?", [idUsuario, idPredio]);
+        if (!usuario) return res.status(404).json({ sucesso: false, erro: "Usuário não encontrado neste prédio." });
+        const [[credencialAtual]] = await pool.query(
+            `SELECT c.id_credencial FROM credenciais_acesso c
+             INNER JOIN usuario u ON u.id_usuario = c.id_usuario
+             WHERE c.id_credencial = ? AND u.id_predio = ?`,
+            [idCredencial, idPredio]
+        );
+        if (!credencialAtual) return res.status(404).json({ sucesso: false, erro: "Credencial não encontrada neste prédio." });
+        const bloqueio = bloqueado_ate ? String(bloqueado_ate).replace("T", " ") : null;
+        if (bloqueio && !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/.test(bloqueio)) return res.status(400).json({ sucesso: false, erro: "Data de bloqueio inválida." });
+        const novoHash = String(novo_token || "").trim();
+        if (novoHash.length > 255) return res.status(400).json({ sucesso: false, erro: "O código da credencial é muito longo." });
+        const valores = [idUsuario, tipo_credencial, status, bloqueio];
+        let sql = "UPDATE credenciais_acesso c INNER JOIN usuario u ON u.id_usuario = c.id_usuario SET c.id_usuario = ?, c.tipo_credencial = ?, c.status = ?, c.bloqueado_ate = ?";
+        if (novoHash) {
+            sql += ", c.token_hash = ?";
+            valores.push(createHash("sha256").update(novoHash).digest("hex"));
+        }
+        sql += " WHERE c.id_credencial = ? AND u.id_predio = ?";
+        valores.push(idCredencial, idPredio);
+        await pool.query(sql, valores);
+        return res.json({ sucesso: true, mensagem: "Credencial atualizada." });
+    } catch (erro) { return next(erro); }
+}
+
+export async function atualizarPermissaoAcesso(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        const idPermissao = Number(req.params.id);
+        const idUsuario = Number(req.body.id_usuario);
+        const idAmbiente = Number(req.body.id_ambiente);
+        const { horario_inicio, horario_fim, status_permissao, data_inicio, data_fim, dias_semana } = req.body;
+        const estados = ["ativa", "inativa", "suspensa", "expirada"];
+        const inicio = String(data_inicio || "").slice(0, 10);
+        const fim = data_fim ? String(data_fim).slice(0, 10) : null;
+        if (!idPredio || !Number.isInteger(idPermissao) || idPermissao <= 0 || !Number.isInteger(idUsuario) || idUsuario <= 0 || !Number.isInteger(idAmbiente) || idAmbiente <= 0 || !estados.includes(status_permissao)) {
+            return res.status(400).json({ sucesso: false, erro: "Confira usuário, ambiente e status da permissão." });
+        }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(inicio) || (fim && (!/^\d{4}-\d{2}-\d{2}$/.test(fim) || fim < inicio))) {
+            return res.status(400).json({ sucesso: false, erro: "Informe um período válido." });
+        }
+        const horaInicio = horario_inicio || null;
+        const horaFim = horario_fim || null;
+        if ((horaInicio && !horaFim) || (!horaInicio && horaFim) || (horaInicio && horaFim && horaFim <= horaInicio)) {
+            return res.status(400).json({ sucesso: false, erro: "Informe horários válidos ou deixe ambos sem restrição." });
+        }
+        const [[permissaoAtual]] = await pool.query(
+            `SELECT pa.id_permissao FROM permissao_acesso pa
+             INNER JOIN usuario u ON u.id_usuario = pa.id_usuario
+             INNER JOIN ambiente a ON a.id_ambiente = pa.id_ambiente
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE pa.id_permissao = ? AND u.id_predio = ? AND an.id_predio = ?`,
+            [idPermissao, idPredio, idPredio]
+        );
+        if (!permissaoAtual) return res.status(404).json({ sucesso: false, erro: "Permissão não encontrada neste prédio." });
+        const [[usuarioDestino]] = await pool.query("SELECT id_usuario FROM usuario WHERE id_usuario = ? AND id_predio = ?", [idUsuario, idPredio]);
+        const [[ambienteDestino]] = await pool.query(
+            `SELECT a.id_ambiente FROM ambiente a INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE a.id_ambiente = ? AND an.id_predio = ?`,
+            [idAmbiente, idPredio]
+        );
+        if (!usuarioDestino || !ambienteDestino) return res.status(404).json({ sucesso: false, erro: "Usuário ou ambiente não encontrado neste prédio." });
+        await pool.query(
+            `UPDATE permissao_acesso pa
+             INNER JOIN usuario titular ON titular.id_usuario = pa.id_usuario
+             INNER JOIN ambiente destino ON destino.id_ambiente = ?
+             INNER JOIN andar an ON an.id_andar = destino.id_andar
+             SET pa.id_usuario = ?, pa.id_ambiente = ?, pa.horario_inicio = ?, pa.horario_fim = ?,
+                 pa.status_permissao = ?, pa.data_inicio = ?, pa.data_fim = ?, pa.dias_semana = ?
+             WHERE pa.id_permissao = ? AND titular.id_predio = ? AND an.id_predio = ?
+               AND EXISTS (SELECT 1 FROM usuario u WHERE u.id_usuario = ? AND u.id_predio = ?)`,
+            [idAmbiente, idUsuario, idAmbiente, horaInicio, horaFim, status_permissao, inicio, fim, String(dias_semana || "").trim() || null, idPermissao, idPredio, idPredio, idUsuario, idPredio]
+        );
+        return res.json({ sucesso: true, mensagem: "Permissão de acesso atualizada." });
+    } catch (erro) { return next(erro); }
+}
+
 /* =========================================================
    ACESSOS DETALHADOS
 ========================================================= */
@@ -1262,6 +1352,10 @@ export async function listarHistoricoDispositivos(req, res, next) {
                      WHERE he.id_dispositivo = h.id_dispositivo
                        AND he.data_historico_energia = h.data_historico_dispositivo
                      ORDER BY he.id_historico_energia DESC LIMIT 1) AS leitura_potencia_kw,
+                    (SELECT he.qualidade_medicao FROM historico_energia he
+                     WHERE he.id_dispositivo = h.id_dispositivo
+                       AND he.data_historico_energia = h.data_historico_dispositivo
+                     ORDER BY he.id_historico_energia DESC LIMIT 1) AS qualidade_medicao,
                     (SELECT ht.temperatura_medida FROM historico_temperatura ht
                      WHERE ht.id_dispositivo = h.id_dispositivo
                        AND ht.data_temperatura = h.data_historico_dispositivo
@@ -1285,6 +1379,158 @@ export async function listarHistoricoDispositivos(req, res, next) {
         );
         return res.json({ sucesso: true, dados });
     } catch (erro) { return next(erro); }
+}
+
+
+export async function atualizarHistoricoDispositivo(req, res, next) {
+    const idHistorico = Number(req.params.id);
+    const {
+        status_dispositivo, data_inicio_status, data_fim_status, motivo,
+        consumo_estimado_kwh, custo_estimado, observacao,
+        consumo_kwh, potencia_kw, qualidade_medicao,
+        temperatura_medida, umidade, iluminacao_medida
+    } = req.body;
+    const statusValidos = ["ativo", "instavel", "manutencao", "inativo", "offline"];
+    if (!Number.isInteger(idHistorico) || idHistorico <= 0 || !statusValidos.includes(status_dispositivo) || !data_inicio_status) {
+        return res.status(400).json({ sucesso: false, erro: "Informe um registro, status e início válidos." });
+    }
+
+    const inicioNormalizado = String(data_inicio_status).replace("T", " ");
+    const fimNormalizado = data_fim_status ? String(data_fim_status).replace("T", " ") : null;
+    const formatoDataHora = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/;
+    if (!formatoDataHora.test(inicioNormalizado) || (fimNormalizado && !formatoDataHora.test(fimNormalizado))) {
+        return res.status(400).json({ sucesso: false, erro: "Informe datas de início e fim válidas." });
+    }
+    if (fimNormalizado && fimNormalizado < inicioNormalizado) {
+        return res.status(400).json({ sucesso: false, erro: "A data de fim não pode ser anterior à data de início." });
+    }
+
+    const idPredio = await obterPredioUsuario(req.usuario.id);
+    if (!idPredio) return res.status(400).json({ sucesso: false, erro: "O usuário não está vinculado a um prédio." });
+    const conexao = await pool.getConnection();
+    try {
+        await conexao.beginTransaction();
+        const [registros] = await conexao.query(
+            `SELECT h.id_historico_dispositivo, h.id_dispositivo, h.data_historico_dispositivo,
+                    d.tipo_dispositivo
+             FROM historico_dispositivo h
+             INNER JOIN dispositivo d ON d.id_dispositivo = h.id_dispositivo
+             INNER JOIN ambiente a ON a.id_ambiente = d.id_ambiente
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE h.id_historico_dispositivo = ? AND an.id_predio = ?
+             FOR UPDATE`,
+            [idHistorico, idPredio]
+        );
+        if (!registros.length) {
+            await conexao.rollback();
+            return res.status(404).json({ sucesso: false, erro: "Registro não encontrado neste prédio." });
+        }
+
+        const registro = registros[0];
+        const numeroOpcional = (valor) => valor === "" || valor == null ? null : Number(valor);
+        const numeroValido = (valor) => valor !== "" && valor != null && Number.isFinite(Number(valor)) && Number(valor) >= 0;
+        if (qualidade_medicao && !["boa", "regular", "ruim"].includes(qualidade_medicao)) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Qualidade de medição inválida." });
+        }
+        if (umidade !== "" && umidade != null && (!numeroValido(umidade) || Number(umidade) > 100)) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "A umidade deve estar entre 0 e 100%." });
+        }
+
+        await conexao.query(
+            `UPDATE historico_dispositivo
+             SET status_dispositivo = ?, data_inicio_status = ?, data_fim_status = ?,
+                 motivo = ?, consumo_estimado_kwh = ?, custo_estimado = ?, observacao = ?
+             WHERE id_historico_dispositivo = ?`,
+            [status_dispositivo, inicioNormalizado, fimNormalizado, motivo?.trim() || null,
+                numeroOpcional(consumo_estimado_kwh), numeroOpcional(custo_estimado),
+                observacao?.trim() || null, idHistorico]
+        );
+
+        const tipo = registro.tipo_dispositivo;
+        const idDispositivo = registro.id_dispositivo;
+        const dataRegistro = registro.data_historico_dispositivo;
+        if (tipo === "energia") {
+            if (consumo_kwh !== "" && consumo_kwh != null && !numeroValido(consumo_kwh)) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Consumo medido inválido." });
+            }
+            if (potencia_kw !== "" && potencia_kw != null && !numeroValido(potencia_kw)) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Potência medida inválida." });
+            }
+            const [leituras] = await conexao.query(
+                `SELECT id_historico_energia FROM historico_energia
+                 WHERE id_dispositivo = ? AND data_historico_energia = ?
+                 ORDER BY id_historico_energia DESC LIMIT 1 FOR UPDATE`,
+                [idDispositivo, dataRegistro]
+            );
+            if (leituras.length) {
+                await conexao.query(
+                    `UPDATE historico_energia SET consumo_kwh = COALESCE(?, consumo_kwh),
+                     potencia_kw = COALESCE(?, potencia_kw), custo_estimado = ?, qualidade_medicao = ?
+                     WHERE id_historico_energia = ?`,
+                    [numeroOpcional(consumo_kwh), numeroOpcional(potencia_kw), numeroOpcional(custo_estimado), qualidade_medicao || null, leituras[0].id_historico_energia]
+                );
+            }
+        } else if (tipo === "temperatura") {
+            if (temperatura_medida !== "" && temperatura_medida != null && !Number.isFinite(Number(temperatura_medida))) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Temperatura medida inválida." });
+            }
+            const [leituras] = await conexao.query(
+                `SELECT id_historico_temperatura FROM historico_temperatura
+                 WHERE id_dispositivo = ? AND data_temperatura = ?
+                 ORDER BY id_historico_temperatura DESC LIMIT 1 FOR UPDATE`,
+                [idDispositivo, dataRegistro]
+            );
+            if (leituras.length) {
+                await conexao.query(
+                    `UPDATE historico_temperatura SET temperatura_medida = COALESCE(?, temperatura_medida), umidade = ?
+                     WHERE id_historico_temperatura = ?`,
+                    [numeroOpcional(temperatura_medida), numeroOpcional(umidade), leituras[0].id_historico_temperatura]
+                );
+            }
+        } else if (tipo === "iluminacao") {
+            if (iluminacao_medida !== "" && iluminacao_medida != null && !numeroValido(iluminacao_medida)) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Iluminação medida inválida." });
+            }
+            const [leituras] = await conexao.query(
+                `SELECT id_historico_iluminacao FROM historico_iluminacao
+                 WHERE id_dispositivo = ? AND data_iluminacao = ?
+                 ORDER BY id_historico_iluminacao DESC LIMIT 1 FOR UPDATE`,
+                [idDispositivo, dataRegistro]
+            );
+            if (leituras.length && iluminacao_medida !== "" && iluminacao_medida != null) {
+                await conexao.query(
+                    `UPDATE historico_iluminacao SET iluminacao_medida = ? WHERE id_historico_iluminacao = ?`,
+                    [Number(iluminacao_medida), leituras[0].id_historico_iluminacao]
+                );
+            }
+        }
+
+        await conexao.query(
+            `UPDATE dispositivo AS d SET status_dispositivo = ?
+             WHERE d.id_dispositivo = ?
+               AND NOT EXISTS (
+                 SELECT 1 FROM historico_dispositivo h
+                 WHERE h.id_dispositivo = d.id_dispositivo
+                   AND (h.data_historico_dispositivo > ? OR
+                        (h.data_historico_dispositivo = ? AND h.id_historico_dispositivo > ?))
+               )`,
+            [status_dispositivo, idDispositivo, dataRegistro, dataRegistro, idHistorico]
+        );
+
+        await conexao.commit();
+        return res.json({ sucesso: true, mensagem: "Registro atualizado." });
+    } catch (erro) {
+        await conexao.rollback();
+        return next(erro);
+    } finally {
+        conexao.release();
+    }
 }
 
 

@@ -18,6 +18,10 @@ function agoraLocal() {
   return data.toISOString().slice(0, 16);
 }
 
+function dataHoraInput(valor) {
+  return valor ? String(valor).replace(" ", "T").slice(0, 16) : "";
+}
+
 function formatarLeitura(item) {
   const numero = (valor) => valor == null ? null : Number(valor).toLocaleString("pt-BR", { maximumFractionDigits: 4 });
   if (item.tipo_dispositivo === "energia") {
@@ -42,6 +46,7 @@ export default function HistoricoDispositivosPage() {
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
   const [registroAlvo, setRegistroAlvo] = useState("");
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     id_dispositivo: "",
     status_dispositivo: "ativo",
@@ -108,32 +113,53 @@ export default function HistoricoDispositivosPage() {
     setErro("");
     setMensagem("");
     try {
-      await requisicaoAPI("/historico-dispositivos", {
-        method: "POST",
+      await requisicaoAPI(editingId ? `/historico-dispositivos/${editingId}` : "/historico-dispositivos", {
+        method: editingId ? "PATCH" : "POST",
         body: JSON.stringify(form),
       });
-      setMensagem("Histórico registrado e status do dispositivo atualizado.");
-      setForm((atual) => ({
-        ...atual,
-        data_inicio_status: agoraLocal(),
-        data_fim_status: "",
-        motivo: "",
-        consumo_estimado_kwh: "",
-        custo_estimado: "",
-        consumo_kwh: "",
-        potencia_kw: "",
-        qualidade_medicao: "",
-        temperatura_medida: "",
-        umidade: "",
-        iluminacao_medida: "",
-        observacao: "",
-      }));
+      setMensagem(editingId ? "Registro atualizado com sucesso." : "Histórico registrado e status do dispositivo atualizado.");
+      setEditingId(null);
+      setForm({ id_dispositivo: "", status_dispositivo: "ativo", data_inicio_status: agoraLocal(), data_fim_status: "", motivo: "", consumo_estimado_kwh: "", custo_estimado: "", consumo_kwh: "", potencia_kw: "", qualidade_medicao: "", temperatura_medida: "", umidade: "", iluminacao_medida: "", observacao: "" });
       await carregarDados();
     } catch (e) {
       setErro(e.message || "Não foi possível registrar o histórico.");
     } finally {
       setSalvando(false);
     }
+  }
+
+  function editarRegistro(item) {
+    setErro("");
+    setMensagem("");
+    setEditingId(item.id_historico_dispositivo);
+    setRegistroAlvo(String(item.id_historico_dispositivo));
+    setForm({
+      id_dispositivo: String(item.id_dispositivo),
+      status_dispositivo: item.status_dispositivo || "ativo",
+      data_inicio_status: dataHoraInput(item.data_inicio_status),
+      data_fim_status: dataHoraInput(item.data_fim_status),
+      motivo: item.motivo || "",
+      consumo_estimado_kwh: item.consumo_estimado_kwh ?? "",
+      custo_estimado: item.custo_estimado ?? "",
+      consumo_kwh: item.leitura_consumo_kwh ?? "",
+      potencia_kw: item.leitura_potencia_kw ?? "",
+      qualidade_medicao: item.qualidade_medicao || "",
+      temperatura_medida: item.leitura_temperatura ?? "",
+      umidade: item.leitura_umidade ?? "",
+      iluminacao_medida: item.leitura_iluminacao ?? "",
+      observacao: item.observacao || "",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelarEdicao() {
+    setEditingId(null);
+    setErro("");
+    setForm({
+      id_dispositivo: "", status_dispositivo: "ativo", data_inicio_status: agoraLocal(), data_fim_status: "",
+      motivo: "", consumo_estimado_kwh: "", custo_estimado: "", consumo_kwh: "", potencia_kw: "",
+      qualidade_medicao: "", temperatura_medida: "", umidade: "", iluminacao_medida: "", observacao: "",
+    });
   }
 
   return (
@@ -146,11 +172,11 @@ export default function HistoricoDispositivosPage() {
       {mensagem && <p className="dh-alert success">{mensagem}</p>}
 
       <section className="dh-card">
-        <h2>Adicionar registro</h2>
+        <div className="dh-form-heading"><h2>{editingId ? "Editar registro" : "Adicionar registro"}</h2>{editingId && <button type="button" className="dh-cancel-edit" onClick={cancelarEdicao}>Cancelar edição</button>}</div>
         {erro && <p className="dh-alert error" role="alert">{erro}</p>}
         <form className="dh-form" onSubmit={salvar}>
           <label>Dispositivo
-            <select required value={form.id_dispositivo} onChange={(e) => atualizar("id_dispositivo", e.target.value)}>
+            <select required disabled={Boolean(editingId)} value={form.id_dispositivo} onChange={(e) => atualizar("id_dispositivo", e.target.value)}>
               <option value="">Selecione um dispositivo</option>
               {dispositivos.map((d) => <option key={d.id_dispositivo} value={d.id_dispositivo}>{d.nome} · {d.nome_ambiente || `#${d.id_dispositivo}`}</option>)}
             </select>
@@ -176,15 +202,15 @@ export default function HistoricoDispositivosPage() {
             </div>
             <div className="dh-measurement-grid">
               {tipoSelecionado === "energia" && <>
-                <label>Consumo medido (kWh)<input required type="number" min="0" step="0.0001" value={form.consumo_kwh} onChange={(e) => atualizar("consumo_kwh", e.target.value)} /></label>
-                <label>Potência medida (kW)<input required type="number" min="0" step="0.0001" value={form.potencia_kw} onChange={(e) => atualizar("potencia_kw", e.target.value)} /></label>
+                <label>Consumo medido (kWh)<input required={!editingId} type="number" min="0" step="0.0001" value={form.consumo_kwh} onChange={(e) => atualizar("consumo_kwh", e.target.value)} /></label>
+                <label>Potência medida (kW)<input required={!editingId} type="number" min="0" step="0.0001" value={form.potencia_kw} onChange={(e) => atualizar("potencia_kw", e.target.value)} /></label>
                 <label>Qualidade da medição<select value={form.qualidade_medicao} onChange={(e) => atualizar("qualidade_medicao", e.target.value)}><option value="">Não informada</option><option value="boa">Boa</option><option value="regular">Regular</option><option value="ruim">Ruim</option></select></label>
               </>}
               {tipoSelecionado === "temperatura" && <>
-                <label>Temperatura medida (°C)<input required type="number" step="0.01" value={form.temperatura_medida} onChange={(e) => atualizar("temperatura_medida", e.target.value)} /></label>
+                <label>Temperatura medida (°C)<input required={!editingId} type="number" step="0.01" value={form.temperatura_medida} onChange={(e) => atualizar("temperatura_medida", e.target.value)} /></label>
                 <label>Umidade (%)<input type="number" min="0" max="100" step="0.01" value={form.umidade} onChange={(e) => atualizar("umidade", e.target.value)} /></label>
               </>}
-              {tipoSelecionado === "iluminacao" && <label>Iluminação medida (lux)<input required type="number" min="0" step="0.01" value={form.iluminacao_medida} onChange={(e) => atualizar("iluminacao_medida", e.target.value)} /></label>}
+              {tipoSelecionado === "iluminacao" && <label>Iluminação medida (lux)<input required={!editingId} type="number" min="0" step="0.01" value={form.iluminacao_medida} onChange={(e) => atualizar("iluminacao_medida", e.target.value)} /></label>}
             </div>
           </div>}
           <label>Consumo estimado (kWh)
@@ -196,20 +222,21 @@ export default function HistoricoDispositivosPage() {
           <label className="dh-wide">Observação
             <textarea rows="3" value={form.observacao} onChange={(e) => atualizar("observacao", e.target.value)} placeholder="Detalhes do evento ou da manutenção" />
           </label>
-          <div className="dh-wide dh-actions"><button type="submit" disabled={salvando || !dispositivos.length}>{salvando ? "Salvando..." : "Registrar histórico"}</button></div>
+          <div className="dh-wide dh-actions"><button type="submit" disabled={salvando || !dispositivos.length}>{salvando ? "Salvando..." : editingId ? "Salvar alterações" : "Registrar histórico"}</button></div>
         </form>
       </section>
 
       <section className="dh-card">
         <div className="dh-list-heading"><h2>Registros recentes</h2><span>{historico.length} registros</span></div>
         {carregando ? <p>Carregando histórico...</p> : dispositivos.length === 0 ? <p>Nenhum dispositivo cadastrado no prédio atual foi encontrado.</p> : historico.length === 0 ? <p>Nenhum histórico registrado.</p> : (
-          <div className="dh-table-wrap"><table className="dh-table"><thead><tr><th>Data</th><th>Dispositivo</th><th>Leitura</th><th>Status</th><th>Motivo</th><th>Observação</th></tr></thead>
+          <div className="dh-table-wrap"><table className="dh-table"><thead><tr><th>Data</th><th>Dispositivo</th><th>Leitura</th><th>Status</th><th>Motivo</th><th>Observação</th><th>Ação</th></tr></thead>
             <tbody>{historico.map((item) => <tr id={`historico-${item.id_historico_dispositivo}`} className={registroAlvo === String(item.id_historico_dispositivo) ? "dh-row-target" : ""} key={item.id_historico_dispositivo}>
               <td>{new Date(item.data_historico_dispositivo).toLocaleString("pt-BR")}</td>
               <td>{item.nome_dispositivo} · #{item.id_dispositivo}</td>
               <td>{formatarLeitura(item)}</td>
               <td><span className={`dh-status ${item.status_dispositivo}`}>{statusOpcoes.find(([v]) => v === item.status_dispositivo)?.[1] || item.status_dispositivo}</span></td>
               <td>{item.motivo || "—"}</td><td>{item.observacao || "—"}</td>
+              <td><button type="button" className="dh-edit-button" onClick={() => editarRegistro(item)}>Editar</button></td>
             </tr>)}</tbody></table></div>
         )}
       </section>

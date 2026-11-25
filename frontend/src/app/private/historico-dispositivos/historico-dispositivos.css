@@ -5,6 +5,11 @@
 .dh-heading p { margin: 0; color: #8290a7; }
 .dh-card { padding: 22px; border: 1px solid #e8edf5; border-radius: 16px; background: #fff; box-shadow: 0 8px 26px #26344d0a; }
 .dh-card h2 { margin: 0 0 18px; font-size: 17px; }
+.dh-form-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.dh-form-heading h2 { margin: 0; }
+.dh-cancel-edit, .dh-edit-button { min-height: 36px; padding: 0 13px; border: 1px solid #d5e0f2; border-radius: 8px; background: #f5f8ff; color: #3157ad; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.dh-edit-button:hover, .dh-cancel-edit:hover { border-color: #9cb3e8; background: #eaf0ff; }
+.dh-form select:disabled { cursor: not-allowed; background: #f3f6fb; color: #71809a; }
 .dh-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .dh-form label { display: grid; gap: 7px; color: #52617a; font-size: 13px; font-weight: 650; }
 .dh-form input, .dh-form select, .dh-form textarea { width: 100%; border: 1px solid #dfe6f0; border-radius: 9px; padding: 10px 12px; color: #26344d; background: #fff; font: inherit; }

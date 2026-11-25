@@ -141,6 +141,10 @@ function agoraLocal() {
   return data.toISOString().slice(0, 16);
 }
 
+function valorDataHoraInput(valor) {
+  return valor ? String(valor).replace(" ", "T").slice(0, 16) : "";
+}
+
 function novoEventoVazio() {
   return {
     id_credencial: "",
@@ -183,6 +187,11 @@ export default function Acessos() {
   const [rawTokens, setRawTokens] = useState([]);
   const [rawPermissions, setRawPermissions] = useState([]);
   const [rawEnvironments, setRawEnvironments] = useState([]);
+  const [rawUsers, setRawUsers] = useState([]);
+  const [editRecord, setEditRecord] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [savingRecord, setSavingRecord] = useState(false);
+  const [recordError, setRecordError] = useState("");
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [eventForm, setEventForm] = useState(novoEventoVazio);
   const [savingEvent, setSavingEvent] = useState(false);
@@ -204,10 +213,13 @@ export default function Acessos() {
   }, [toast]);
 
   useEffect(() => {
-    if (!eventModalOpen) return;
+    if (!eventModalOpen && !editRecord) return;
     const overflowAnterior = document.body.style.overflow;
     const fecharNoEscape = (evento) => {
-      if (evento.key === "Escape") setEventModalOpen(false);
+      if (evento.key === "Escape") {
+        setEventModalOpen(false);
+        setEditRecord(null);
+      }
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", fecharNoEscape);
@@ -215,7 +227,7 @@ export default function Acessos() {
       document.body.style.overflow = overflowAnterior;
       window.removeEventListener("keydown", fecharNoEscape);
     };
-  }, [eventModalOpen]);
+  }, [eventModalOpen, editRecord]);
 
   const carregarDados = useCallback(async () => {
     try {
@@ -245,6 +257,7 @@ export default function Acessos() {
         .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
       setRawEnvironments((resAmbientes.dados || [])
         .filter((ambiente) => idsAmbientes.has(Number(ambiente.id_ambiente))));
+      setRawUsers((resUsuarios.dados || []).filter((usuario) => idsUsuarios.has(Number(usuario.id_usuario))));
       setRawPermissions((resPermissoes.dados || [])
         .filter((permissao) => idsUsuarios.has(Number(permissao.id_usuario)) && idsAmbientes.has(Number(permissao.id_ambiente))));
 
@@ -380,6 +393,57 @@ export default function Acessos() {
       setToast(erro.message || "Erro ao alterar credencial.");
     }
   };
+
+  function abrirEdicaoCredencial(id) {
+    const credencial = rawTokens.find((item) => Number(item.id_credencial) === Number(id));
+    if (!credencial) return;
+    setRecordError("");
+    setEditRecord({ tipo: "credencial", id });
+    setEditForm({
+      id_usuario: String(credencial.id_usuario),
+      tipo_credencial: credencial.tipo_credencial,
+      status: credencial.status,
+      bloqueado_ate: valorDataHoraInput(credencial.bloqueado_ate),
+      novo_token: "",
+    });
+  }
+
+  function abrirEdicaoPermissao(id) {
+    const permissao = rawPermissions.find((item) => Number(item.id_permissao) === Number(id));
+    if (!permissao) return;
+    setRecordError("");
+    setEditRecord({ tipo: "permissao", id });
+    setEditForm({
+      id_usuario: String(permissao.id_usuario),
+      id_ambiente: String(permissao.id_ambiente),
+      horario_inicio: permissao.horario_inicio ? String(permissao.horario_inicio).slice(0, 5) : "",
+      horario_fim: permissao.horario_fim ? String(permissao.horario_fim).slice(0, 5) : "",
+      status_permissao: permissao.status_permissao,
+      data_inicio: String(permissao.data_inicio || "").slice(0, 10),
+      data_fim: permissao.data_fim ? String(permissao.data_fim).slice(0, 10) : "",
+      dias_semana: permissao.dias_semana || "",
+    });
+  }
+
+  async function salvarEdicao(evento) {
+    evento.preventDefault();
+    if (!editRecord) return;
+    setSavingRecord(true);
+    setRecordError("");
+    try {
+      const endpoint = editRecord.tipo === "credencial"
+        ? `/credenciais/${editRecord.id}/editar`
+        : `/permissoes-acesso/${editRecord.id}`;
+      const resposta = await requisicaoAPI(endpoint, { method: "PATCH", body: JSON.stringify(editForm) });
+      setEditRecord(null);
+      setToast(resposta.mensagem || "Registro atualizado.");
+      await carregarDados();
+    } catch (erro) {
+      setRecordError(erro.message || "Não foi possível atualizar o registro.");
+    } finally {
+      setSavingRecord(false);
+    }
+  }
 
   async function registrarEvento(evento) {
     evento.preventDefault();
@@ -783,18 +847,16 @@ export default function Acessos() {
                     {token.active ? "Ativa" : "Bloqueada"}
                   </span>
 
-                  <button
-                    className={`ac-token-button ${
-                      token.active ? "block" : "unblock"
-                    }`}
-                    onClick={() => toggleToken(token.id)}
-                  >
-                    <AccessIcon
-                      name={token.active ? "lock" : "unlock"}
-                      size={14}
-                    />
-                    {token.active ? "Bloquear" : "Liberar"}
-                  </button>
+                  <div className="ac-token-actions">
+                    {canRegisterEvent && <button type="button" className="ac-record-edit-button" onClick={() => abrirEdicaoCredencial(token.id)}>Editar</button>}
+                    <button
+                      className={`ac-token-button ${token.active ? "block" : "unblock"}`}
+                      onClick={() => toggleToken(token.id)}
+                    >
+                      <AccessIcon name={token.active ? "lock" : "unlock"} size={14} />
+                      {token.active ? "Bloquear" : "Liberar"}
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -831,10 +893,97 @@ export default function Acessos() {
                 <small>{permission.days} · {permission.period}</small>
               </div>
               <span className={`ac-permission-status ${permission.status === "Ativa" ? "active" : "inactive"}`}>{permission.status}</span>
+              {canRegisterEvent && <button type="button" className="ac-record-edit-button" onClick={() => abrirEdicaoPermissao(permission.id)}>Editar</button>}
             </article>
           )) : <p className="ac-permission-empty">Nenhuma permissão de acesso cadastrada.</p>}
         </div>
       </section>
+
+      {editRecord && (
+        <div className="ac-event-modal-overlay" onMouseDown={(evento) => {
+          if (evento.target === evento.currentTarget) setEditRecord(null);
+        }}>
+          <section className="ac-event-modal ac-record-edit-modal" role="dialog" aria-modal="true" aria-labelledby="ac-record-edit-title">
+            <header className="ac-event-modal-header">
+              <div>
+                <span>GERENCIAMENTO DE ACESSO</span>
+                <h2 id="ac-record-edit-title">Editar {editRecord.tipo === "credencial" ? "credencial" : "permissão"}</h2>
+                <p>As alterações seguem os campos cadastrados no banco de dados.</p>
+              </div>
+              <button type="button" onClick={() => setEditRecord(null)} aria-label="Fechar formulário">×</button>
+            </header>
+            <form onSubmit={salvarEdicao}>
+              {recordError && <p className="ac-event-form-error" role="alert">{recordError}</p>}
+              {editRecord.tipo === "credencial" ? (
+                <div className="ac-event-form-grid">
+                  <label className="ac-event-form-wide">Usuário vinculado
+                    <select required value={editForm.id_usuario || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_usuario: evento.target.value }))}>
+                      <option value="">Selecione o usuário</option>
+                      {rawUsers.map((usuario) => <option key={usuario.id_usuario} value={usuario.id_usuario}>{usuario.nome} · {PERFIL_LABEL[usuario.perfil] || usuario.perfil}</option>)}
+                    </select>
+                  </label>
+                  <label>Tipo de credencial
+                    <select required value={editForm.tipo_credencial || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, tipo_credencial: evento.target.value }))}>
+                      <option value="cartao_rfid">Cartão RFID</option><option value="tag_nfc">Tag NFC</option><option value="qr_code">QR Code</option>
+                    </select>
+                  </label>
+                  <label>Status
+                    <select required value={editForm.status || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, status: evento.target.value }))}>
+                      <option value="ativa">Ativa</option><option value="bloqueada">Bloqueada</option><option value="expirada">Expirada</option>
+                    </select>
+                  </label>
+                  <label>Bloqueada até (opcional)
+                    <input type="datetime-local" value={editForm.bloqueado_ate || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, bloqueado_ate: evento.target.value }))} />
+                  </label>
+                  <label>Novo código (opcional)
+                    <input autoComplete="off" value={editForm.novo_token || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, novo_token: evento.target.value }))} placeholder="Deixe vazio para manter o atual" />
+                    <small>O novo código será salvo somente como hash.</small>
+                  </label>
+                </div>
+              ) : (
+                <div className="ac-event-form-grid">
+                  <label>Usuário
+                    <select required value={editForm.id_usuario || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_usuario: evento.target.value }))}>
+                      <option value="">Selecione o usuário</option>
+                      {rawUsers.map((usuario) => <option key={usuario.id_usuario} value={usuario.id_usuario}>{usuario.nome} · {PERFIL_LABEL[usuario.perfil] || usuario.perfil}</option>)}
+                    </select>
+                  </label>
+                  <label>Ambiente
+                    <select required value={editForm.id_ambiente || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_ambiente: evento.target.value }))}>
+                      <option value="">Selecione o ambiente</option>
+                      {rawEnvironments.map((ambiente) => <option key={ambiente.id_ambiente} value={ambiente.id_ambiente}>{ambiente.nome} · {ambiente.localizacao}</option>)}
+                    </select>
+                  </label>
+                  <label>Status da permissão
+                    <select required value={editForm.status_permissao || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, status_permissao: evento.target.value }))}>
+                      <option value="ativa">Ativa</option><option value="inativa">Inativa</option><option value="suspensa">Suspensa</option><option value="expirada">Expirada</option>
+                    </select>
+                  </label>
+                  <label>Dias da semana
+                    <input maxLength={100} value={editForm.dias_semana || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, dias_semana: evento.target.value }))} placeholder="Ex.: Segunda a sexta" />
+                  </label>
+                  <label>Horário inicial (opcional)
+                    <input type="time" value={editForm.horario_inicio || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, horario_inicio: evento.target.value }))} />
+                  </label>
+                  <label>Horário final (opcional)
+                    <input type="time" value={editForm.horario_fim || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, horario_fim: evento.target.value }))} />
+                  </label>
+                  <label>Início da validade
+                    <input required type="date" value={editForm.data_inicio || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, data_inicio: evento.target.value }))} />
+                  </label>
+                  <label>Fim da validade (opcional)
+                    <input type="date" value={editForm.data_fim || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, data_fim: evento.target.value }))} />
+                  </label>
+                </div>
+              )}
+              <footer className="ac-event-modal-footer">
+                <button type="button" className="ac-event-cancel" onClick={() => setEditRecord(null)}>Cancelar</button>
+                <button type="submit" className="ac-event-submit" disabled={savingRecord}>{savingRecord ? "Salvando…" : "Salvar alterações"}</button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      )}
 
       {eventModalOpen && (
         <div className="ac-event-modal-overlay" onMouseDown={(evento) => {

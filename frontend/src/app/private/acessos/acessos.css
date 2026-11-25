@@ -787,7 +787,7 @@
 
 .ac-token {
   display: grid;
-  grid-template-columns: 38px minmax(120px, 1fr) minmax(105px, .8fr) minmax(90px, .7fr) 85px 105px;
+  grid-template-columns: 38px minmax(120px, 1fr) minmax(105px, .8fr) minmax(90px, .7fr) 85px 190px;
   align-items: center;
   gap: 13px;
   padding: 14px 21px;
@@ -874,6 +874,10 @@
   background: #e2f5ea;
 }
 
+.ac-token-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.ac-record-edit-button { min-height: 36px; padding: 0 12px; border: 1px solid #d8e2f2; border-radius: 8px; background: #f7f9fd; color: #3e5c95; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; white-space: nowrap; }
+.ac-record-edit-button:hover { border-color: #aebfe1; background: #eef3ff; }
+
 /* Responsividade */
 
 @media (max-width: 1150px) {
@@ -897,7 +901,7 @@
   }
 
   .ac-token {
-    grid-template-columns: 38px minmax(100px, 1fr) minmax(100px, .8fr) 85px 105px;
+    grid-template-columns: 38px minmax(100px, 1fr) minmax(100px, .8fr) 85px 190px;
   }
 
   .ac-token-expiry {
@@ -978,10 +982,8 @@
     display: none;
   }
 
-  .ac-token-button {
-    grid-column: 2 / 4;
-    justify-self: start;
-  }
+  .ac-token-actions { grid-column: 2 / 4; justify-content: flex-start; flex-wrap: wrap; }
+  .ac-token-button { min-height: 36px; padding: 0 10px; }
 
   .ac-token-status {
     justify-self: end;
@@ -1018,7 +1020,7 @@
 .ac-event-permission > small { color: #78869c; font-size: 12px; line-height: 1.5; }
 .ac-permissions-panel { overflow: hidden; }
 .ac-permission-list { padding: 0 22px 16px; }
-.ac-permission-row { display: grid; grid-template-columns: minmax(140px, .9fr) minmax(150px, 1fr) minmax(220px, 1.3fr) auto; align-items: center; gap: 16px; padding: 16px 10px; border-top: 1px solid #edf0f5; }
+.ac-permission-row { display: grid; grid-template-columns: minmax(140px, .9fr) minmax(150px, 1fr) minmax(220px, 1.3fr) auto auto; align-items: center; gap: 16px; padding: 16px 10px; border-top: 1px solid #edf0f5; }
 .ac-permission-row > div { display: grid; gap: 5px; min-width: 0; }
 .ac-permission-row b { overflow-wrap: anywhere; color: #344761; font-size: 14px; }
 .ac-permission-row small { color: #8390a4; font-size: 12px; line-height: 1.45; }

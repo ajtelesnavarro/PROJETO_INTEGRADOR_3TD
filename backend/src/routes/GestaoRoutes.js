@@ -24,9 +24,12 @@ gestaoRouter.delete("/equipes/:id/integrantes/:idUsuario", adminOuManutencao, Ge
 gestaoRouter.get("/credenciais", consulta, GestaoController.listarCredenciais);
 gestaoRouter.get("/permissoes-acesso", consulta, GestaoController.listarPermissoesAcesso);
 gestaoRouter.patch("/credenciais/:id", adminOuPorteiro, GestaoController.atualizarCredencial);
+gestaoRouter.patch("/credenciais/:id/editar", adminOuPorteiro, GestaoController.editarCredencial);
+gestaoRouter.patch("/permissoes-acesso/:id", adminOuPorteiro, GestaoController.atualizarPermissaoAcesso);
 
 gestaoRouter.get("/acessos-detalhados", consulta, GestaoController.listarAcessosDetalhado);
 gestaoRouter.post("/eventos-acesso", adminOuPorteiro, GestaoController.registrarEventoAcesso);
 gestaoRouter.get("/historico-dispositivos/contexto", adminOuManutencao, GestaoController.contextoHistoricoDispositivos);
 gestaoRouter.get("/historico-dispositivos", adminOuManutencao, GestaoController.listarHistoricoDispositivos);
 gestaoRouter.post("/historico-dispositivos", adminOuManutencao, GestaoController.criarHistoricoDispositivo);
+gestaoRouter.patch("/historico-dispositivos/:id", adminOuManutencao, GestaoController.atualizarHistoricoDispositivo);
