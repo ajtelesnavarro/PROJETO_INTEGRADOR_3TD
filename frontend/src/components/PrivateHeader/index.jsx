@@ -89,16 +89,6 @@ export default function Header({
       </div>
 
       <div className="lumora-header-actions">
-        <div className="lumora-building-info">
-          <span className="lumora-building-icon">
-            <HeaderIcon name="building" size={17} />
-          </span>
-
-          <span className="lumora-building-text">
-            <small>PRÉDIO ATUAL</small>
-            <b>{buildingName}</b>
-          </span>
-        </div>
 
         <div className="lumora-header-divider" />
 
