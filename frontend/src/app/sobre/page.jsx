@@ -96,7 +96,7 @@ export default function Sobre() {
             <span>Administrador <small>Visão geral e indicadores</small></span>
             <span>Manutenção <small>Alertas e ocorrências</small></span>
             <span>Portaria <small>Controle e acompanhamento</small></span>
-            <span>Gestão <small>Dados para decisões</small></span>
+            <span>Locador <small>Informações para o locador</small></span>
           </div>
         </div>
       </section>

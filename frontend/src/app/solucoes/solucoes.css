@@ -98,8 +98,8 @@
     background: #FFFFFF;
     border: 1px solid #DFE7FA;
     border-radius: 13px;
-    padding: 27px;
-    min-height: 275px;
+    padding: 32px;
+    min-height: 310px;
     transition: transform .25s, box-shadow .25s;
 }
 
@@ -113,32 +113,32 @@
     align-items: center;
     justify-content: space-between;
     color: #94A3B8;
-    font: 10px "DM Mono";
+    font: 12px "DM Mono";
 }
 
 .solution-card-top i {
     font-style: normal;
-    width: 43px;
-    height: 43px;
+    width: 50px;
+    height: 50px;
     display: grid;
     place-items: center;
     border-radius: 12px;
     background: #EAEAFF;
     color: #6D28D9;
-    font-size: 23px;
+    font-size: 27px;
 }
 
 .solution-card h3 {
-    font: 700 19px "Plus Jakarta Sans";
+    font: 700 22px "Plus Jakarta Sans";
     color: #172B5E;
     margin: 25px 0 10px;
 }
 
 .solution-card p {
-    font-size: 12px;
+    font-size: 15px;
     line-height: 1.8;
     color: #64748B;
-    min-height: 66px;
+    min-height: 81px;
 }
 
 .solution-tags {
@@ -149,11 +149,11 @@
 }
 
 .solution-tags span {
-    padding: 6px 8px;
+    padding: 8px 10px;
     background: #F1F5FF;
     border-radius: 4px;
     color: #52658A;
-    font: 8px "DM Mono";
+    font: 11px "DM Mono";
 }
 
 /* ========================================

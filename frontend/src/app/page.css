@@ -1126,10 +1126,28 @@
         #172B5E,
         #263E80
     ) !important;
+    color: #F5F7FF;
+}
+
+.energy .small-label {
+    display: block;
+    margin-top: 26px;
+    color: #DCE7FF;
+}
+
+.energy .energy-value {
+    margin-top: 14px;
+    color: #FFFFFF !important;
 }
 
 .energy-value span {
     color: var(--lumora-blue-light) !important;
+}
+
+.energy p {
+    color: #E4EAFB !important;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .energy-bars i {
@@ -1169,6 +1187,20 @@
 }
 
 /* Mantém legíveis os detalhes dos cards em telas menores. */
+.section-kicker {
+    font-size: 14px;
+    letter-spacing: 1.3px;
+}
+
+.card-number,
+.layer > span {
+    font-size: 12px;
+}
+
+.bottom-copy span {
+    font-size: 11px;
+}
+
 .small-label {
     font-size: 12px;
 }
@@ -1217,7 +1249,7 @@
 }
 
 .final-box .section-kicker {
-    color: var(--lumora-blue-light) !important;
+    color: #F5F7FF !important;
 }
 
 .final-box h2 em {
@@ -1404,7 +1436,7 @@
     }
 
     .metrics-grid span {
-        font-size: 8px;
+        font-size: 10px;
     }
 
     .final-box {
