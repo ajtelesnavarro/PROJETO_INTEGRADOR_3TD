@@ -380,8 +380,6 @@
   font-size: 9px;
 }
 
-<<<<<<< HEAD
-=======
 .lumora-alert-empty {
   margin: 0;
   padding: 18px 4px 6px;
@@ -390,7 +388,6 @@
   text-align: center;
 }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .lumora-alert-footer {
   width: 100%;
   margin-top: 13px;
@@ -569,8 +566,4 @@
   .lumora-global-search {
     gap: 7px;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

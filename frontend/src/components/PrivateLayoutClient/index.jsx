@@ -4,14 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/PrivateHeader/index";
 import Sidebar from "@/components/PrivateSidebar/index";
-<<<<<<< HEAD
-
-const PERFIS_LABEL = {
-  administrador: "Administrador",
-  manutencao: "Manuten??o",
-  porteiro: "Porteiro",
-  funcionario: "Funcion?rio",
-=======
 import { requisicaoAPI } from "@/services/api";
 
 const PERFIS_LABEL = {
@@ -20,23 +12,12 @@ const PERFIS_LABEL = {
   porteiro: "Porteiro",
   funcionario: "Funcionário",
   locador: "Locador",
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 };
 
 export default function PrivateLayoutClient({ children }) {
   const router = useRouter();
   const [sidebar, setSidebar] = useState(true);
   const [autorizado, setAutorizado] = useState(false);
-<<<<<<< HEAD
-  const [usuario, setUsuario] = useState({ nome: "Usu?rio", perfil: "Administrador" });
-
-  useEffect(() => {
-    const token = localStorage.getItem("lumora_token");
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-=======
   const [usuario, setUsuario] = useState({ nome: "Usuário", perfil: "Administrador" });
   const [perfil, setPerfil] = useState("");
   const [predioAtual, setPredioAtual] = useState(null);
@@ -47,7 +28,6 @@ export default function PrivateLayoutClient({ children }) {
     //   router.replace("/login");
     //   return;
     // }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
     try {
       const salvo = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
@@ -56,17 +36,6 @@ export default function PrivateLayoutClient({ children }) {
           nome: salvo.nome,
           perfil: PERFIS_LABEL[salvo.perfil] || salvo.perfil || "Administrador",
         });
-<<<<<<< HEAD
-      }
-    } catch {}
-
-    setAutorizado(true);
-  }, [router]);
-
-  function handleLogout() {
-    localStorage.removeItem("lumora_token");
-    localStorage.removeItem("lumora_usuario");
-=======
         setPerfil(salvo.perfil || "");
       }
     } catch {}
@@ -112,7 +81,6 @@ export default function PrivateLayoutClient({ children }) {
     localStorage.removeItem("lumora_token");
     localStorage.removeItem("lumora_usuario");
     sessionStorage.removeItem("lumora_predio_atual");
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     router.push("/login");
   }
 
@@ -120,11 +88,7 @@ export default function PrivateLayoutClient({ children }) {
 
   return (
     <div className={`private-layout ${sidebar ? "sidebar-open" : "sidebar-closed"}`}>
-<<<<<<< HEAD
-      {sidebar && <Sidebar setSidebar={setSidebar} />}
-=======
       {sidebar && <Sidebar setSidebar={setSidebar} perfil={perfil} />}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
       <div className="private-main">
         <Header
@@ -132,10 +96,7 @@ export default function PrivateLayoutClient({ children }) {
           sidebar={sidebar}
           userName={usuario.nome}
           userRole={usuario.perfil}
-<<<<<<< HEAD
-=======
           buildingName={predioAtual?.nome_predio || (predioAtual ? "Prédio cadastrado" : "Nenhum prédio vinculado")}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           onLogout={handleLogout}
         />
 

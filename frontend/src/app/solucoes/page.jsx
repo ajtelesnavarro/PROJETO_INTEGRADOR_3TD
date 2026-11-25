@@ -162,10 +162,6 @@ export default function Solucoes() {
               <li><span>✓</span> Informações centralizadas para a equipe</li>
               <li><span>✓</span> Alertas e indicadores para apoiar decisões</li>
             </ul>
-<<<<<<< HEAD
-            <small className="solutions-example-note">Exemplo ilustrativo. Os resultados variam conforme cada projeto.</small>
-=======
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           </div>
         </div>
       </section>

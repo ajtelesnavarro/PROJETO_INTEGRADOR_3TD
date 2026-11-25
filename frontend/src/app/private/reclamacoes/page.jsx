@@ -1,31 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-<<<<<<< HEAD
-import "./reclamacoes.css";
-
-/*
-  API usada por esta página (resposta: { dados } | erro: { erro }):
-
-  GET   /auth/me                       usuário logado: id_usuario, nome, perfil
-  GET   /reclamacoes                   locador recebe só as dele (o backend filtra)
-  POST  /reclamacoes                   o id_usuario_abertura vem do token
-  PUT   /reclamacoes/:id               edita a reclamação
-  PATCH /reclamacoes/:id/status        corpo: { status_chamado }
-  PATCH /reclamacoes/:id/responsavel   corpo: { id_usuario_responsavel }
-  GET   /usuarios                      id_usuario, nome, perfil
-  GET   /ambientes                     id_ambiente, nome
-  GET   /dispositivos                  id_dispositivo, id_ambiente, nome
-
-  Os campos têm o mesmo nome das colunas do banco (ex.: status_chamado).
-*/
-
-/* ---------- Constantes (iguais aos ENUMs do banco) ---------- */
-=======
 import { obterPredioAtual } from "@/services/predioAtual";
 import "./reclamacoes.css";
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 const statusChamado = {
   aberto: { rotulo: "Aberto", cor: "amber" },
@@ -75,13 +53,6 @@ const formularioVazio = {
 
 /* ---------- Funções auxiliares ---------- */
 
-<<<<<<< HEAD
-function obterUrlApi() {
-  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
-  return base.endsWith("/api") ? base : `${base}/api`;
-}
-
-=======
 
 function obterUrlApi() {
   const base = (
@@ -95,7 +66,6 @@ function obterUrlApi() {
 }
 
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 // Chamada à API com o token do login. Devolve o campo "dados" da resposta.
 async function chamarApi(caminho, metodo = "GET", corpo) {
   const token = localStorage.getItem("lumora_token");
@@ -210,21 +180,6 @@ export default function Reclamacoes({ toast }) {
 
     async function carregarDados() {
       try {
-<<<<<<< HEAD
-        const [eu, lista, pessoas, locais, aparelhos] = await Promise.all([
-          chamarApi("/auth/me"),
-          chamarApi("/reclamacoes"),
-          chamarApi("/usuarios"),
-          chamarApi("/ambientes"),
-          chamarApi("/dispositivos"),
-        ]);
-        if (!ativo) return;
-        setUsuarioLogado(eu);
-        setReclamacoes(lista);
-        setUsuarios(pessoas);
-        setAmbientes(locais);
-        setDispositivos(aparelhos);
-=======
         const eu = await chamarApi("/auth/me");
         const [lista, contexto] = await Promise.all([
           chamarApi("/reclamacoes"),
@@ -253,7 +208,6 @@ export default function Reclamacoes({ toast }) {
         setUsuarios((contexto.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
         setAmbientes(locaisAtuais);
         setDispositivos(aparelhosAtuais);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       } catch (e) {
         if (ativo) setErro(mensagemDoErro(e));
       } finally {

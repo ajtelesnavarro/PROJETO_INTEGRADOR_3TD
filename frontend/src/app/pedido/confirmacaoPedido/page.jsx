@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import "./styles.css";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 export default function ConfirmacaoPedidoPage() {
     const searchParams = useSearchParams();
@@ -14,29 +11,6 @@ export default function ConfirmacaoPedidoPage() {
     const idPagamento = searchParams.get("idPagamento");
 
     const [pagamento, setPagamento] = useState(null);
-<<<<<<< HEAD
-    const [erro, setErro] = useState("");
-
-    useEffect(() => {
-        if (!idPagamento) return;
-
-        requisicaoAPI(`/pagamentos/${idPagamento}`)
-            .then(setPagamento)
-            .catch((erro) => setErro(erro.message));
-    }, [idPagamento]);
-
-    if (!pagamento) {
-        return <p>{erro || "Consultando pagamento..."}</p>;
-    }
-
-    return (
-        <div>
-            <h1>Resultado do Pagamento</h1>
-
-            <p>Pedido: {pagamento.id_pedido}</p>
-            <p>Valor: {pagamento.valor_pago}</p>
-            <p>M├®todo: {pagamento.metodo_pagamento}</p>
-=======
     const [orcamento, setOrcamento] = useState(null);
     const [predioCriado, setPredioCriado] = useState(null);
     const [dadosPredio, setDadosPredio] = useState({
@@ -133,15 +107,10 @@ export default function ConfirmacaoPedidoPage() {
                 </div>
 
                 {erro && <p className="confirmacao-erro">{erro}</p>}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
             {pagamento.status_pagamento === "aprovado" ? (
                 <>
                     <h2>Pedido confirmado!</h2>
-<<<<<<< HEAD
-                    <p>Pagamento aprovado.</p>
-                    <p>C├│digo da transa├º├úo: {pagamento.codigo_transacao}</p>
-=======
                     <p>Pagamento aprovado na simulação. Nenhum valor real foi cobrado.</p>
                     <p>Código da transação: {pagamento.codigo_transacao}</p>
                     {orcamento && <p>Orçamento: {orcamento.nome_empresa}</p>}
@@ -186,31 +155,19 @@ export default function ConfirmacaoPedidoPage() {
                             <button type="submit" disabled={salvandoPredio}>{salvandoPredio ? "Cadastrando..." : "Criar prédio"}</button>
                         </form>
                     )}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 </>
             ) : pagamento.status_pagamento === "recusado" ? (
                 <>
                     <h2>Pagamento recusado</h2>
-<<<<<<< HEAD
-                    <p>N├úo foi poss├¡vel confirmar seu pedido.</p>
-=======
                     <p>Não foi possível confirmar seu pedido.</p>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 </>
             ) : (
                 <>
                     <h2>Pagamento pendente</h2>
-<<<<<<< HEAD
-                    <p>Aguardando confirma├º├úo do pagamento.</p>
-                </>
-            )}
-        </div>
-=======
                     <p>Aguardando confirmação do pagamento.</p>
                 </>
             )}
             </section>
         </main>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     );
 }
