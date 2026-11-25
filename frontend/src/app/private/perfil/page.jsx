@@ -23,14 +23,26 @@ const camposPerfil = [
 ];
 
 function obterUrlApi() {
+<<<<<<< HEAD
   const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
+=======
+  const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "");
+  if (base.endsWith("/api/v1")) return base;
+  if (base.endsWith("/api")) return `${base}/v1`;
+  return `${base}/api/v1`;
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 function obterUrlFoto(foto) {
   if (!foto) return "/images/logo.png";
   if (/^(https?:|data:|blob:)/i.test(foto)) return foto;
+<<<<<<< HEAD
   return `${obterUrlApi().slice(0, -4)}${foto.startsWith("/") ? "" : "/"}${foto}`;
+=======
+  const origem = obterUrlApi().replace(/\/api\/v1$/, "");
+  return `${origem}${foto.startsWith("/") ? "" : "/"}${foto}`;
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 function lerImagem(arquivo) {

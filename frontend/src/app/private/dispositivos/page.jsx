@@ -3,6 +3,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+<<<<<<< HEAD
+=======
+import { obterPredioAtual } from "@/services/predioAtual";
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./dispositivos.css";
 
 const TIPO_CONFIG = {
@@ -39,6 +43,7 @@ const STATUS_CONFIG = {
 
 const emptyForm = {
   nome: "",
+<<<<<<< HEAD
   identificador: "",
   tipo_dispositivo: "energia",
   id_predio: "",
@@ -46,6 +51,16 @@ const emptyForm = {
   fabricante: "",
   modelo: "",
   potencia_nominal_kw: "",
+=======
+  tipo_dispositivo: "energia",
+  id_predio: "",
+  id_ambiente: "",
+  id_usuario: "",
+  fabricante: "",
+  modelo: "",
+  potencia_nominal_kw: "",
+  data_dispositivo: new Date().toISOString().slice(0, 10),
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   status_dispositivo: "ativo",
 };
 
@@ -132,7 +147,14 @@ function DispositivosConteudo() {
   const searchParams = useSearchParams();
   const parametroAplicadoRef = useRef("");
 
+<<<<<<< HEAD
   const [predios, setPredios] = useState([]);
+=======
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const ehManutencao = String(usuarioLogado?.perfil || '').toLowerCase() === 'manutencao';
+  const [predios, setPredios] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   const [andares, setAndares] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
   const [dispositivosBrutos, setDispositivosBrutos] = useState([]);
@@ -166,12 +188,19 @@ function DispositivosConteudo() {
   const carregarDados = useCallback(async () => {
     try {
       setCarregando(true);
+<<<<<<< HEAD
       const [resPredios, resAndares, resAmbientes, resDispositivos] =
         await Promise.all([
+=======
+      const [resPerfil, resPredios, resAndares, resAmbientes, resDispositivos, resUsuarios] =
+        await Promise.all([
+          requisicaoAPI("/auth/me"),
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           requisicaoAPI("/predios?limite=200"),
           requisicaoAPI("/andares?limite=200"),
           requisicaoAPI("/ambientes?limite=200"),
           requisicaoAPI("/dispositivos?limite=200"),
+<<<<<<< HEAD
         ]);
 
       setPredios(
@@ -193,6 +222,33 @@ function DispositivosConteudo() {
         deduplicarPor(resDispositivos.dados, "id_dispositivo").sort(
           (a, b) => a.id_dispositivo - b.id_dispositivo
         )
+=======
+          requisicaoAPI("/usuarios?limite=200"),
+        ]);
+
+      const usuarioAtual = resPerfil.dados || resPerfil;
+      setUsuarioLogado(usuarioAtual);
+      const predioAtual = obterPredioAtual();
+      const idPredioAtual = Number(predioAtual?.id_predio);
+      const prediosAtuais = deduplicarPor(resPredios.dados, "id_predio")
+        .filter((predio) => predio.id_predio === idPredioAtual);
+      const andaresAtuais = deduplicarPor(resAndares.dados, "id_andar")
+        .filter((andar) => andar.id_predio === idPredioAtual);
+      const idsAndares = new Set(andaresAtuais.map((andar) => andar.id_andar));
+      const ambientesAtuais = deduplicarPor(resAmbientes.dados, "id_ambiente")
+        .filter((ambiente) => idsAndares.has(ambiente.id_andar));
+      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => ambiente.id_ambiente));
+
+      setPredios(prediosAtuais);
+      setUsuarios(resUsuarios.dados || []);
+      setAndares(andaresAtuais);
+      setAmbientes(ambientesAtuais);
+      setPredioFilter(idPredioAtual ? String(idPredioAtual) : "Todos");
+      setDispositivosBrutos(
+        deduplicarPor(resDispositivos.dados, "id_dispositivo")
+          .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente))
+          .sort((a, b) => a.id_dispositivo - b.id_dispositivo)
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       );
     } catch (erro) {
       notify(erro.message || "Erro ao carregar dispositivos do banco de dados.");
@@ -255,7 +311,11 @@ function DispositivosConteudo() {
         id: dev.id_dispositivo,
         displayId: `DEV-${String(dev.id_dispositivo).padStart(3, "0")}`,
         name: dev.nome,
+<<<<<<< HEAD
         code: dev.identificador || `ID-${dev.id_dispositivo}`,
+=======
+        code: `DIS-${String(dev.id_dispositivo).padStart(3, "0")}`,
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         tipoKey,
         type: tipoCfg.label,
         unit: dev.unidade_medida || tipoCfg.unit,
@@ -263,6 +323,11 @@ function DispositivosConteudo() {
         status: statusCfg.label,
         signal: statusCfg.signal,
         id_ambiente: dev.id_ambiente,
+<<<<<<< HEAD
+=======
+        id_usuario: dev.id_usuario ?? "",
+        dateRaw: dev.data_dispositivo ? String(dev.data_dispositivo).slice(0, 10) : "",
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         id_andar: andar?.id_andar ?? null,
         id_predio: predio?.id_predio ?? null,
         room: amb?.nome || "Ambiente não vinculado",
@@ -277,7 +342,11 @@ function DispositivosConteudo() {
             : "Não informado",
         reading,
         updated: dataFmt,
+<<<<<<< HEAD
         serial: `${dev.identificador || "LUM"}-2026-${String(dev.id_dispositivo).padStart(5, "0")}`,
+=======
+        serial: `LUM-${String(dev.id_dispositivo).padStart(5, "0")}`,
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         description: `Equipamento de monitoramento de ${tipoCfg.label.toLowerCase()} instalado em ${amb?.nome || "ambiente corporativo"}.`,
         history:
           statusKey === "offline" || statusKey === "inativo"
@@ -503,6 +572,10 @@ function DispositivosConteudo() {
   }, [ambientes, andares, form.id_predio]);
 
   function openNewModal() {
+<<<<<<< HEAD
+=======
+    if (ehManutencao) return;
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     const predioPadrao =
       predioFilter !== "Todos"
         ? String(predioFilter)
@@ -529,6 +602,7 @@ function DispositivosConteudo() {
     setEditingId(device.id);
     setForm({
       nome: device.name,
+<<<<<<< HEAD
       identificador: device.code,
       tipo_dispositivo: device.tipoKey,
       id_predio: device.id_predio ? String(device.id_predio) : "",
@@ -536,6 +610,16 @@ function DispositivosConteudo() {
       fabricante: device.manufacturer === "Não informado" ? "" : device.manufacturer,
       modelo: device.model === "Não informado" ? "" : device.model,
       potencia_nominal_kw: device.potenciaRaw,
+=======
+      tipo_dispositivo: device.tipoKey,
+      id_predio: device.id_predio ? String(device.id_predio) : "",
+      id_ambiente: device.id_ambiente ? String(device.id_ambiente) : "",
+      id_usuario: device.id_usuario ? String(device.id_usuario) : "",
+      fabricante: device.manufacturer === "Não informado" ? "" : device.manufacturer,
+      modelo: device.model === "Não informado" ? "" : device.model,
+      potencia_nominal_kw: device.potenciaRaw,
+      data_dispositivo: device.dateRaw || "",
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       status_dispositivo: device.statusKey,
     });
     setShowModal(true);
@@ -565,16 +649,26 @@ function DispositivosConteudo() {
   async function saveDevice(e) {
     e.preventDefault();
 
+<<<<<<< HEAD
     if (!form.nome.trim() || !form.identificador.trim() || !form.id_ambiente) {
       notify("Preencha nome, identificador e ambiente do dispositivo.");
+=======
+    if (!form.nome.trim() || !form.id_ambiente) {
+      notify("Preencha nome e ambiente do dispositivo.");
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       return;
     }
 
     const tipoCfg = TIPO_CONFIG[form.tipo_dispositivo] || TIPO_CONFIG.energia;
     const payload = {
       id_ambiente: Number(form.id_ambiente),
+<<<<<<< HEAD
       nome: form.nome.trim(),
       identificador: form.identificador.trim(),
+=======
+      id_usuario: form.id_usuario ? Number(form.id_usuario) : null,
+      nome: form.nome.trim(),
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       tipo_dispositivo: form.tipo_dispositivo,
       unidade_medida: tipoCfg.unit,
       fabricante: form.fabricante.trim() || null,
@@ -584,6 +678,10 @@ function DispositivosConteudo() {
           ? null
           : Number(form.potencia_nominal_kw),
       status_dispositivo: form.status_dispositivo,
+<<<<<<< HEAD
+=======
+      data_dispositivo: form.data_dispositivo || null,
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     };
 
     try {
@@ -597,7 +695,10 @@ function DispositivosConteudo() {
         setSelectedId(editingId);
         notify("Dispositivo atualizado no banco de dados!");
       } else {
+<<<<<<< HEAD
         payload.data_dispositivo = new Date().toISOString().slice(0, 10);
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         const criado = await requisicaoAPI("/dispositivos", {
           method: "POST",
           body: JSON.stringify(payload),
@@ -645,7 +746,11 @@ function DispositivosConteudo() {
 
   function limparFiltros() {
     setSearch("");
+<<<<<<< HEAD
     setPredioFilter("Todos");
+=======
+    setPredioFilter(String(predios[0]?.id_predio ?? "Todos"));
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     setAndarFilter("Todos");
     setAmbienteFilter("Todos");
     setTypeFilter("Todos");
@@ -655,7 +760,10 @@ function DispositivosConteudo() {
 
   const temFiltroAtivo =
     search ||
+<<<<<<< HEAD
     predioFilter !== "Todos" ||
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     andarFilter !== "Todos" ||
     ambienteFilter !== "Todos" ||
     typeFilter !== "Todos" ||
@@ -689,10 +797,19 @@ function DispositivosConteudo() {
           </p>
         </div>
 
+<<<<<<< HEAD
         <button className="dv-add-button" onClick={openNewModal}>
           <span>＋</span>
           Adicionar dispositivo
         </button>
+=======
+        {!ehManutencao && (
+          <button className="dv-add-button" onClick={openNewModal}>
+            <span>＋</span>
+            Adicionar dispositivo
+          </button>
+        )}
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </header>
 
       <section className="dv-command-bar">
@@ -838,6 +955,7 @@ function DispositivosConteudo() {
             />
           </label>
 
+<<<<<<< HEAD
           <select
             value={predioFilter}
             onChange={(e) => {
@@ -853,6 +971,9 @@ function DispositivosConteudo() {
               </option>
             ))}
           </select>
+=======
+          <span className="dv-current-building">{predioSelecionadoObj?.nome_predio || "Nenhum prédio vinculado"}</span>
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
           <select
             value={andarFilter}
@@ -1141,7 +1262,10 @@ function DispositivosConteudo() {
                   alignItems: "center",
                 }}
               >
+<<<<<<< HEAD
                 <small>Alterações salvas diretamente no banco.</small>
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 <button
                   type="button"
                   onClick={() => deleteDevice(selected)}
@@ -1163,7 +1287,11 @@ function DispositivosConteudo() {
         </>
       )}
 
+<<<<<<< HEAD
       {showModal && (
+=======
+      {showModal && !(ehManutencao && !editingId) && (
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         <div
           className="dv-modal-backdrop"
           onClick={() => setShowModal(false)}
@@ -1204,6 +1332,7 @@ function DispositivosConteudo() {
 
             <div className="dv-form-row">
               <label>
+<<<<<<< HEAD
                 Identificador / Código *
                 <input
                   required
@@ -1215,6 +1344,8 @@ function DispositivosConteudo() {
                 />
               </label>
               <label>
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 Tipo *
                 <select
                   value={form.tipo_dispositivo}
@@ -1231,6 +1362,7 @@ function DispositivosConteudo() {
 
             <div className="dv-form-row">
               <label>
+<<<<<<< HEAD
                 Prédio
                 <select
                   value={form.id_predio}
@@ -1265,6 +1397,8 @@ function DispositivosConteudo() {
               </label>
 
               <label>
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 Ambiente *
                 <select
                   required
@@ -1293,6 +1427,16 @@ function DispositivosConteudo() {
                   })}
                 </select>
               </label>
+<<<<<<< HEAD
+=======
+              <label>
+                Responsável
+                <select value={form.id_usuario} onChange={(e) => setForm({ ...form, id_usuario: e.target.value })}>
+                  <option value="">Sem responsável</option>
+                  {usuarios.map((usuario) => <option key={usuario.id_usuario} value={String(usuario.id_usuario)}>{usuario.nome}</option>)}
+                </select>
+              </label>
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             </div>
 
             <div className="dv-form-row">
@@ -1314,6 +1458,13 @@ function DispositivosConteudo() {
                   placeholder="Ex.: ST-Climate"
                 />
               </label>
+<<<<<<< HEAD
+=======
+              <label>
+                Data de cadastro
+                <input type="date" value={form.data_dispositivo} onChange={(e) => setForm({ ...form, data_dispositivo: e.target.value })} />
+              </label>
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             </div>
 
             <div className="dv-form-row">

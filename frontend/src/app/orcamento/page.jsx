@@ -15,13 +15,20 @@ export default function Orcamento() {
         email: "",
         telefone: "",
         enderecoEmpresa: "",
-        tipo: "Comercial",
         quantidadeAndares: "",
         quantidadeAmbientes: "",
         quantidadeDispositivos: "",
-        prioridade: "Monitoramento",
+        servicosDesejados: [],
         mensagem: ""
     });
+
+    const opcoesServicos = [
+        ["monitoramento_temperatura", "Monitoramento de temperatura"],
+        ["controle_iluminacao", "Controle de iluminação"],
+        ["monitoramento_energia", "Monitoramento de energia"],
+        ["controle_acesso", "Controle de acesso"],
+        ["monitoramento_dispositivos", "Monitoramento de dispositivos"],
+    ];
 
     const [erro, setErro] = useState("");
     const [enviando, setEnviando] = useState(false);
@@ -48,14 +55,21 @@ export default function Orcamento() {
                 quantidadeAndares: form.quantidadeAndares,
                 quantidadeAmbientes: form.quantidadeAmbientes,
                 quantidadeDispositivos: form.quantidadeDispositivos,
-                servicosDesejados: form.prioridade,
-                descricao: `Tipo de edifício: ${form.tipo}\n${form.mensagem}`
+                servicosDesejados: form.servicosDesejados,
+                descricao: form.mensagem,
             };
 
             const dados = await requisicaoAPI("/orcamentos", {
                 method: "POST",
                 body: JSON.stringify(dadosEnvio)
             });
+
+            if (dados.senhaTemporaria) {
+                sessionStorage.setItem(
+                    `lumora_senha_orcamento_${dados.idOrcamento}`,
+                    dados.senhaTemporaria
+                );
+            }
 
             router.push(
                 `/orcamento/resumoOrcamento?id=${dados.idOrcamento}`
@@ -150,20 +164,6 @@ export default function Orcamento() {
                             placeholder="Endereço completo"
                         />
 
-                        <label>
-                            Tipo de edifício
-                            <select
-                                name="tipo"
-                                value={form.tipo}
-                                onChange={set}
-                            >
-                                <option disabled>Comercial</option>
-                                <option>Corporativo</option>
-                                <option disabled>Residencial</option>
-                                <option disabled>Outro</option>
-                            </select>
-                        </label>
-
                         <Field
                             label="Quantidade de andares *"
                             type="number"
@@ -196,22 +196,24 @@ export default function Orcamento() {
                             placeholder="Ex.: 100"
                         />
 
-                        <label>
-                            Principal necessidade
-                            <select
-                                name="prioridade"
-                                value={form.prioridade}
-                                onChange={set}
-                            >
-                                <option>Monitoramento</option>
-                                <option>Gestão de energia</option>
-                                <option>Automação</option>
-                                <option>Controle de acessos</option>
-                                <option>Alertas e ocorrências</option>
-                                <option>Integração de sistemas</option>
-                                <option>Outra necessidade</option>
-                            </select>
-                        </label>
+                        <fieldset className="servicos-opcoes">
+                            <legend>Serviços desejados</legend>
+                            {opcoesServicos.map(([id, nome]) => (
+                                <label key={id}>
+                                    <input
+                                        type="checkbox"
+                                        checked={form.servicosDesejados.includes(id)}
+                                        onChange={(e) => setForm((atual) => ({
+                                            ...atual,
+                                            servicosDesejados: e.target.checked
+                                                ? [...atual.servicosDesejados, id]
+                                                : atual.servicosDesejados.filter((servico) => servico !== id),
+                                        }))}
+                                    />
+                                    {nome}
+                                </label>
+                            ))}
+                        </fieldset>
 
                     </div>
 

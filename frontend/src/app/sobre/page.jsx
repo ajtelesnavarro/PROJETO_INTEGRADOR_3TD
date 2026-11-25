@@ -7,8 +7,12 @@ export default function Sobre() {
       <section className="inner-hero about-hero">
         <div className="container inner-hero-grid">
           <div>
+<<<<<<< HEAD
             <div className="pill"><span className="pulse"></span> A LUMORA</div>
             <h1>Edifícios mais inteligentes. <em>Um futuro mais eficiente.</em></h1>
+=======
+            <h1>Edifícios mais inteligentes. <em style={{ color: '#2898D8', fontStyle: 'normal' }}>Um futuro mais eficiente.</em></h1>
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           </div>
           <p>A Lumora conecta tecnologia, pessoas e infraestrutura para transformar a maneira como os edifícios são acompanhados, operados e evoluem.</p>
         </div>

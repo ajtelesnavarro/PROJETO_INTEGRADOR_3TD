@@ -6,7 +6,11 @@ export const recursos = {
         campos: [
             'nome_predio',
             'cep',
+<<<<<<< HEAD
             'logradouro',
+=======
+            'rua',
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             'numero',
             'complemento',
             'bairro',
@@ -16,7 +20,11 @@ export const recursos = {
         obrigatorios: [
             'nome_predio',
             'cep',
+<<<<<<< HEAD
             'logradouro',
+=======
+            'rua',
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             'numero',
             'bairro',
             'cidade',
@@ -39,6 +47,24 @@ export const recursos = {
         ]
     },
 
+<<<<<<< HEAD
+=======
+    setores: {
+        tabela: 'setor',
+        id: 'id_setor',
+        campos: [
+            'id_andar',
+            'nome_setor',
+            'descricao',
+            'id_usuario_responsavel'
+        ],
+        obrigatorios: [
+            'id_andar',
+            'nome_setor'
+        ]
+    },
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     ambientes: {
         tabela: 'ambiente',
         id: 'id_ambiente',
@@ -71,14 +97,21 @@ export const recursos = {
             'unidade_medida',
             'potencia_nominal_kw',
             'data_dispositivo',
+<<<<<<< HEAD
             'identificador',
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             'status_dispositivo'
         ],
         obrigatorios: [
             'id_ambiente',
             'nome',
+<<<<<<< HEAD
             'tipo_dispositivo',
             'identificador'
+=======
+            'tipo_dispositivo'
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         ]
     },
 

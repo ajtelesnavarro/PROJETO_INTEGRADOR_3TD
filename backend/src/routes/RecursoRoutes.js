@@ -43,6 +43,12 @@ const rotas = [
         permiteExcluir: true
     },
     {
+        nome: 'setores',
+        escrita: escritaPredios,
+        permiteAtualizar: true,
+        permiteExcluir: true
+    },
+    {
         nome: 'ambientes',
         escrita: escritaPredios,
         permiteAtualizar: true,
@@ -80,7 +86,9 @@ for (const recurso of rotas) {
     if (recurso.escrita) {
         router.post(
             '/',
-            recurso.escrita,
+            recurso.nome === 'dispositivos' || recurso.nome === 'ocorrencias'
+                ? autorizarPerfis('administrador')
+                : recurso.escrita,
             Controller.criar(recurso.nome)
         );
     }

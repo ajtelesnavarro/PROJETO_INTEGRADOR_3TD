@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
 import "./reclamacoes.css";
 
 /*
@@ -20,6 +21,11 @@ import "./reclamacoes.css";
 */
 
 /* ---------- Constantes (iguais aos ENUMs do banco) ---------- */
+=======
+import { obterPredioAtual } from "@/services/predioAtual";
+import "./reclamacoes.css";
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 const statusChamado = {
   aberto: { rotulo: "Aberto", cor: "amber" },
@@ -69,11 +75,27 @@ const formularioVazio = {
 
 /* ---------- Funções auxiliares ---------- */
 
+<<<<<<< HEAD
 function obterUrlApi() {
   const base = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 }
 
+=======
+
+function obterUrlApi() {
+  const base = (
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1"
+  ).replace(/\/+$/, "");
+
+  if (base.endsWith("/api/v1")) return base;
+  if (base.endsWith("/api")) return `${base}/v1`;
+
+  return `${base}/api/v1`;
+}
+
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 // Chamada à API com o token do login. Devolve o campo "dados" da resposta.
 async function chamarApi(caminho, metodo = "GET", corpo) {
   const token = localStorage.getItem("lumora_token");
@@ -188,6 +210,7 @@ export default function Reclamacoes({ toast }) {
 
     async function carregarDados() {
       try {
+<<<<<<< HEAD
         const [eu, lista, pessoas, locais, aparelhos] = await Promise.all([
           chamarApi("/auth/me"),
           chamarApi("/reclamacoes"),
@@ -201,6 +224,36 @@ export default function Reclamacoes({ toast }) {
         setUsuarios(pessoas);
         setAmbientes(locais);
         setDispositivos(aparelhos);
+=======
+        const eu = await chamarApi("/auth/me");
+        const [lista, contexto] = await Promise.all([
+          chamarApi("/reclamacoes"),
+          eu?.perfil === "locador"
+            ? chamarApi("/reclamacoes/contexto")
+            : Promise.all([
+                chamarApi("/usuarios"),
+                chamarApi("/ambientes"),
+                chamarApi("/dispositivos"),
+                chamarApi("/andares"),
+              ]).then(([usuarios, ambientes, dispositivos, andares]) => ({ usuarios, ambientes, dispositivos, andares })),
+        ]);
+        if (!ativo) return;
+        const idPredioAtual = Number(obterPredioAtual()?.id_predio ?? eu?.id_predio);
+        const idsAndares = new Set((contexto.andares || [])
+          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+          .map((andar) => Number(andar.id_andar)));
+        const locaisAtuais = (contexto.ambientes || []).filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)));
+        const idsAmbientes = new Set(locaisAtuais.map((ambiente) => Number(ambiente.id_ambiente)));
+        const aparelhosAtuais = (contexto.dispositivos || []).filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
+        const idsDispositivos = new Set(aparelhosAtuais.map((dispositivo) => Number(dispositivo.id_dispositivo)));
+        setUsuarioLogado(eu);
+        setReclamacoes(lista.filter((reclamacao) =>
+          idsAmbientes.has(Number(reclamacao.id_ambiente)) || idsDispositivos.has(Number(reclamacao.id_dispositivo))
+        ));
+        setUsuarios((contexto.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
+        setAmbientes(locaisAtuais);
+        setDispositivos(aparelhosAtuais);
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       } catch (e) {
         if (ativo) setErro(mensagemDoErro(e));
       } finally {

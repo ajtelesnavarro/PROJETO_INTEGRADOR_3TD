@@ -4,7 +4,7 @@ export function criarOrcamentoController({ orcamentoService }) {
             const resultado = await orcamentoService.criar(req.body);
             res.status(201).json({ sucesso: true, ...resultado });
         } catch (erro) {
-            res.status(400).json({ sucesso: false, mensagem: erro.message });
+            res.status(erro.status || 400).json({ sucesso: false, mensagem: erro.message });
         }
     }
 

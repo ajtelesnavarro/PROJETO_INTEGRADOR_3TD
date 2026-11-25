@@ -11,6 +11,7 @@ export default function ResumoOrcamentoPage() {
   const id = searchParams.get("id");
 
   const [orcamento, setOrcamento] = useState(null);
+  const [senhaTemporaria, setSenhaTemporaria] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(false);
@@ -20,6 +21,13 @@ export default function ResumoOrcamentoPage() {
       setErro("Identificador do orçamento não informado.");
       setCarregando(false);
       return;
+    }
+
+    const chaveSenha = `lumora_senha_orcamento_${id}`;
+    const senhaRecebida = sessionStorage.getItem(chaveSenha);
+    if (senhaRecebida) {
+      setSenhaTemporaria(senhaRecebida);
+      sessionStorage.removeItem(chaveSenha);
     }
 
     requisicaoAPI(`/orcamentos/${id}`)
@@ -90,7 +98,15 @@ export default function ResumoOrcamentoPage() {
   const valorEstrutura = valorAndares + valorAmbientes + valorDispositivos;
 
   const valorSubtotal = Number(orcamento?.valor_subtotal || 0);
-  const valorServicos = Math.max(0, valorSubtotal - valorEstrutura);
+
+  const servicos = Array.isArray(orcamento?.servicos)
+  ? orcamento.servicos
+  : [];
+
+  const valorServicos = servicos.reduce(
+    (total, servico) => total + Number(servico.valor_servico || 0),
+    0
+  );
 
   const valorDesconto = Number(orcamento?.valor_desconto || 0);
   const valorTotal = Number(orcamento?.valor_total || 0);
@@ -136,6 +152,16 @@ export default function ResumoOrcamentoPage() {
           <span className="resumo-id">ORÇAMENTO Nº {id}</span>
         </header>
 
+        {senhaTemporaria && (
+          <section className="resumo-card" aria-live="polite">
+            <span className="resumo-label">ACESSO À PLATAFORMA</span>
+            <h2>Sua senha temporária</h2>
+            <p>Guarde esta senha agora: por segurança, ela é exibida uma única vez.</p>
+            <p><strong>E-mail:</strong> {orcamento.email}</p>
+            <p><strong>Senha:</strong> <code>{senhaTemporaria}</code></p>
+          </section>
+        )}
+
         {erro && <div className="resumo-alerta">{erro}</div>}
 
         <section className="resumo-card">
@@ -144,10 +170,7 @@ export default function ResumoOrcamentoPage() {
               <span className="resumo-label">SOLICITAÇÃO</span>
               <h2>Dados do projeto</h2>
             </div>
-
-            <span className="resumo-status">
-              {orcamento.status_orcamento || "Solicitado"}
-            </span>
+            <span className="resumo-status">{orcamento.status_orcamento || "Solicitado"}</span>
           </div>
 
           <div className="resumo-dados">
@@ -188,7 +211,7 @@ export default function ResumoOrcamentoPage() {
 
             <div>
               <span>Serviços desejados</span>
-              <strong>{orcamento.servicos_desejados || "Não informado"}</strong>
+              <strong>{servicos.length ? servicos.map((servico) => servico.nome_servico.replaceAll("_", " ")).join(", ") : "Nenhum serviço selecionado"}</strong>
             </div>
           </div>
 
@@ -250,7 +273,7 @@ export default function ResumoOrcamentoPage() {
             <div className="investimento-linha">
               <div>
                 <strong>Serviços do projeto</strong>
-                <small>{orcamento.servicos_desejados || "Não informado"}</small>
+                <small>{servicos.length ? servicos.map((servico) => servico.nome_servico.replaceAll("_", " ")).join(", ") : "Nenhum serviço selecionado"}</small>
               </div>
 
               <span>{moeda(valorServicos)}</span>
@@ -280,17 +303,17 @@ export default function ResumoOrcamentoPage() {
               <strong>{moeda(valorTotal)}</strong>
             </div>
 
-            <p>
-              O valor total corresponde ao subtotal do projeto menos o desconto
-              aplicado.
-            </p>
           </div>
         </section>
 
         <section className="resumo-card resumo-prazo">
           <div>
             <span>Prazo estimado</span>
-            <strong>{orcamento.prazo_estimado_dias ?? 0} dias</strong>
+            <strong>
+              {orcamento.prazo_estimado_dias != null
+                ? `${orcamento.prazo_estimado_dias} dias`
+                : "A definir"}
+            </strong>
           </div>
 
           <div>

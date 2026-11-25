@@ -442,6 +442,15 @@
     cursor: pointer;
 }
 
+<<<<<<< HEAD
+=======
+.oc-responsible-select:disabled {
+    cursor: default;
+    opacity: .78;
+    background: #F7F9FC;
+}
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .oc-action-button {
     display: inline-flex;
     align-items: center;

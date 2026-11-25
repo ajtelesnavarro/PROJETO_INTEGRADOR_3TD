@@ -3,6 +3,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
+<<<<<<< HEAD
+=======
+import { obterPredioAtual } from "@/services/predioAtual";
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./ambientes.css";
 
 const emptyForm = {
@@ -15,6 +19,16 @@ const emptyForm = {
   opening: "08:00",
   closing: "18:00",
   reservation: false,
+<<<<<<< HEAD
+=======
+  temperaturaMinima: "",
+  temperaturaMaxima: "",
+  iluminacaoMinima: "",
+  iluminacaoMaxima: "",
+  consumoMinimo: "",
+  consumoMaximo: "",
+  potenciaMaxima: "",
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 };
 
 function Icon({ name, size = 18 }) {
@@ -160,6 +174,10 @@ function AmbientesConteudo({ toast }) {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
+<<<<<<< HEAD
+=======
+  const [perfilAtual, setPerfilAtual] = useState("");
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
   const notify = useCallback(
     (text) => {
@@ -185,6 +203,7 @@ function AmbientesConteudo({ toast }) {
           requisicaoAPI("/dispositivos?limite=200"),
         ]);
 
+<<<<<<< HEAD
       setPredios(
         deduplicarPor(resPredios.dados, "id_predio").sort(
           (a, b) => a.id_predio - b.id_predio
@@ -198,6 +217,26 @@ function AmbientesConteudo({ toast }) {
       setAmbientesBrutos(deduplicarPor(resAmbientes.dados, "id_ambiente"));
       setDispositivosBrutos(
         deduplicarPor(resDispositivos.dados, "id_dispositivo")
+=======
+      const predioAtual = obterPredioAtual();
+      const idPredioAtual = Number(predioAtual?.id_predio);
+      const prediosAtuais = deduplicarPor(resPredios.dados, "id_predio")
+        .filter((predio) => predio.id_predio === idPredioAtual);
+      const andaresAtuais = deduplicarPor(resAndares.dados, "id_andar")
+        .filter((andar) => andar.id_predio === idPredioAtual);
+      const idsAndares = new Set(andaresAtuais.map((andar) => andar.id_andar));
+      const ambientesAtuais = deduplicarPor(resAmbientes.dados, "id_ambiente")
+        .filter((ambiente) => idsAndares.has(ambiente.id_andar));
+      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => ambiente.id_ambiente));
+
+      setPredios(prediosAtuais);
+      setAndares(andaresAtuais);
+      setPredioFilter(idPredioAtual ? String(idPredioAtual) : "Todos");
+      setAmbientesBrutos(ambientesAtuais);
+      setDispositivosBrutos(
+        deduplicarPor(resDispositivos.dados, "id_dispositivo")
+          .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente))
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       );
     } catch (erro) {
       notify(erro.message || "Erro ao carregar ambientes do banco de dados.");
@@ -208,6 +247,10 @@ function AmbientesConteudo({ toast }) {
 
   useEffect(() => {
     carregarDados();
+<<<<<<< HEAD
+=======
+    requisicaoAPI("/auth/me").then((res) => setPerfilAtual(res?.dados?.perfil || "")).catch(() => {});
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   }, [carregarDados]);
 
   const suportaReserva = useMemo(() => {
@@ -402,6 +445,13 @@ function AmbientesConteudo({ toast }) {
   }, [predios, predioFilter]);
 
   const openNew = () => {
+<<<<<<< HEAD
+=======
+    if (perfilAtual === "manutencao") {
+      notify("O perfil Manutenção não pode cadastrar novos ambientes.");
+      return;
+    }
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     const predioPadrao =
       predioFilter !== "Todos"
         ? String(predioFilter)
@@ -427,6 +477,10 @@ function AmbientesConteudo({ toast }) {
   const openEdit = (item) => {
     setEditingId(item.id);
     setForm({
+<<<<<<< HEAD
+=======
+      ...emptyForm,
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       id_predio: item.id_predio ? String(item.id_predio) : "",
       id_andar: item.id_andar ? String(item.id_andar) : "",
       id_setor: item.id_setor ? String(item.id_setor) : "",
@@ -461,6 +515,14 @@ function AmbientesConteudo({ toast }) {
   const saveEnvironment = async (event) => {
     event.preventDefault();
 
+<<<<<<< HEAD
+=======
+    if (!editingId && perfilAtual === "manutencao") {
+      notify("O perfil Manutenção não pode cadastrar novos ambientes.");
+      return;
+    }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     if (!form.name.trim() || !form.localizacao.trim() || !form.id_andar) {
       notify("Preencha o nome, o andar e a localização do ambiente.");
       return;
@@ -484,6 +546,35 @@ function AmbientesConteudo({ toast }) {
       horario_fechamento: fechamento,
     };
 
+<<<<<<< HEAD
+=======
+    if (!editingId) {
+      const limitesAmbiente = {};
+      if (form.temperaturaMinima !== "" || form.temperaturaMaxima !== "") {
+        limitesAmbiente.temperatura = {
+          minimo: form.temperaturaMinima,
+          maximo: form.temperaturaMaxima,
+        };
+      }
+      if (form.iluminacaoMinima !== "" || form.iluminacaoMaxima !== "") {
+        limitesAmbiente.iluminacao = {
+          minimo: form.iluminacaoMinima,
+          maximo: form.iluminacaoMaxima,
+        };
+      }
+      if (form.consumoMinimo !== "" || form.consumoMaximo !== "" || form.potenciaMaxima !== "") {
+        limitesAmbiente.energia = {
+          minimo: form.consumoMinimo,
+          maximo: form.consumoMaximo,
+          potencia_maxima: form.potenciaMaxima,
+        };
+      }
+      if (Object.keys(limitesAmbiente).length) {
+        payload.limites_ambiente = limitesAmbiente;
+      }
+    }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     if (suportaReserva) {
       payload.requer_reserva = form.reservation ? 1 : 0;
     }
@@ -547,7 +638,11 @@ function AmbientesConteudo({ toast }) {
 
   const limparFiltros = () => {
     setSearch("");
+<<<<<<< HEAD
     setPredioFilter("Todos");
+=======
+    setPredioFilter(String(predios[0]?.id_predio ?? "Todos"));
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     setFloorFilter("Todos");
     setReservationFilter("Todos");
     router.replace("/private/ambientes");
@@ -565,10 +660,19 @@ function AmbientesConteudo({ toast }) {
           </p>
         </div>
 
+<<<<<<< HEAD
         <button className="amb-primary" onClick={openNew}>
           <Icon name="plus" size={17} />
           Novo ambiente
         </button>
+=======
+        {perfilAtual !== "manutencao" && (
+          <button className="amb-primary" onClick={openNew}>
+            <Icon name="plus" size={17} />
+            Novo ambiente
+          </button>
+        )}
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </header>
 
       <section className="amb-summary">
@@ -643,6 +747,7 @@ function AmbientesConteudo({ toast }) {
           </div>
 
           <div className="amb-filters" style={{ flexWrap: "wrap" }}>
+<<<<<<< HEAD
             <label>
               <Icon name="building" size={14} />
               <select
@@ -660,6 +765,9 @@ function AmbientesConteudo({ toast }) {
                 ))}
               </select>
             </label>
+=======
+            <span className="amb-current-building">{predios[0]?.nome_predio || "Nenhum prédio vinculado"}</span>
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
             <label>
               <Icon name="filter" size={14} />
@@ -687,8 +795,12 @@ function AmbientesConteudo({ toast }) {
               </select>
             )}
 
+<<<<<<< HEAD
             {(predioFilter !== "Todos" ||
               floorFilter !== "Todos" ||
+=======
+            {(floorFilter !== "Todos" ||
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
               reservationFilter !== "Todos" ||
               search) && (
               <button
@@ -948,6 +1060,7 @@ function AmbientesConteudo({ toast }) {
               </label>
 
               <label>
+<<<<<<< HEAD
                 Edifício *
                 <select
                   value={form.id_predio}
@@ -966,6 +1079,8 @@ function AmbientesConteudo({ toast }) {
               </label>
 
               <label>
+=======
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 Andar *
                 <select
                   value={form.id_andar}
@@ -1008,6 +1123,52 @@ function AmbientesConteudo({ toast }) {
                 />
               </label>
 
+<<<<<<< HEAD
+=======
+              {!editingId && (
+                <div className="amb-limits-section full">
+                  <div className="amb-limits-heading">
+                    <strong>Limites de monitoramento</strong>
+                    <small>Opcional. Ao informar um tipo, preencha todos os limites dele; energia também exige potência máxima.</small>
+                  </div>
+                  <div className="amb-limits-grid">
+                    <fieldset className="amb-limit-card">
+                      <legend>Temperatura (°C)</legend>
+                      <label>Mínima
+                        <input type="number" step="0.1" value={form.temperaturaMinima} onChange={(event) => updateForm("temperaturaMinima", event.target.value)} placeholder="Ex.: 18" />
+                      </label>
+                      <label>Máxima
+                        <input type="number" step="0.1" value={form.temperaturaMaxima} onChange={(event) => updateForm("temperaturaMaxima", event.target.value)} placeholder="Ex.: 27" />
+                      </label>
+                    </fieldset>
+
+                    <fieldset className="amb-limit-card">
+                      <legend>Iluminação (lux)</legend>
+                      <label>Mínima
+                        <input type="number" min="0" step="0.01" value={form.iluminacaoMinima} onChange={(event) => updateForm("iluminacaoMinima", event.target.value)} placeholder="Ex.: 150" />
+                      </label>
+                      <label>Máxima
+                        <input type="number" min="0" step="0.01" value={form.iluminacaoMaxima} onChange={(event) => updateForm("iluminacaoMaxima", event.target.value)} placeholder="Ex.: 700" />
+                      </label>
+                    </fieldset>
+
+                    <fieldset className="amb-limit-card">
+                      <legend>Energia</legend>
+                      <label>Consumo mínimo (kWh)
+                        <input type="number" min="0" step="0.0001" value={form.consumoMinimo} onChange={(event) => updateForm("consumoMinimo", event.target.value)} placeholder="Ex.: 0.1" />
+                      </label>
+                      <label>Consumo máximo (kWh)
+                        <input type="number" min="0" step="0.0001" value={form.consumoMaximo} onChange={(event) => updateForm("consumoMaximo", event.target.value)} placeholder="Ex.: 12" />
+                      </label>
+                      <label className="full">Potência máxima (kW)
+                        <input type="number" min="0" step="0.0001" value={form.potenciaMaxima} onChange={(event) => updateForm("potenciaMaxima", event.target.value)} placeholder="Ex.: 3.5" />
+                      </label>
+                    </fieldset>
+                  </div>
+                </div>
+              )}
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
               {suportaReserva ? (
                 <label className="amb-checkbox-field">
                   <input

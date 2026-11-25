@@ -8,6 +8,7 @@ import { resolve } from "node:path";
 
 // Rotas existentes
 import { authRouter } from "./routes/AuthRoutes.js";
+import { reclamacaoRouter } from "./routes/ReclamacaoRoutes.js";
 
 import { recursosRouter } from "./routes/RecursoRoutes.js";
 import { gestaoRouter } from "./routes/GestaoRoutes.js";
@@ -16,11 +17,13 @@ import { gestaoRouter } from "./routes/GestaoRoutes.js";
 import { criarOrcamentoRoutes } from "./routes/orcamentoRoutes.js";
 import { criarPedidoRoutes } from "./routes/pedidoRoutes.js";
 import { criarPagamentoRoutes } from "./routes/pagamentoRoutes.js";
+import { tarifaEnergiaRouter } from "./routes/TarifaEnergiaRoutes.js";
 
 // Models
 import { criarOrcamentoModel } from "./models/OrcamentoModels.js";
 import { criarPedidoModel } from "./models/PedidoModels.js";
 import { criarPagamentoModel } from "./models/PagamentoModels.js";
+import { criarProvisionamentoPredioModel } from "./models/ProvisionamentoPredioModel.js";
 
 // Services
 import { criarOrcamentoService } from "./services/OrcamentoService.js";
@@ -58,11 +61,11 @@ app.use(cors({
 
         return callback(new Error("Origem não permitida pelo CORS."));
     },
-    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "4mb" }));
 
 // ==========================================
 // ARQUIVOS ESTÁTICOS
@@ -87,6 +90,7 @@ app.get("/api/v1/check", (_req, res) => {
 // ==========================================
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/reclamacoes", reclamacaoRouter);
 
 // ==========================================
 // ORÇAMENTO, PEDIDO E PAGAMENTO
@@ -96,6 +100,7 @@ app.use("/api/v1/auth", authRouter);
 const orcamentoModel = criarOrcamentoModel({ pool });
 const pedidoModel = criarPedidoModel({ pool });
 const pagamentoModel = criarPagamentoModel({ pool });
+const provisionamentoPredioModel = criarProvisionamentoPredioModel({ pool });
 
 // Services
 const orcamentoService = criarOrcamentoService({
@@ -109,7 +114,9 @@ const pedidoService = criarPedidoService({
 
 const pagamentoService = criarPagamentoService({
     pagamentoModel,
-    pedidoModel
+    pedidoModel,
+    orcamentoModel,
+    provisionamentoPredioModel
 });
 
 // Controllers
@@ -132,23 +139,30 @@ app.use(
     criarOrcamentoRoutes({ orcamentoController })
 );
 
-// Rotas protegidas
-app.use("/api/v1", recursosRouter);
-app.use("/api/v1", gestaoRouter);
-
+// O cliente cria/consulta o pedido depois de aprovar um orçamento, sem login.
+// Registre antes dos routers protegidos montados em /api/v1.
 app.use(
     "/api/v1/pedidos",
     criarPedidoRoutes({ pedidoController })
 );
 
+// O cliente registra/consulta o pagamento do pedido sem login.
 app.use(
     "/api/v1/pagamentos",
     criarPagamentoRoutes({ pagamentoController })
 );
 
+app.use("/api/v1/tarifa-energia", tarifaEnergiaRouter);
+
+// Rotas protegidas
+app.use("/api/v1", recursosRouter);
+app.use("/api/v1", gestaoRouter);
+
 // ==========================================
 // TRATAMENTO DE ERROS
 // ==========================================
+
+// SLA
 
 app.use((_req, res) => {
     return res.status(404).json({

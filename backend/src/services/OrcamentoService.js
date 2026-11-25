@@ -1,10 +1,5 @@
-const TABELA_SERVICOS = {
-  monitoramento_temperatura: { chave: "temperatura", preco: 480 },
-  controle_iluminacao: { chave: "iluminacao", preco: 620 },
-  monitoramento_energia: { chave: "energia", preco: 750 },
-  controle_acesso: { chave: "acesso", preco: 890 },
-  monitoramento_dispositivos: { chave: "dispositivo", preco: 540 },
-};
+import { randomBytes } from "node:crypto";
+import bcrypt from "bcryptjs";
 
 const STATUS_VALIDOS = [
   "solicitado",
@@ -14,12 +9,14 @@ const STATUS_VALIDOS = [
   "recusado",
   "expirado",
 ];
+const REGEX_EMAIL = /^[^\s@]+@[^\s@]+$/;
 
 export function criarOrcamentoService({ orcamentoModel }) {
   async function criar(dados) {
-    const nomeResponsavel = dados.nomeResponsavel || dados.nome_responsavel;
+    const nomeRecebido = dados.nomeResponsavel || dados.nome_responsavel;
+    const nomeResponsavel = typeof nomeRecebido === "string" ? nomeRecebido.trim() : "";
     const nomeEmpresa = dados.nomeEmpresa || dados.nome_empresa;
-    const email = dados.email;
+    const email = typeof dados.email === "string" ? dados.email.trim().toLowerCase() : "";
     const telefone = dados.telefone || "";
     const quantidadeAndares = Number(
       dados.quantidadeAndares ?? dados.quantidade_andares ?? 0
@@ -31,19 +28,16 @@ export function criarOrcamentoService({ orcamentoModel }) {
       dados.quantidadeDispositivos ?? dados.quantidade_dispositivos ?? 0
     );
     const servicosRecebidos = dados.servicosDesejados ?? dados.servicos ?? [];
-
-    const servicosLista = Array.isArray(servicosRecebidos)
-      ? servicosRecebidos
-      : [];
-
-    const servicosDesejados = Array.isArray(servicosRecebidos)
-      ? servicosRecebidos.join(", ")
-      : String(servicosRecebidos).trim();
+    const servicosLista = [...new Set(
+      (Array.isArray(servicosRecebidos) ? servicosRecebidos : [servicosRecebidos])
+        .map((id) => String(id).trim())
+        .filter(Boolean)
+    )];
 
     if (
       !nomeResponsavel ||
       !nomeEmpresa ||
-      !email ||
+      !REGEX_EMAIL.test(email) ||
       quantidadeAndares <= 0 ||
       quantidadeAmbientes <= 0
     ) {
@@ -52,10 +46,14 @@ export function criarOrcamentoService({ orcamentoModel }) {
       );
     }
 
-    const servicosDetalhes = servicosLista.map((id) => ({
-      id,
-      ...(TABELA_SERVICOS[id] || { chave: id, preco: 0 }),
-    }));
+    if (nomeResponsavel.length > 100) {
+      throw new Error("O nome do responsável deve ter no máximo 100 caracteres.");
+    }
+
+    const servicosDetalhes = await orcamentoModel.buscarServicosPorNome(servicosLista);
+    if (servicosDetalhes.length !== servicosLista.length) {
+      throw new Error("Um ou mais serviços selecionados são inválidos.");
+    }
 
     const totalServicos = servicosDetalhes.reduce((acc, s) => acc + s.preco, 0);
     const totalEstrutura =
@@ -79,31 +77,40 @@ export function criarOrcamentoService({ orcamentoModel }) {
         ? Number(dados.valorTotal)
         : Number((valorSubtotal - valorDesconto).toFixed(2));
 
-    const prazoEstimadoDias = Number(
-      dados.prazoEstimadoDias ?? dados.prazo_estimado_dias ?? 15
+    const prazoCalculado = Math.max(
+      5,
+      Math.ceil(quantidadeAndares / 2) +
+        Math.ceil(quantidadeAmbientes / 10) +
+        Math.ceil(quantidadeDispositivos / 20) +
+        servicosDetalhes.length * 2
     );
-    const validade = new Date();
-    validade.setDate(validade.getDate() + prazoEstimadoDias);
+    const prazoInformado = dados.prazoEstimadoDias ?? dados.prazo_estimado_dias;
+    const prazoEstimadoDias =
+      prazoInformado === undefined || prazoInformado === null || prazoInformado === ""
+        ? prazoCalculado
+        : Number(prazoInformado);
+    const validadeCalculada = new Date();
+    validadeCalculada.setUTCDate(validadeCalculada.getUTCDate() + 30);
     const dataValidade =
-      dados.dataValidade || validade.toISOString().slice(0, 10);
+      dados.dataValidade ??
+      dados.data_validade ??
+      validadeCalculada.toISOString().slice(0, 10);
 
     const descricaoBase = (dados.descricao || "").trim();
-    const tagServicos = servicosLista.length
-      ? `[servicos:${servicosLista.join(",")}]`
-      : "";
-    const descricaoFinal =
-      [descricaoBase, tagServicos].filter(Boolean).join(" ").trim() || null;
+    const descricaoFinal = descricaoBase || null;
+    const senhaTemporaria = `Lumora@${randomBytes(12).toString("hex")}`;
+    const senhaHashBcrypt = await bcrypt.hash(senhaTemporaria, 12);
+    const senhaHash = senhaHashBcrypt.replace(/^\$2b\$/, () => "$2y$");
 
     const idOrcamento = await orcamentoModel.criar({
-      idUsuario: dados.idUsuario ?? null,
       nomeResponsavel,
       nomeEmpresa,
       email,
       telefone,
+      senhaHash,
       quantidadeAndares,
       quantidadeAmbientes,
       quantidadeDispositivos: quantidadeDispositivos || null,
-      servicosDesejados,
       descricao: descricaoFinal,
       valorSubtotal,
       valorDesconto,
@@ -114,7 +121,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
     });
 
     const criado = await orcamentoModel.buscarPorId(idOrcamento);
-    return { idOrcamento, dados: criado };
+    return { idOrcamento, dados: criado, senhaTemporaria };
   }
 
   async function listar() {

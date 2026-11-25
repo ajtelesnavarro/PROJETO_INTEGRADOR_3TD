@@ -12,6 +12,22 @@
   animation: amb-enter .35s ease;
 }
 
+<<<<<<< HEAD
+=======
+.amb-current-building {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #dce3f1;
+  border-radius: 8px;
+  background: #fff;
+  color: #182747;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 @keyframes amb-enter {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -715,6 +731,55 @@
   grid-column: 1 / -1;
 }
 
+<<<<<<< HEAD
+=======
+.amb-limits-section.full {
+  grid-column: 1 / -1;
+  padding: 15px;
+  border: 1px solid #e8edf4;
+  border-radius: 11px;
+  background: #fbfcfe;
+}
+
+.amb-limits-heading {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.amb-limits-heading strong { color: #34445d; font-size: 12px; }
+.amb-limits-heading small { color: #8995a8; font-size: 10px; line-height: 1.5; }
+
+.amb-limits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.amb-limit-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e8edf4;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.amb-limit-card legend {
+  padding: 0 5px;
+  color: #596982;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.amb-form-grid .amb-limit-card label { min-width: 0; font-size: 10px; }
+.amb-limit-card label.full { grid-column: 1 / -1; }
+.amb-limits-grid input { font-size: 10px !important; }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .amb-form-grid input:not([type="checkbox"]),
 .amb-form-grid textarea {
   width: 100%;
@@ -909,6 +974,14 @@
     grid-template-columns: 1fr;
   }
 
+<<<<<<< HEAD
+=======
+  .amb-limits-grid,
+  .amb-limit-card {
+    grid-template-columns: 1fr;
+  }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   .amb-form-grid label.full {
     grid-column: auto;
   }

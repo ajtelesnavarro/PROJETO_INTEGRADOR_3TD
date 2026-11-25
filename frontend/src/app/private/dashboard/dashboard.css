@@ -243,6 +243,74 @@
   box-shadow: 0 3px 12px rgba(29, 49, 86, 0.025);
 }
 
+<<<<<<< HEAD
+=======
+.dash-tarifa-panel { margin-bottom: 20px; }
+
+.dash-tarifa-atual {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid #dcefe9;
+  border-radius: 9px;
+  background: #f0faf6;
+  color: #28745a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dash-tarifa-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.3fr) minmax(160px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.dash-tarifa-form label {
+  display: grid;
+  gap: 7px;
+  color: #65738a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dash-tarifa-form input,
+.dash-tarifa-form select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  outline: 0;
+  background: #fbfcfe;
+  color: var(--dash-text);
+}
+
+.dash-tarifa-form input:focus,
+.dash-tarifa-form select:focus {
+  border-color: #829ce0;
+  box-shadow: 0 0 0 3px rgba(49, 95, 209, .09);
+}
+
+.dash-tarifa-form button {
+  min-height: 42px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dash-primary);
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dash-tarifa-form button:hover { background: var(--dash-primary-dark); }
+.dash-tarifa-form button:disabled { cursor: wait; opacity: .65; }
+.dash-tarifa-form small,
+.dash-tarifa-empty { grid-column: 1 / -1; margin: 0; color: var(--dash-muted); font-size: 10px; }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .dash-panel-heading {
   display: flex;
   align-items: flex-start;
@@ -770,6 +838,12 @@
   .dash-health-content {
     justify-content: flex-start;
   }
+<<<<<<< HEAD
+=======
+
+  .dash-tarifa-form { grid-template-columns: 1fr 1fr; }
+  .dash-tarifa-form button { grid-column: 1 / -1; }
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 @media (max-width: 600px) {
@@ -818,6 +892,13 @@
     flex-wrap: wrap;
   }
 
+<<<<<<< HEAD
+=======
+  .dash-tarifa-form { grid-template-columns: 1fr; }
+  .dash-tarifa-form button,
+  .dash-tarifa-form small { grid-column: auto; }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   .dash-range {
     width: 100%;
     justify-content: space-between;
@@ -854,3 +935,22 @@
     grid-template-columns: 1fr;
   }
 }
+<<<<<<< HEAD
+=======
+
+
+/* Dashboard específico de manutenção */
+.maintenance-devices-panel, .maintenance-occurrences-panel { margin-top: 22px; }
+.maintenance-device-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 4px 0 2px; }
+.maintenance-device-card { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 14px 16px; border: 1px solid #e8edf5; border-radius: 12px; background: #fbfcfe; }
+.maintenance-device-card > div { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.maintenance-device-card strong { color: #17243b; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.maintenance-device-card small { color: #78859a; font-size: 12px; }
+.maintenance-device-status { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: #e2a33b; }
+.maintenance-device-status.offline, .maintenance-device-status.inativo { background: #dc6262; }
+.maintenance-device-status.manutencao { background: #4779e8; }
+.maintenance-device-label { color: #65748b; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.maintenance-empty { padding: 20px; color: #78859a; font-size: 13px; }
+.maintenance-dashboard-note { margin: 16px 2px 0; color: #718096; font-size: 12px; line-height: 1.6; }
+@media (max-width: 760px) { .maintenance-device-grid { grid-template-columns: 1fr; } .maintenance-device-card { flex-wrap: wrap; } }
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

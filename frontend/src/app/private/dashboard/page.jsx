@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { requisicaoAPI } from "@/services/api";
+<<<<<<< HEAD
+=======
+import { obterPredioAtual } from "@/services/predioAtual";
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./dashboard.css";
 
 function Icon({ name, size = 18 }) {
@@ -332,6 +336,14 @@ function Incidents({ items, onResolve }) {
 
 export default function DashboardPage() {
   const [range, setRange] = useState("7 dias");
+<<<<<<< HEAD
+=======
+  const [perfilAtual, setPerfilAtual] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || ""; }
+    catch { return ""; }
+  });
+  const [eventosAcesso, setEventosAcesso] = useState([]);
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   const [toast, setToast] = useState("");
   const [predios, setPredios] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
@@ -340,6 +352,7 @@ export default function DashboardPage() {
   const [equipes, setEquipes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [leituras, setLeituras] = useState([]);
+<<<<<<< HEAD
 
   function showToast(message) {
     setToast(message);
@@ -374,6 +387,194 @@ export default function DashboardPage() {
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
+=======
+  const [predioTarifaId, setPredioTarifaId] = useState("");
+  const [predioTarifaNome, setPredioTarifaNome] = useState("");
+  const [tarifaAtual, setTarifaAtual] = useState(null);
+  const [valorTarifa, setValorTarifa] = useState("");
+  const [carregandoTarifa, setCarregandoTarifa] = useState(false);
+  const [salvandoTarifa, setSalvandoTarifa] = useState(false);
+
+  const showToast = useCallback((message) => {
+    setToast(message);
+    window.clearTimeout(window.__lumoraToast);
+    window.__lumoraToast = window.setTimeout(() => setToast(""), 2800);
+  }, []);
+
+  const carregarDados = useCallback(async () => {
+    const lerLista = (resultado) => {
+      if (!resultado || resultado.status !== "fulfilled") return [];
+      return Array.isArray(resultado.value?.dados) ? resultado.value.dados : [];
+    };
+    const erroDa = (resultado) => resultado?.status === "rejected"
+      ? (resultado.reason?.message || "Falha na consulta")
+      : null;
+
+    try {
+      // O prédio é obtido primeiro da sessão e, como fallback, do perfil autenticado.
+      let predioSelecionado = obterPredioAtual();
+      if (!predioSelecionado?.id_predio) {
+        try {
+          const perfil = await requisicaoAPI("/auth/me");
+          if (perfil?.dados?.id_predio) {
+            predioSelecionado = {
+              id_predio: perfil.dados.id_predio,
+              nome_predio: perfil.dados.nome_predio || "",
+            };
+            sessionStorage.setItem("lumora_predio_atual", JSON.stringify(predioSelecionado));
+          }
+        } catch {
+          // As demais consultas ainda podem ser exibidas mesmo sem os dados do perfil.
+        }
+      }
+      const idPredioAtual = Number(predioSelecionado?.id_predio || 0);
+
+      if (perfilAtual === "porteiro") {
+        const resultados = await Promise.allSettled([
+          requisicaoAPI("/predios?limite=200"),
+          requisicaoAPI("/andares?limite=300"),
+          requisicaoAPI("/ambientes?limite=300"),
+          requisicaoAPI("/acessos-detalhados"),
+        ]);
+        const [rPredios, rAndares, rAmbientes, rEventos] = resultados;
+        const andares = lerLista(rAndares);
+        const ambientesRecebidos = lerLista(rAmbientes);
+        const idsAndares = new Set(andares
+          .filter((a) => Number(a.id_predio) === idPredioAtual)
+          .map((a) => Number(a.id_andar)));
+        const ambientesAtuais = ambientesRecebidos
+          .filter((a) => idsAndares.has(Number(a.id_andar)));
+        const idsAmbientes = new Set(ambientesAtuais.map((a) => Number(a.id_ambiente)));
+        const eventos = lerLista(rEventos)
+          .filter((e) => idsAmbientes.has(Number(e.id_ambiente)))
+          .sort((a, b) => new Date(b.data_utilizacao || 0) - new Date(a.data_utilizacao || 0));
+
+        setPredios(lerLista(rPredios).filter((p) => Number(p.id_predio) === idPredioAtual));
+        setAmbientes(ambientesAtuais);
+        setEventosAcesso(eventos.slice(0, 8));
+        const falhas = resultados.map(erroDa).filter(Boolean);
+        if (falhas.length) showToast(`Parte dos dados da portaria não carregou: ${falhas[0]}`);
+        return;
+      }
+
+      // Consultas independentes: uma rota indisponível não zera o dashboard inteiro.
+      const resultados = await Promise.allSettled([
+        requisicaoAPI("/predios?limite=200"),
+        requisicaoAPI("/andares?limite=200"),
+        requisicaoAPI("/ambientes?limite=200"),
+        requisicaoAPI("/dispositivos?limite=200"),
+        requisicaoAPI("/ocorrencias?limite=50"),
+        requisicaoAPI("/equipes"),
+        requisicaoAPI("/usuarios"),
+        requisicaoAPI("/leituras?limite=200"),
+      ]);
+      const [rPredios, rAndares, rAmbientes, rDispositivos, rOcorrencias, rEquipes, rUsuarios, rLeituras] = resultados;
+
+      const prediosRecebidos = lerLista(rPredios);
+      const andaresRecebidos = lerLista(rAndares);
+      const ambientesRecebidos = lerLista(rAmbientes);
+      const dispositivosRecebidos = lerLista(rDispositivos);
+      const ocorrenciasRecebidas = lerLista(rOcorrencias);
+      const equipesRecebidas = lerLista(rEquipes);
+      const usuariosRecebidos = lerLista(rUsuarios);
+      const leiturasRecebidas = lerLista(rLeituras);
+
+      const idsAndares = new Set(andaresRecebidos
+        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+        .map((andar) => Number(andar.id_andar)));
+      const ambientesAtuais = ambientesRecebidos
+        .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)));
+      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => Number(ambiente.id_ambiente)));
+      const dispositivosAtuais = dispositivosRecebidos
+        .filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
+      const idsDispositivos = new Set(dispositivosAtuais.map((dispositivo) => Number(dispositivo.id_dispositivo)));
+
+      setPredios(prediosRecebidos.filter((predio) => Number(predio.id_predio) === idPredioAtual));
+      setAmbientes(ambientesAtuais);
+      setDispositivos(dispositivosAtuais);
+      setOcorrencias(perfilAtual === "manutencao"
+        ? ocorrenciasRecebidas
+        : ocorrenciasRecebidas.filter((ocorrencia) => idsDispositivos.has(Number(ocorrencia.id_dispositivo))));
+      setEquipes(equipesRecebidas.filter((equipe) => Number(equipe.id_predio) === idPredioAtual));
+      setUsuarios(usuariosRecebidos.filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
+      setLeituras(leiturasRecebidas.filter((leitura) => idsDispositivos.has(Number(leitura.dispositivo_id))));
+
+      const falhas = resultados.map(erroDa).filter(Boolean);
+      if (falhas.length) {
+        showToast(`Alguns indicadores não carregaram: ${falhas[0]}`);
+      }
+    } catch (erro) {
+      showToast(erro.message || "Erro ao carregar indicadores.");
+    }
+  }, [showToast, perfilAtual]);
+
+  useEffect(() => {
+    requisicaoAPI("/auth/me").then((res) => {
+      const perfil = res?.dados?.perfil || "";
+      if (perfil) setPerfilAtual(perfil);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (perfilAtual) carregarDados();
+  }, [carregarDados, perfilAtual]);
+
+  useEffect(() => {
+    try {
+      const predio = JSON.parse(sessionStorage.getItem("lumora_predio_atual") || "null");
+      setPredioTarifaId(predio?.id_predio ? String(predio.id_predio) : "");
+      setPredioTarifaNome(predio?.nome_predio || "");
+    } catch {
+      setPredioTarifaId("");
+      setPredioTarifaNome("");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (perfilAtual === "porteiro" || !predioTarifaId) {
+      setTarifaAtual(null);
+      setValorTarifa("");
+      return;
+    }
+
+    let ativo = true;
+    setCarregandoTarifa(true);
+    requisicaoAPI(`/tarifa-energia/${predioTarifaId}`)
+      .then((resposta) => {
+        if (!ativo) return;
+        setTarifaAtual(resposta.dados || null);
+        setValorTarifa(resposta.dados?.valor_kwh ?? "");
+      })
+      .catch((erro) => {
+        if (ativo) showToast(erro.message || "Não foi possível carregar a tarifa.");
+      })
+      .finally(() => {
+        if (ativo) setCarregandoTarifa(false);
+      });
+
+    return () => { ativo = false; };
+  }, [predioTarifaId, showToast, perfilAtual]);
+
+  async function salvarTarifa(event) {
+    event.preventDefault();
+    if (!predioTarifaId || valorTarifa === "") return;
+
+    try {
+      setSalvandoTarifa(true);
+      const resposta = await requisicaoAPI(`/tarifa-energia/${predioTarifaId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ valor_kwh: Number(String(valorTarifa).replace(",", ".")) }),
+      });
+      setTarifaAtual(resposta.dados || null);
+      setValorTarifa(resposta.dados?.valor_kwh ?? valorTarifa);
+      showToast("Tarifa de energia atualizada.");
+    } catch (erro) {
+      showToast(erro.message || "Não foi possível salvar a tarifa.");
+    } finally {
+      setSalvandoTarifa(false);
+    }
+  }
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
   const resumoIndicadores = useMemo(() => {
     const ativos = dispositivos.filter((d) => d.status_dispositivo === "ativo").length;
@@ -455,6 +656,109 @@ export default function DashboardPage() {
     }
   }
 
+<<<<<<< HEAD
+=======
+  if (perfilAtual === "manutencao") {
+    const abertas = ocorrencias.filter((item) => item.status_ocorrencia === "aberta").length;
+    const andamento = ocorrencias.filter((item) => item.status_ocorrencia === "em_andamento").length;
+    const resolvidas = ocorrencias.filter((item) => item.status_ocorrencia === "resolvida").length;
+    const altaPrioridade = ocorrencias.filter((item) => item.prioridade === "alta" && item.status_ocorrencia !== "resolvida").length;
+    const dispositivosAtencao = dispositivos.filter((item) => ["instavel", "manutencao", "offline", "inativo"].includes(item.status_dispositivo));
+
+    return (
+      <div className="lumora-dashboard">
+        <div className="dash-title">
+          <div>
+            <span className="dash-eyebrow">CENTRAL TÉCNICA</span>
+            <h1>Painel de Manutenção</h1>
+            <p>Acompanhe suas ocorrências, dispositivos e atividades técnicas do edifício.</p>
+          </div>
+          <div className="dash-title-right">
+            <Link href="/private/ocorrencias" className="dash-link">Gerenciar ocorrências <Icon name="arrow" size={15} /></Link>
+          </div>
+        </div>
+
+        <section className="dash-metrics">
+          <MetricCard icon="alert" label="Ocorrências abertas" value={String(abertas).padStart(2, "0")} description="Aguardando início do atendimento" color="orange" footer={<span>Priorize os chamados pendentes</span>} />
+          <MetricCard icon="clock" label="Em andamento" value={String(andamento).padStart(2, "0")} description="Atividades em execução" color="blue" footer={<span>Atividades em execução</span>} />
+          <MetricCard icon="check" label="Resolvidas" value={String(resolvidas).padStart(2, "0")} description="Ocorrências finalizadas" color="green" footer={<span>Histórico de atendimentos</span>} />
+          <MetricCard icon="alert" label="Alta prioridade" value={String(altaPrioridade).padStart(2, "0")} description="Ocorrências que exigem atenção" color="purple" footer={<span>{dispositivosAtencao.length} dispositivos em atenção</span>} />
+        </section>
+
+        <section className="dash-panel maintenance-devices-panel">
+          <div className="dash-panel-heading">
+            <div><span className="dash-section-label">MONITORAMENTO TÉCNICO</span><h2>Dispositivos que precisam de atenção</h2><p>Equipamentos instáveis, offline ou em manutenção.</p></div>
+            <Link href="/private/dispositivos" className="dash-link">Ver dispositivos <Icon name="arrow" size={15} /></Link>
+          </div>
+          <div className="maintenance-device-grid">
+            {dispositivosAtencao.length ? dispositivosAtencao.slice(0, 6).map((device) => {
+              const ambiente = ambientes.find((item) => Number(item.id_ambiente) === Number(device.id_ambiente));
+              const statusLabel = { instavel: "Instável", manutencao: "Em manutenção", offline: "Offline", inativo: "Inativo" }[device.status_dispositivo] || device.status_dispositivo;
+              return <article className="maintenance-device-card" key={device.id_dispositivo}>
+                <span className={`maintenance-device-status ${device.status_dispositivo}`}></span>
+                <div><strong>{device.nome}</strong><small>{ambiente?.nome || "Ambiente não identificado"}</small></div>
+                <span className="maintenance-device-label">{statusLabel}</span>
+              </article>;
+            }) : <p className="maintenance-empty">Nenhum dispositivo requer atenção no momento.</p>}
+          </div>
+        </section>
+
+        <section className="dash-panel dash-incidents maintenance-occurrences-panel">
+          <div className="dash-panel-heading dash-incidents-heading">
+            <div><span className="dash-section-label">FILA DE ATENDIMENTO</span><h2>Minhas ocorrências <span className="dash-count">{ocorrencias.length}</span></h2><p>Acompanhe os chamados vinculados aos seus dispositivos.</p></div>
+            <Link href="/private/ocorrencias" className="dash-link">Abrir painel <Icon name="arrow" size={15} /></Link>
+          </div>
+          <div className="dash-table-wrapper">
+            <table className="dash-table"><thead><tr><th>OCORRÊNCIA</th><th>DISPOSITIVO</th><th>AMBIENTE</th><th>PRIORIDADE</th><th>STATUS</th></tr></thead>
+              <tbody>
+                {ocorrenciasFormatadas.length ? ocorrenciasFormatadas.map((item) => (
+                  <tr key={item.rawId}><td><strong>{item.id}</strong><small>{item.title}</small></td><td>{item.category}</td><td>{item.location}</td><td><Status value={item.priority} /></td><td><Status value={item.status} /></td></tr>
+                )) : <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>Nenhuma ocorrência vinculada aos seus dispositivos.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <p className="maintenance-dashboard-note">Este painel é voltado ao acompanhamento e à execução da manutenção. A abertura manual de novas ocorrências fica restrita ao administrador; alertas automáticos continuam sendo registrados pelo sistema.</p>
+        {toast && <div className="dash-toast"><span><Icon name="check" size={16} /></span>{toast}</div>}
+      </div>
+    );
+  }
+
+  if (perfilAtual === "porteiro") {
+    const permitidos = eventosAcesso.filter((e) => e.decisao_acesso === "permitido").length;
+    const negados = eventosAcesso.filter((e) => e.decisao_acesso !== "permitido").length;
+    return (
+      <div className="lumora-dashboard">
+        <div className="dash-title">
+          <div>
+            <span className="dash-eyebrow">CENTRAL DA PORTARIA</span>
+            <h1>Painel da Portaria</h1>
+            <p>Resumo dos ambientes e das movimentações de acesso do edifício.</p>
+          </div>
+          <div className="dash-title-right"><span className="dash-date"><Icon name="clock" size={15} /> Consulta de registros</span></div>
+        </div>
+        <section className="dash-metrics">
+          <MetricCard icon="building" label="Prédio vinculado" value={predios.length ? "01" : "00"} description="Edifício da sua portaria" color="blue" footer={<span><Icon name="pin" size={13} /> {predios[0]?.nome_predio || "Não identificado"}</span>} />
+          <MetricCard icon="rooms" label="Ambientes" value={String(ambientes.length).padStart(2, "0")} description="Espaços cadastrados" color="purple" footer={<span>Consulta de localização</span>} />
+          <MetricCard icon="check" label="Acessos permitidos" value={String(permitidos).padStart(2, "0")} description="Entre os últimos registros" color="cyan" footer={<span>Registros recentes</span>} />
+          <MetricCard icon="alert" label="Acessos negados" value={String(negados).padStart(2, "0")} description="Entre os últimos registros" color="orange" footer={<span>Verifique o motivo no controle</span>} />
+        </section>
+        <section className="dash-panel" style={{ marginTop: 22 }}>
+          <div className="dash-panel-heading">
+            <div><span className="dash-section-label">MOVIMENTAÇÕES RECENTES</span><h2>Últimos registros de acesso</h2><p>Visualização dos eventos vinculados ao prédio atual.</p></div>
+            <Link href="/private/acessos" className="dash-link">Abrir controle de acesso <Icon name="arrow" size={15} /></Link>
+          </div>
+          <div className="dash-table-wrapper"><table className="dash-table"><thead><tr><th>Data e hora</th><th>Pessoa / credencial</th><th>Ambiente</th><th>Movimento</th><th>Resultado</th></tr></thead><tbody>
+            {eventosAcesso.length ? eventosAcesso.map((evento) => <tr key={evento.id_evento}><td>{evento.data_utilizacao ? new Date(evento.data_utilizacao).toLocaleString("pt-BR") : "—"}</td><td>{evento.nome_usuario || "Credencial não identificada"}</td><td>{evento.nome_ambiente || `Ambiente #${evento.id_ambiente}`}</td><td>{evento.tipo_acesso === "saida" ? "Saída" : "Entrada"}</td><td><Status value={evento.decisao_acesso === "permitido" ? "Permitido" : "Negado"} /></td></tr>) : <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>Nenhum registro de acesso encontrado.</td></tr>}
+          </tbody></table></div>
+        </section>
+        <p style={{ marginTop: 16, color: "#718096", fontSize: 13 }}>Este painel é somente para consulta. Configurações, indicadores administrativos, tarifas e gestão de equipes não são exibidos para o perfil Porteiro.</p>
+        {toast && <div className="dash-toast"><span><Icon name="check" size={16} /></span>{toast}</div>}
+      </div>
+    );
+  }
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   return (
     <div className="lumora-dashboard">
       <div className="dash-title">
@@ -475,9 +779,15 @@ export default function DashboardPage() {
       <section className="dash-metrics">
         <MetricCard
           icon="building"
+<<<<<<< HEAD
           label="Edifícios"
           value={String(predios.length).padStart(2, "0")}
           description="Unidades cadastradas"
+=======
+          label="Prédio atual"
+          value={predios.length ? "01" : "00"}
+          description="Edifício vinculado à conta"
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           color="blue"
           footer={
             <span>
@@ -519,6 +829,45 @@ export default function DashboardPage() {
         />
       </section>
 
+<<<<<<< HEAD
+=======
+      <section className="dash-panel dash-tarifa-panel">
+        <div className="dash-panel-heading">
+          <div>
+            <span className="dash-section-label">CONFIGURAÇÃO DO EDIFÍCIO</span>
+            <h2>Tarifa de energia</h2>
+            <p>Defina o valor cobrado por kWh para os cálculos de consumo.</p>
+          </div>
+          <span className="dash-tarifa-atual">
+            {carregandoTarifa
+              ? "Carregando tarifa..."
+              : tarifaAtual
+                ? `Vigente: ${Number(tarifaAtual.valor_kwh).toLocaleString("pt-BR", { minimumFractionDigits: 4, maximumFractionDigits: 4 })} R$/kWh`
+                : "Nenhuma tarifa cadastrada"}
+          </span>
+        </div>
+
+        {predioTarifaId ? (
+          <form className="dash-tarifa-form" onSubmit={salvarTarifa}>
+            <label>
+              Prédio atual
+              <input value={predioTarifaNome || `Prédio #${predioTarifaId}`} readOnly />
+            </label>
+            <label>
+              Valor por kWh (R$)
+              <input type="number" min="0" step="0.0001" value={valorTarifa} onChange={(event) => setValorTarifa(event.target.value)} placeholder="Ex.: 0.7350" required />
+            </label>
+            <button type="submit" disabled={salvandoTarifa || carregandoTarifa}>
+              {salvandoTarifa ? "Salvando..." : "Salvar tarifa"}
+            </button>
+            <small>A nova tarifa passa a valer hoje e encerra a anterior.</small>
+          </form>
+        ) : (
+          <p className="dash-tarifa-empty">Seu usuário ainda não está vinculado a um prédio.</p>
+        )}
+      </section>
+
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       <section className="dash-analytics">
         <div className="dash-panel dash-chart-panel">
           <div className="dash-panel-heading">
@@ -570,4 +919,8 @@ export default function DashboardPage() {
       )}
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

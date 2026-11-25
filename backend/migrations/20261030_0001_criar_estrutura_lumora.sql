@@ -11,7 +11,7 @@ CREATE TABLE predio (
     id_predio INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nome_predio VARCHAR(100) NOT NULL,
     cep CHAR(9) NOT NULL,
-    logradouro VARCHAR(100) NOT NULL,
+    rua VARCHAR(100) NOT NULL,
     numero VARCHAR(10) NOT NULL,
     complemento VARCHAR(100) NULL,
     bairro VARCHAR(100) NOT NULL,
