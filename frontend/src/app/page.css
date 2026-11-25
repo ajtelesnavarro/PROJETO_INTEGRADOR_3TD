@@ -1155,8 +1155,41 @@
 }
 
 .layer.active {
-    background: var(--lumora-blue) !important;
+    background: linear-gradient(110deg, #173A75 0%, #34206D 100%) !important;
     color: white !important;
+    border-left-color: #20C4B5;
+    border-radius: 0 10px 10px 0;
+}
+
+.layer.active > span,
+.layer.active b,
+.layer.active small,
+.layer.active i {
+    color: #fff !important;
+}
+
+/* Mantém legíveis os detalhes dos cards em telas menores. */
+.small-label {
+    font-size: 12px;
+}
+
+.incident-row b {
+    font-size: 14px;
+}
+
+.incident-row small {
+    color: #66758a;
+    font-size: 12px;
+}
+
+.incident-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+}
+
+.access-content p {
+    font-size: 13px;
 }
 
 /* MÉTRICAS */

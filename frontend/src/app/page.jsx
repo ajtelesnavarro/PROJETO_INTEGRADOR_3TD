@@ -87,8 +87,8 @@ export default async function Home() {
             <article className="bento-card incidents">
               <div className="card-number">03</div>
               <span className="small-label">OCORRÊNCIAS</span>
-              <div className="incident-row"><span className="incident-icon">!</span><div><b>Sensor de temperatura</b><small>Em atendimento</small></div><span className="arrow">↗</span></div>
-              <div className="incident-row"><span className="incident-icon green-bg">✓</span><div><b>Iluminação · Sala 04</b><small>Resolvida</small></div><span className="arrow">↗</span></div>
+              <div className="incident-row"><span className="incident-icon">!</span><div><b>Sensor de temperatura</b><small>Em atendimento</small></div></div>
+              <div className="incident-row"><span className="incident-icon green-bg">✓</span><div><b>Iluminação · Sala 04</b><small>Resolvida</small></div></div>
             </article>
 
             <article className="bento-card access">
@@ -106,9 +106,9 @@ export default async function Home() {
           <div className="architecture-grid">
             <div><h2>Uma arquitetura pensada para crescer junto com seu edifício.</h2><p>O sistema organiza ambientes, dispositivos, leituras, acessos e ocorrências em uma estrutura preparada para evolução.</p><Link href="/orcamento" className="button primary">Falar com a Lumora →</Link></div>
             <div className="layers">
-              <div className="layer active"><span>01</span><div><b>Dados</b><small>Temperatura · iluminação · energia · acessos</small></div><i>↗</i></div>
-              <div className="layer"><span>02</span><div><b>Inteligência</b><small>Alertas · histórico · indicadores · análise</small></div><i>↗</i></div>
-              <div className="layer"><span>03</span><div><b>Decisão</b><small>Ocorrências · manutenção · gestão operacional</small></div><i>↗</i></div>
+              <div className="layer active"><span>01</span><div><b>Dados</b><small>Temperatura · iluminação · energia · acessos</small></div></div>
+              <div className="layer"><span>02</span><div><b>Inteligência</b><small>Alertas · histórico · indicadores · análise</small></div></div>
+              <div className="layer"><span>03</span><div><b>Decisão</b><small>Ocorrências · manutenção · gestão operacional</small></div></div>
             </div>
           </div>
         </div>
