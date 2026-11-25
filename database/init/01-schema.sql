@@ -10,7 +10,7 @@ CREATE TABLE predio (
     id_predio INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nome_predio VARCHAR(100) NOT NULL,
     cep CHAR(9) NOT NULL,
-    rua VARCHAR(100) NOT NULL,
+    logradouro VARCHAR(100) NOT NULL,
     numero VARCHAR(10) NOT NULL,
     complemento VARCHAR(100) NULL,
     bairro VARCHAR(100) NOT NULL,
@@ -943,7 +943,7 @@ CREATE INDEX idx_hist_ocorrencia_data
 -- PREDIO
 
 INSERT INTO predio
-(id_predio, nome_predio, cep, rua, numero, complemento, bairro, cidade, estado)
+(id_predio, nome_predio, cep, logradouro, numero, complemento, bairro, cidade, estado)
 VALUES
 (1, 'Edificio Empresarial Central', '09080-500', 'Rua das Acacias', '120', NULL, 'Jardim', 'Santo Andre', 'SP'),
 (2, 'Centro Empresarial Horizonte', '09020-110', 'Avenida Portugal', '450', 'Bloco A', 'Centro', 'Santo Andre', 'SP'),
