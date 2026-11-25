@@ -1,7 +1,9 @@
 
 /* HERO */
 
-/* ARQUITETURA — TEXTOS MAIORES E SEM FLECHAS */
+body {
+    font-size: 18px;
+}
 
 .architecture .layers .layer {
     grid-template-columns: 55px 1fr;
@@ -448,7 +450,7 @@
 
 .section-kicker {
     font: 10px "DM Mono";
-    color: var(--aqua);
+    color: #2563EB;
     letter-spacing: 1.5px;
 }
 
@@ -711,7 +713,7 @@
     display: grid;
     place-items: center;
     font-weight: 800;
-    font-size: 10px;
+    font-size: 20px;
 }
 
 .green-bg {
