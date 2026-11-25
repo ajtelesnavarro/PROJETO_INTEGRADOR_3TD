@@ -1,23 +1,10 @@
 import * as Model from '../../models/RecursoModel.js';
-<<<<<<< HEAD
-=======
 import { pool } from '../../config/database.js';
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import { recursos } from './recursoConfig.js';
 import { validarId, preparar } from './validacaoService.js';
 
 const config = recursos.ocorrencias;
 
-<<<<<<< HEAD
-export async function listar(filtros = {}, paginacao = {}) {
-    return Model.listar(config, filtros, paginacao);
-}
-
-export async function buscar(idRecebido) {
-    const id = validarId(idRecebido);
-
-    const ocorrencia = await Model.buscar(config, id);
-=======
 export async function listar(filtros = {}, paginacao = {}, usuario = null) {
     const perfil = String(usuario?.perfil || '').toLowerCase();
     if (perfil !== 'manutencao' && perfil !== 'funcionario') {
@@ -66,7 +53,6 @@ export async function buscar(idRecebido, usuario = null) {
     } else {
         ocorrencia = await Model.buscar(config, id);
     }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
     if (!ocorrencia) {
         const erro = new Error('Ocorrência não encontrada.');
@@ -82,14 +68,9 @@ export async function criar(dados) {
     return Model.criar(config, dadosValidados);
 }
 
-<<<<<<< HEAD
-export async function atualizar(idRecebido, dados) {
-    const id = validarId(idRecebido);
-=======
 export async function atualizar(idRecebido, dados, usuario = null) {
     const id = validarId(idRecebido);
     await buscar(id, usuario);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     const dadosValidados = preparar(config, dados, true);
 
     if (Object.keys(dadosValidados).length === 0) {
@@ -108,11 +89,7 @@ export async function atualizar(idRecebido, dados, usuario = null) {
         throw erro;
     }
 
-<<<<<<< HEAD
-    return buscar(id);
-=======
     return buscar(id, usuario);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 export async function excluir(idRecebido) {

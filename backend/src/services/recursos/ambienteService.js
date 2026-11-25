@@ -1,11 +1,7 @@
 
 import * as Model from '../../models/RecursoModel.js';
 import { recursos } from './recursoConfig.js';
-<<<<<<< HEAD
-import { validarId, preparar } from './validacaoService.js';
-=======
 import { validarId, validarNumero, preparar } from './validacaoService.js';
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 const config = recursos.ambientes;
 
@@ -26,11 +22,6 @@ export async function buscar(idRecebido) {
     return ambiente;
 }
 
-<<<<<<< HEAD
-export async function criar(dados) {
-    const dadosValidados = preparar(config, dados);
-    return Model.criar(config, dadosValidados);
-=======
 function validarLimitesAmbiente(limitesRecebidos = {}) {
     const limites =
         limitesRecebidos && typeof limitesRecebidos === 'object'
@@ -86,7 +77,6 @@ export async function criar(dados, usuario) {
         limites,
         usuario?.id
     );
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 export async function atualizar(idRecebido, dados) {

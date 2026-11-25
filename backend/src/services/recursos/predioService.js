@@ -1,9 +1,6 @@
 
 import * as Model from '../../models/RecursoModel.js';
-<<<<<<< HEAD
-=======
 import { pool } from '../../config/database.js';
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import { recursos } from './recursoConfig.js';
 import { validarId, preparar } from './validacaoService.js';
 
@@ -26,11 +23,6 @@ export async function buscar(idRecebido) {
     return predio;
 }
 
-<<<<<<< HEAD
-export async function criar(dados) {
-    const dadosValidados = preparar(config, dados);
-    return Model.criar(config, dadosValidados);
-=======
 export async function criar(dados, usuario) {
     const dadosValidados = preparar(config, dados);
     const [usuarios] = await pool.query(
@@ -51,7 +43,6 @@ export async function criar(dados, usuario) {
         );
     }
     return predio;
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 export async function atualizar(idRecebido, dados) {
