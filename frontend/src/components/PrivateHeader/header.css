@@ -567,3 +567,24 @@
     gap: 7px;
   }
 }
+
+/* Notificações maiores e com melhor leitura em telas comuns. */
+.lumora-header-icon { width: 46px; height: 46px; }
+.lumora-header-icon > svg { width: 23px; height: 23px; }
+.lumora-alert-count { top: 1px; right: 1px; min-width: 19px; height: 19px; font-size: 11px; }
+.lumora-alert-dropdown { width: min(420px, calc(100vw - 24px)); padding: 21px; }
+.lumora-alert-heading b { font-size: 17px; }
+.lumora-alert-heading span:not(.lumora-alert-new) { font-size: 13px; line-height: 1.45; }
+.lumora-alert-new { font-size: 12px; }
+.lumora-alert-item { gap: 13px; padding: 17px 0; }
+.lumora-alert-symbol { width: 40px; height: 40px; }
+.lumora-alert-item b { font-size: 14px; }
+.lumora-alert-item p { font-size: 13px; line-height: 1.55; }
+.lumora-alert-item small { font-size: 12px; }
+.lumora-alert-empty { font-size: 14px; line-height: 1.5; }
+.lumora-alert-footer { min-height: 42px; font-size: 13px; }
+
+@media (max-width: 650px) {
+  .lumora-header-icon { width: 42px; height: 42px; }
+  .lumora-alert-dropdown { top: 75px; right: 10px; width: min(420px, calc(100vw - 20px)); }
+}

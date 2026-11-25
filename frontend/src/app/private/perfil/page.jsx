@@ -65,6 +65,7 @@ export default function PerfilUsuario() {
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   useEffect(() => {
     if (imagem.startsWith("blob:")) return () => URL.revokeObjectURL(imagem);
@@ -168,19 +169,37 @@ export default function PerfilUsuario() {
               {camposPerfil.map((campo) => (
                 <div className={`campo ${campo.largura || ""}`} key={campo.nome}>
                   <label htmlFor={campo.nome}>{campo.rotulo}</label>
-                  <input
-                    id={campo.nome}
-                    name={campo.nome}
-                    type={campo.tipo}
-                    placeholder={campo.placeholder}
-                    value={formulario[campo.nome]}
-                    onChange={alterarCampo}
-                    required={campo.obrigatorio}
-                    minLength={campo.minimo}
-                    maxLength={campo.maxLength}
-                    inputMode={campo.inputMode}
-                    autoComplete={campo.nome === "senha" ? "new-password" : undefined}
-                  />
+                  {campo.nome === "senha" ? (
+                    <div className="perfil-senha-controle">
+                      <input
+                        id={campo.nome}
+                        name={campo.nome}
+                        type={mostrarSenha ? "text" : "password"}
+                        placeholder={campo.placeholder}
+                        value={formulario[campo.nome]}
+                        onChange={alterarCampo}
+                        minLength={campo.minimo}
+                        autoComplete="new-password"
+                      />
+                      <button type="button" onClick={() => setMostrarSenha((visivel) => !visivel)} aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"} aria-pressed={mostrarSenha}>
+                        <i className={`bi ${mostrarSenha ? "bi-eye-slash" : "bi-eye"}`} aria-hidden="true" />
+                        {mostrarSenha ? "Ocultar" : "Mostrar"}
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      id={campo.nome}
+                      name={campo.nome}
+                      type={campo.tipo}
+                      placeholder={campo.placeholder}
+                      value={formulario[campo.nome]}
+                      onChange={alterarCampo}
+                      required={campo.obrigatorio}
+                      minLength={campo.minimo}
+                      maxLength={campo.maxLength}
+                      inputMode={campo.inputMode}
+                    />
+                  )}
                 </div>
               ))}
             </div>

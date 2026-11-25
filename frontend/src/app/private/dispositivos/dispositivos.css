@@ -2191,3 +2191,46 @@
   .dv-page .dv-network-ring-inner { width: 83px; height: 83px; }
   .dv-page .dv-network-legend { min-width: 0; }
 }
+
+/* Remove o fundo global aplicado à seta e melhora a leitura da inspeção. */
+.dv-page .dv-metric-symbol.green {
+  background: transparent !important;
+  color: #159b72;
+}
+
+.dv-page .dv-drawer {
+  width: min(540px, calc(100vw - 36px));
+  padding: 28px;
+}
+
+.dv-page .dv-drawer-top p { font-size: 15px; }
+.dv-page .dv-drawer-device h2 { font-size: 21px; }
+.dv-page .dv-drawer-device > div > span { font-size: 13px; }
+.dv-page .dv-drawer-reading { padding: 20px; }
+.dv-page .dv-drawer-reading > span,
+.dv-page .dv-serial > span,
+.dv-page .dv-drawer-controls > span { font-size: 12px; }
+.dv-page .dv-drawer-reading > div:not(.dv-chart-labels) { font-size: 42px; }
+.dv-page .dv-drawer-reading > div > small { font-size: 16px; }
+.dv-page .dv-drawer-reading > p { font-size: 13px; }
+.dv-page .dv-chart-labels { font-size: 12px; }
+.dv-page .dv-drawer-section-title h3 { font-size: 18px; }
+.dv-page .dv-drawer-section-title span { font-size: 12px; }
+.dv-page .dv-info-grid > div { padding: 14px; }
+.dv-page .dv-info-grid span { font-size: 12px; }
+.dv-page .dv-info-grid b { font-size: 14px; }
+.dv-page .dv-serial { padding: 15px; }
+.dv-page .dv-serial b { font-size: 14px; }
+.dv-page .dv-description { font-size: 14px; }
+.dv-page .dv-control-actions button,
+.dv-page .dv-control-actions select { min-height: 46px; font-size: 14px; }
+.dv-page .dv-drawer-controls > small { font-size: 13px; }
+
+@media (max-width: 480px) {
+  .dv-page .dv-drawer {
+    width: calc(100vw - 16px);
+    padding: 20px;
+  }
+
+  .dv-page .dv-drawer-reading > div:not(.dv-chart-labels) { font-size: 34px; }
+}

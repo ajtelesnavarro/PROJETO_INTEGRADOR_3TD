@@ -859,3 +859,39 @@
 @media (max-width: 760px) {
   .rec-summary.three { grid-template-columns: 1fr; }
 }
+
+/* Tipografia ampliada para facilitar a leitura da fila e dos detalhes. */
+.rec-eyebrow, .rec-section-label { font-size: 12px; }
+.rec-heading h1 { font-size: clamp(30px, 2.5vw, 36px); }
+.rec-heading p { font-size: 16px; }
+.rec-summary-item { min-height: 104px; padding: 20px; }
+.rec-summary-item strong { font-size: 29px; }
+.rec-summary-item span:not(.rec-summary-icon) { font-size: 14px; }
+.rec-list-heading h2 { font-size: 20px; }
+.rec-count { font-size: 13px; }
+.rec-search { min-height: 46px; }
+.rec-search input, .rec-filters select { font-size: 14px; }
+.rec-list-copy strong { font-size: 15px; }
+.rec-list-copy small, .rec-list-meta { font-size: 12px; }
+.rec-list-footer, .rec-list-footer button { font-size: 12px; }
+.rec-badge { padding: 6px 9px; font-size: 12px; }
+.rec-detail-panel { padding: 28px; }
+.rec-detail-title { font-size: 25px; }
+.rec-step small { font-size: 13px; }
+.rec-info-box { min-height: 98px; padding: 16px; }
+.rec-info-box small { font-size: 11px; }
+.rec-info-box strong { font-size: 15px; }
+.rec-info-box em, .rec-assign select, .rec-note p, .rec-no-selection p { font-size: 13px; }
+.rec-assign h3, .rec-no-selection h2 { font-size: 17px; }
+.rec-cancelled { font-size: 14px; }
+.rec-primary, .rec-cancel { min-height: 46px; font-size: 14px; }
+.rec-form-grid label { font-size: 13px; }
+.rec-form-grid select, .rec-form-grid textarea, .rec-form-grid input { font-size: 14px; }
+.rec-no-selection { min-height: 420px; }
+.rec-filters label { font-size: 12px; }
+.rec-status-actions button { min-height: 44px; font-size: 13px; }
+.rec-user-message p { font-size: 13px; }
+
+@media (max-width: 760px) {
+  .rec-detail-panel { padding: 22px; }
+}

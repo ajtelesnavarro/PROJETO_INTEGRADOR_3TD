@@ -1,5 +1,5 @@
 import express from "express";
-import { autenticar, autorizarPerfis } from "../middlewares/AuthMiddleware.js";
+import { autenticar, autorizarPerfis, somenteAdmin } from "../middlewares/AuthMiddleware.js";
 import * as GestaoController from "../controllers/GestaoController.js";
 
 export const gestaoRouter = express.Router();
@@ -13,8 +13,7 @@ const adminOuPorteiro = autorizarPerfis("administrador", "porteiro");
 
 gestaoRouter.get("/equipes", consulta, GestaoController.listarEquipes);
 gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
-gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
-gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
+gestaoRouter.post("/usuarios", somenteAdmin, GestaoController.criarUsuario);
 gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
 gestaoRouter.get("/alertas-limites", consultaAlertas, GestaoController.listarAlertasLimites);
 gestaoRouter.post("/equipes/:id/integrantes", adminOuManutencao, GestaoController.adicionarIntegrante);

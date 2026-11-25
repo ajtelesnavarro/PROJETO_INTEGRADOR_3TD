@@ -78,13 +78,6 @@ const nav = [
   href: "/private/reclamacoes",
 },
   {
-    id: "historico",
-    label: "Histórico de reclamações",
-    meta: "Acompanhar solicitações",
-    icon: "message-square-warning",
-    href: "/private/historico",
-  },
-  {
     id: "perfil",
     label: "Minha Conta",
     meta: "Dados pessoais",

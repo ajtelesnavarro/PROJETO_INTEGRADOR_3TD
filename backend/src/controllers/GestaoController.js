@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync } from "node:crypto";
+import bcrypt from "bcryptjs";
 import { pool } from "../config/database.js";
 
 function formatarDataSQL(valor) {
@@ -85,6 +85,43 @@ export async function listarUsuarios(req, res, next) {
             dados
         });
 
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function criarUsuario(req, res, next) {
+    try {
+        const nome = String(req.body.nome || "").trim();
+        const email = String(req.body.email || "").trim().toLowerCase();
+        const cpf = String(req.body.cpf || "").replace(/\D/g, "");
+        const telefone = String(req.body.telefone || "").trim();
+        const senha = req.body.senha;
+        const perfil = String(req.body.perfil || "funcionario");
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+
+        if (!idPredio) return res.status(400).json({ sucesso: false, erro: "O administrador não está vinculado a um prédio." });
+        if (nome.length < 3 || nome.length > 100) return res.status(400).json({ sucesso: false, erro: "Informe um nome entre 3 e 100 caracteres." });
+        if (!/^[^\s@]+@[^\s@]+$/.test(email)) return res.status(400).json({ sucesso: false, erro: "Informe um e-mail válido." });
+        if (cpf.length !== 11) return res.status(400).json({ sucesso: false, erro: "Informe um CPF com 11 números." });
+        if (typeof senha !== "string" || senha.length < 8) return res.status(400).json({ sucesso: false, erro: "A senha deve ter pelo menos 8 caracteres." });
+        if (telefone.length > 20) return res.status(400).json({ sucesso: false, erro: "O telefone deve ter no máximo 20 caracteres." });
+        if (!["manutencao", "porteiro", "funcionario"].includes(perfil)) return res.status(400).json({ sucesso: false, erro: "Selecione um perfil de funcionário válido." });
+
+        const [[duplicado]] = await pool.query(
+            "SELECT id_usuario FROM usuario WHERE email = ? OR cpf = ? LIMIT 1",
+            [email, cpf]
+        );
+        if (duplicado) return res.status(409).json({ sucesso: false, erro: "Já existe uma conta com este e-mail ou CPF." });
+
+        const senhaHash = (await bcrypt.hash(senha, 12)).replace(/^\$2b\$/, "$2y$");
+        const [resultado] = await pool.query(
+            `INSERT INTO usuario (id_predio, nome, email, senha_hash, telefone, perfil, cpf)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [idPredio, nome, email, senhaHash, telefone || null, perfil, cpf]
+        );
+
+        return res.status(201).json({ sucesso: true, id_usuario: resultado.insertId, mensagem: "Usuário cadastrado com segurança." });
     } catch (erro) {
         return next(erro);
     }
@@ -583,32 +620,22 @@ export async function listarAlertasLimites(req, res, next) {
 export async function adicionarIntegrante(req, res, next) {
     try {
         const idEquipe = Number(req.params.id);
+        const idUsuario = Number(req.body.id_usuario);
+        const { status, since } = req.body;
+        const idPredioUsuario = await obterPredioUsuario(req.usuario.id);
 
-        const {
-            nome,
-            email,
-            telefone,
-            role,
-            perfil,
-            status,
-            since
-        } = req.body;
-
-        if (!nome || !email) {
-            return res.status(400).json({
-                sucesso: false,
-                erro: "Informe nome e e-mail do integrante."
-            });
+        if (!idPredioUsuario || !Number.isInteger(idEquipe) || idEquipe <= 0 || !Number.isInteger(idUsuario) || idUsuario <= 0) {
+            return res.status(400).json({ sucesso: false, erro: "Selecione uma equipe e um usuário já cadastrado." });
         }
 
         const [[equipe]] = await pool.query(
             `
             SELECT *
             FROM equipe
-            WHERE id_equipe = ?
+            WHERE id_equipe = ? AND id_predio = ?
             LIMIT 1
             `,
-            [idEquipe]
+            [idEquipe, idPredioUsuario]
         );
 
         if (!equipe) {
@@ -618,95 +645,11 @@ export async function adicionarIntegrante(req, res, next) {
             });
         }
 
-        const perfilFinal =
-            normalizarPerfil(perfil || role);
-
-        const [[usuarioExistente]] = await pool.query(
-            `
-            SELECT *
-            FROM usuario
-            WHERE email = ?
-            LIMIT 1
-            `,
-            [email.trim()]
+        const [[usuario]] = await pool.query(
+            "SELECT id_usuario FROM usuario WHERE id_usuario = ? AND id_predio = ? LIMIT 1",
+            [idUsuario, equipe.id_predio]
         );
-
-        let idUsuario;
-
-        if (usuarioExistente) {
-
-            idUsuario = usuarioExistente.id_usuario;
-
-            await pool.query(
-                `
-                UPDATE usuario
-                SET
-                    nome = ?,
-                    telefone = ?,
-                    perfil = ?,
-                    id_predio = ?
-                WHERE id_usuario = ?
-                `,
-                [
-                    nome.trim(),
-                    telefone ||
-                        usuarioExistente.telefone ||
-                        null,
-                    perfilFinal,
-                    equipe.id_predio,
-                    idUsuario
-                ]
-            );
-
-        } else {
-
-            const salt =
-                randomBytes(16).toString("hex");
-
-            const hash =
-                scryptSync(
-                    "Lumora@2026",
-                    salt,
-                    32
-                ).toString("hex");
-
-            const cpfGerado =
-                String(
-                    Math.floor(
-                        10000000000 +
-                        Math.random() * 89999999999
-                    )
-                );
-
-            const [insertUser] =
-                await pool.query(
-                    `
-                    INSERT INTO usuario
-                        (
-                            id_predio,
-                            nome,
-                            email,
-                            senha_hash,
-                            telefone,
-                            perfil,
-                            cpf
-                        )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    `,
-                    [
-                        equipe.id_predio,
-                        nome.trim(),
-                        email.trim(),
-                        `${salt}:${hash}`,
-                        telefone || null,
-                        perfilFinal,
-                        cpfGerado
-                    ]
-                );
-
-            idUsuario =
-                insertUser.insertId;
-        }
+        if (!usuario) return res.status(404).json({ sucesso: false, erro: "Usuário não encontrado no prédio desta equipe." });
 
 
         const dataEntrada =
@@ -1103,7 +1046,27 @@ export async function listarHistoricoDispositivos(req, res, next) {
         const idPredio = await obterPredioUsuario(req.usuario.id);
         if (!idPredio) return res.json({ sucesso: true, dados: [] });
         const [dados] = await pool.query(
-            `SELECT h.*, d.nome AS nome_dispositivo, d.tipo_dispositivo
+            `SELECT h.*, d.nome AS nome_dispositivo, d.tipo_dispositivo,
+                    (SELECT he.consumo_kwh FROM historico_energia he
+                     WHERE he.id_dispositivo = h.id_dispositivo
+                       AND he.data_historico_energia = h.data_historico_dispositivo
+                     ORDER BY he.id_historico_energia DESC LIMIT 1) AS leitura_consumo_kwh,
+                    (SELECT he.potencia_kw FROM historico_energia he
+                     WHERE he.id_dispositivo = h.id_dispositivo
+                       AND he.data_historico_energia = h.data_historico_dispositivo
+                     ORDER BY he.id_historico_energia DESC LIMIT 1) AS leitura_potencia_kw,
+                    (SELECT ht.temperatura_medida FROM historico_temperatura ht
+                     WHERE ht.id_dispositivo = h.id_dispositivo
+                       AND ht.data_temperatura = h.data_historico_dispositivo
+                     ORDER BY ht.id_historico_temperatura DESC LIMIT 1) AS leitura_temperatura,
+                    (SELECT ht.umidade FROM historico_temperatura ht
+                     WHERE ht.id_dispositivo = h.id_dispositivo
+                       AND ht.data_temperatura = h.data_historico_dispositivo
+                     ORDER BY ht.id_historico_temperatura DESC LIMIT 1) AS leitura_umidade,
+                    (SELECT hi.iluminacao_medida FROM historico_iluminacao hi
+                     WHERE hi.id_dispositivo = h.id_dispositivo
+                       AND hi.data_iluminacao = h.data_historico_dispositivo
+                     ORDER BY hi.id_historico_iluminacao DESC LIMIT 1) AS leitura_iluminacao
              FROM historico_dispositivo h
              INNER JOIN dispositivo d ON d.id_dispositivo = h.id_dispositivo
              INNER JOIN ambiente a ON a.id_ambiente = d.id_ambiente
@@ -1135,7 +1098,13 @@ export async function criarHistoricoDispositivo(
         motivo,
         consumo_estimado_kwh,
         custo_estimado,
-        observacao
+        observacao,
+        consumo_kwh,
+        potencia_kw,
+        qualidade_medicao,
+        temperatura_medida,
+        umidade,
+        iluminacao_medida
     } = req.body;
 
 
@@ -1177,7 +1146,7 @@ export async function criarHistoricoDispositivo(
         const [dispositivos] =
             await conexao.query(
                 `
-                SELECT id_dispositivo
+                SELECT id_dispositivo, tipo_dispositivo
                 FROM dispositivo
                 WHERE id_dispositivo = ?
                 FOR UPDATE
@@ -1196,12 +1165,46 @@ export async function criarHistoricoDispositivo(
             });
         }
 
+        const tipoDispositivo = dispositivos[0].tipo_dispositivo;
+        const numeroOpcional = (valor) =>
+            valor === "" || valor == null ? null : Number(valor);
+        const numeroValido = (valor) =>
+            valor !== "" && valor != null && Number.isFinite(Number(valor)) && Number(valor) >= 0;
+
+        if (tipoDispositivo === "energia" && (!numeroValido(consumo_kwh) || !numeroValido(potencia_kw))) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Informe consumo e potência medidos para o dispositivo de energia." });
+        }
+
+        if (tipoDispositivo === "temperatura" && (temperatura_medida === "" || temperatura_medida == null || !Number.isFinite(Number(temperatura_medida)))) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Informe a temperatura medida pelo dispositivo." });
+        }
+
+        if (tipoDispositivo === "iluminacao" && !numeroValido(iluminacao_medida)) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Informe a iluminação medida pelo dispositivo." });
+        }
+
+        if (qualidade_medicao && !["boa", "regular", "ruim"].includes(qualidade_medicao)) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Qualidade de medição inválida." });
+        }
+
+        if (umidade !== "" && umidade != null && (!numeroValido(umidade) || Number(umidade) > 100)) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "A umidade deve estar entre 0 e 100%." });
+        }
+
+        await conexao.query("SET @data_registro_historico = CURRENT_TIMESTAMP");
+
 
         await conexao.query(
             `
             INSERT INTO historico_dispositivo
             (
                 id_dispositivo,
+                data_historico_dispositivo,
                 status_dispositivo,
                 data_inicio_status,
                 data_fim_status,
@@ -1210,7 +1213,7 @@ export async function criarHistoricoDispositivo(
                 custo_estimado,
                 observacao
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, @data_registro_historico, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 idDispositivo,
@@ -1243,6 +1246,32 @@ export async function criarHistoricoDispositivo(
                 observacao?.trim() || null
             ]
         );
+
+        if (tipoDispositivo === "energia") {
+            await conexao.query(
+                `INSERT INTO historico_energia
+                    (id_dispositivo, id_tarifa, consumo_kwh, potencia_kw, custo_estimado, qualidade_medicao, data_historico_energia)
+                 VALUES (?, NULL, ?, ?, ?, ?, @data_registro_historico)`,
+                [idDispositivo, Number(consumo_kwh), Number(potencia_kw), numeroOpcional(custo_estimado), qualidade_medicao || null]
+            );
+        } else if (tipoDispositivo === "temperatura") {
+            await conexao.query(
+                `INSERT INTO historico_temperatura
+                    (id_dispositivo, temperatura_medida, umidade, data_temperatura)
+                 VALUES (?, ?, ?, @data_registro_historico)`,
+                [idDispositivo, Number(temperatura_medida), numeroOpcional(umidade)]
+            );
+        } else if (tipoDispositivo === "iluminacao") {
+            await conexao.query(
+                `INSERT INTO historico_iluminacao
+                    (id_dispositivo, iluminacao_medida, data_iluminacao)
+                 VALUES (?, ?, @data_registro_historico)`,
+                [idDispositivo, Number(iluminacao_medida)]
+            );
+        } else {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Tipo de dispositivo sem tabela de leitura configurada." });
+        }
 
 
         await conexao.query(

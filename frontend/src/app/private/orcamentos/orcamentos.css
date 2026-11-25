@@ -1307,3 +1307,50 @@
     flex-wrap: wrap;
   }
 }
+
+/* Amplia as informações de orçamento, inclusive valores e status. */
+.orc-eyebrow, .orc-section-kicker { font-size: 12px; }
+.orc-heading h1 { font-size: clamp(30px, 2.6vw, 38px); }
+.orc-heading p { font-size: 16px; }
+.orc-primary-button { min-height: 46px; font-size: 14px; }
+.orc-metric { min-height: 104px; padding: 19px; }
+.orc-metric-caption { font-size: 12px; }
+.orc-metric > strong { font-size: 32px; }
+.orc-metric > strong.orc-metric-money { font-size: clamp(22px, 2vw, 28px); }
+.orc-metric > small { font-size: 13px; }
+.orc-section-heading h2, .orc-detail-top h2 { font-size: 21px; }
+.orc-counter { font-size: 13px; }
+.orc-search, .orc-filter { min-height: 46px; font-size: 14px; }
+.orc-search input { font-size: 14px; }
+.orc-quote-row { min-height: 84px; padding: 18px 20px; }
+.orc-quote-info strong { font-size: 15px; }
+.orc-quote-info small { font-size: 12px; }
+.orc-quote-value > strong { font-size: 14px; }
+.orc-status { padding: 6px 9px; font-size: 12px; }
+.orc-list-footer, .orc-list-footer span, .orc-list-footer button { font-size: 12px; }
+.orc-no-results strong { font-size: 16px; }
+.orc-no-results p, .orc-detail-empty { font-size: 14px; }
+.orc-detail-company { padding: 17px; }
+.orc-detail-company > strong { font-size: 17px; }
+.orc-detail-company > span:not(.orc-status) { font-size: 12px; }
+.orc-detail-data span, .orc-scope span { font-size: 12px; }
+.orc-detail-data strong { font-size: 14px; }
+.orc-detail-subtitle { font-size: 12px; }
+.orc-scope strong { font-size: 23px; }
+.orc-service-tags span { font-size: 12px; }
+.orc-price-summary > div, .orc-status-control { font-size: 13px; }
+.orc-price-summary .orc-total-line strong { font-size: 19px; }
+.orc-status-control select { min-height: 40px; font-size: 13px; }
+.orc-create-banner h2 { font-size: 23px; }
+.orc-create-banner p { font-size: 14px; }
+.orc-create-banner > button { min-height: 46px; font-size: 13px; }
+.orc-form-title { font-size: 22px; }
+.orc-form-section { font-size: 14px; }
+.orc-field { font-size: 13px; }
+.orc-field input, .orc-field select, .orc-field textarea { min-height: 44px; font-size: 14px; }
+.orc-service-option strong { font-size: 15px; }
+.orc-service-option small { font-size: 13px; }
+
+@media (max-width: 600px) {
+  .orc-quote-value > strong { font-size: 13px; }
+}

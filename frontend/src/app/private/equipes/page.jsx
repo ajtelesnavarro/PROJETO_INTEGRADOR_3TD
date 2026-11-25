@@ -115,6 +115,8 @@ const emptyForm = {
   since: new Date().toLocaleDateString("pt-BR"),
 };
 
+const usuarioVazio = { nome: "", email: "", cpf: "", telefone: "", senha: "", perfil: "funcionario" };
+
 export default function Page() {
   const [teams, setTeams] = useState([]);
   const [usuariosDisponiveis, setUsuariosDisponiveis] = useState([]);
@@ -124,6 +126,9 @@ export default function Page() {
   const [filter, setFilter] = useState("Todos");
   const [modalOpen, setModalOpen] = useState(false);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [perfilAtual, setPerfilAtual] = useState("");
+  const [userForm, setUserForm] = useState(usuarioVazio);
   const [teamForm, setTeamForm] = useState({ nome_equipe: "", descricao: "" });
   const [editingMember, setEditingMember] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -178,6 +183,14 @@ export default function Page() {
   useEffect(() => {
     carregarEquipes();
   }, [carregarEquipes]);
+
+  useEffect(() => {
+    try {
+      setPerfilAtual(JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || "");
+    } catch {
+      setPerfilAtual("");
+    }
+  }, []);
 
   const team = teams.find((item) => item.id === activeTeam);
 
@@ -315,6 +328,20 @@ export default function Page() {
     }
   }
 
+  async function criarUsuario(event) {
+    event.preventDefault();
+    if (perfilAtual !== "administrador") return;
+    try {
+      await requisicaoAPI("/usuarios", { method: "POST", body: JSON.stringify(userForm) });
+      setUserModalOpen(false);
+      setUserForm(usuarioVazio);
+      setFeedback("Usuário cadastrado. Ele já pode ser vinculado a uma equipe.");
+      await carregarEquipes();
+    } catch (erro) {
+      setFeedback(erro.message || "Erro ao cadastrar usuário.");
+    }
+  }
+
   async function deleteMember(memberId) {
     const member = team?.members.find((item) => item.id === memberId);
     if (!member) return;
@@ -362,6 +389,10 @@ export default function Page() {
         </div>
 
         <div className="tm-page-actions">
+          {perfilAtual === "administrador" && <button className="tm-primary-button tm-user-action" onClick={() => setUserModalOpen(true)}>
+            <Icon name="plus" size={17} />
+            Cadastrar usuário
+          </button>}
           <button className="tm-primary-button tm-secondary-action" onClick={() => setTeamModalOpen(true)}>
             <Icon name="plus" size={17} />
             Criar equipe
@@ -462,13 +493,6 @@ export default function Page() {
             ))}
           </div>
 
-          <div className="tm-sidebar-footer">
-            <Icon name="shield" size={18} />
-            <div>
-              <strong>Estrutura do edifício</strong>
-              <span>Banco de dados conectado</span>
-            </div>
-          </div>
         </aside>
 
         <main className="tm-members-area">
@@ -904,6 +928,35 @@ export default function Page() {
               <div className="tm-modal-footer">
                 <button type="button" className="tm-cancel-button" onClick={() => setTeamModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Criar equipe</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {userModalOpen && perfilAtual === "administrador" && (
+        <div className="tm-modal-overlay" onMouseDown={() => setUserModalOpen(false)}>
+          <section className="tm-modal" role="dialog" aria-modal="true" aria-labelledby="tm-user-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="tm-modal-header">
+              <div>
+                <span className="tm-section-label">USUÁRIOS DO PRÉDIO</span>
+                <h2 id="tm-user-modal-title">Cadastrar usuário</h2>
+                <p>O cadastro cria uma conta. O vínculo com uma equipe pode ser feito depois.</p>
+              </div>
+              <button type="button" className="tm-modal-close" onClick={() => setUserModalOpen(false)} aria-label="Fechar"><Icon name="close" size={19} /></button>
+            </div>
+            <form onSubmit={criarUsuario}>
+              <div className="tm-form-grid">
+                <label className="tm-form-full">Nome completo<input required minLength={3} maxLength={100} value={userForm.nome} onChange={(event) => setUserForm((atual) => ({ ...atual, nome: event.target.value }))} /></label>
+                <label>E-mail<input required type="email" value={userForm.email} onChange={(event) => setUserForm((atual) => ({ ...atual, email: event.target.value }))} /></label>
+                <label>CPF<input required inputMode="numeric" maxLength={14} placeholder="11 números" value={userForm.cpf} onChange={(event) => setUserForm((atual) => ({ ...atual, cpf: event.target.value.replace(/\D/g, "").slice(0, 11) }))} /></label>
+                <label>Telefone (opcional)<input maxLength={20} value={userForm.telefone} onChange={(event) => setUserForm((atual) => ({ ...atual, telefone: event.target.value }))} /></label>
+                <label>Perfil<select value={userForm.perfil} onChange={(event) => setUserForm((atual) => ({ ...atual, perfil: event.target.value }))}><option value="funcionario">Funcionário</option><option value="manutencao">Manutenção</option><option value="porteiro">Portaria / Segurança</option></select></label>
+                <label className="tm-form-full">Senha inicial<input required type="password" minLength={8} autoComplete="new-password" value={userForm.senha} onChange={(event) => setUserForm((atual) => ({ ...atual, senha: event.target.value }))} /><small>A senha será armazenada como hash. Use pelo menos 8 caracteres.</small></label>
+              </div>
+              <div className="tm-modal-footer">
+                <button type="button" className="tm-cancel-button" onClick={() => setUserModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Cadastrar usuário</button>
               </div>
             </form>
           </section>

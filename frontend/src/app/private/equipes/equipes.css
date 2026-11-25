@@ -1172,3 +1172,56 @@
     width: 100%;
   }
 }
+
+/* Leitura ampliada para a tabela e o painel de funcionário. */
+.tm-page-actions { gap: 12px; flex-wrap: wrap; }
+.tm-management { grid-template-columns: 245px minmax(0, 1fr) 310px; min-height: 620px; }
+.tm-members-area { padding: 26px; }
+.tm-members-table { min-width: 700px; }
+.tm-members-table th { height: 48px; padding: 0 14px; font-size: 12px; }
+.tm-members-table td { height: 76px; padding: 12px 14px; font-size: 14px; }
+.tm-employee { gap: 12px; }
+.tm-employee-avatar { flex-basis: 42px; width: 42px; height: 42px; font-size: 13px; }
+.tm-employee strong { font-size: 14px; }
+.tm-employee small { max-width: 220px; font-size: 12px; }
+.tm-status { padding: 6px 10px; font-size: 12px; }
+.tm-overview-item span { font-size: 13px; }
+.tm-overview-item strong { font-size: 28px; }
+.tm-team-option-info strong { font-size: 14px; }
+.tm-team-option-info small { font-size: 12px; }
+.tm-team-header h2 { font-size: 24px; }
+.tm-team-header p { font-size: 14px; }
+.tm-table-heading h3 { font-size: 16px; }
+.tm-table-heading span, .tm-table-footer { font-size: 12px; }
+.tm-add-inline { padding: 10px 12px; font-size: 12px; }
+.tm-inspector { padding: 25px 21px; }
+.tm-inspector-heading h3 { font-size: 18px; }
+.tm-profile-avatar { width: 76px; height: 76px; font-size: 22px; }
+.tm-profile h3 { font-size: 18px; }
+.tm-profile > span:not(.tm-status) { font-size: 13px; }
+.tm-info-label { font-size: 11px; }
+.tm-detail-row small { font-size: 12px; }
+.tm-detail-row strong { font-size: 14px; }
+.tm-profile-actions button { min-height: 46px; font-size: 13px; }
+.tm-modal-footer { gap: 14px; }
+.tm-modal-footer button { min-width: 145px; }
+.tm-form-grid label { font-size: 13px; }
+.tm-form-grid input, .tm-form-grid select { height: 46px; font-size: 14px; }
+.tm-form-grid label > small { color: #8490a4; font-size: 12px; font-weight: 500; line-height: 1.5; }
+
+@media (max-width: 1250px) {
+  .tm-management { grid-template-columns: 205px minmax(0, 1fr); }
+  .tm-inspector { grid-template-columns: 210px minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+@media (max-width: 850px) {
+  .tm-management { grid-template-columns: 1fr; }
+  .tm-inspector { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+  .tm-page-actions { width: 100%; flex-direction: column; }
+  .tm-page-actions button { width: 100%; }
+  .tm-members-area { padding: 20px 14px; }
+  .tm-inspector { display: flex; flex-direction: column; gap: 0; }
+}

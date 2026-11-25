@@ -656,14 +656,6 @@ export default function Reclamacoes({ toast }) {
                 </>
               )}
 
-              <div className="rec-note">
-                <Icone nome="info" tamanho={17} />
-                <p>
-                  {ehLocador
-                    ? "Você pode editar ou cancelar a reclamação enquanto o atendimento não começar. Depois disso, acompanhe o andamento por aqui."
-                    : "Para investigar o problema, consulte o histórico de leituras e as ocorrências do dispositivo vinculado. Os valores medidos não ficam guardados na reclamação."}
-                </p>
-              </div>
             </>
           ) : (
             <div className="rec-no-selection">

@@ -178,6 +178,33 @@
     color: #aaaaaa;
 }
 
+.perfil-senha-controle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.perfil-senha-controle input {
+    flex: 1;
+    min-width: 0;
+}
+
+.perfil-senha-controle button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #dce4f0;
+    border-radius: 7px;
+    background: #f8faff;
+    color: #395ca8;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
 .campo-email {
     grid-column: span 2;
 }
