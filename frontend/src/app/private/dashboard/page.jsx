@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import { obterPredioAtual } from "@/services/predioAtual";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./dashboard.css";
 
 function Icon({ name, size = 18 }) {
@@ -336,14 +333,11 @@ function Incidents({ items, onResolve }) {
 
 export default function DashboardPage() {
   const [range, setRange] = useState("7 dias");
-<<<<<<< HEAD
-=======
   const [perfilAtual, setPerfilAtual] = useState(() => {
     try { return JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || ""; }
     catch { return ""; }
   });
   const [eventosAcesso, setEventosAcesso] = useState([]);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   const [toast, setToast] = useState("");
   const [predios, setPredios] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
@@ -352,42 +346,6 @@ export default function DashboardPage() {
   const [equipes, setEquipes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [leituras, setLeituras] = useState([]);
-<<<<<<< HEAD
-
-  function showToast(message) {
-    setToast(message);
-    window.clearTimeout(window.__lumoraToast);
-    window.__lumoraToast = window.setTimeout(() => setToast(""), 2800);
-  }
-
-  const carregarDados = useCallback(async () => {
-    try {
-      const [resPredios, resAmbientes, resDispositivos, resOcorrencias, resEquipes, resLeituras] =
-        await Promise.all([
-          requisicaoAPI("/predios?limite=200"),
-          requisicaoAPI("/ambientes?limite=200"),
-          requisicaoAPI("/dispositivos?limite=200"),
-          requisicaoAPI("/ocorrencias?limite=50"),
-          requisicaoAPI("/equipes"),
-          requisicaoAPI("/leituras?limite=200"),
-        ]);
-
-      setPredios(resPredios.dados || []);
-      setAmbientes(resAmbientes.dados || []);
-      setDispositivos(resDispositivos.dados || []);
-      setOcorrencias(resOcorrencias.dados || []);
-      setEquipes(resEquipes.dados || []);
-      setUsuarios(resEquipes.usuarios || []);
-      setLeituras(resLeituras.dados || []);
-    } catch (erro) {
-      showToast(erro.message || "Erro ao carregar indicadores.");
-    }
-  }, []);
-
-  useEffect(() => {
-    carregarDados();
-  }, [carregarDados]);
-=======
   const [predioTarifaId, setPredioTarifaId] = useState("");
   const [predioTarifaNome, setPredioTarifaNome] = useState("");
   const [tarifaAtual, setTarifaAtual] = useState(null);
@@ -574,7 +532,6 @@ export default function DashboardPage() {
       setSalvandoTarifa(false);
     }
   }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
   const resumoIndicadores = useMemo(() => {
     const ativos = dispositivos.filter((d) => d.status_dispositivo === "ativo").length;
@@ -656,8 +613,6 @@ export default function DashboardPage() {
     }
   }
 
-<<<<<<< HEAD
-=======
   if (perfilAtual === "manutencao") {
     const abertas = ocorrencias.filter((item) => item.status_ocorrencia === "aberta").length;
     const andamento = ocorrencias.filter((item) => item.status_ocorrencia === "em_andamento").length;
@@ -758,7 +713,6 @@ export default function DashboardPage() {
     );
   }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   return (
     <div className="lumora-dashboard">
       <div className="dash-title">
@@ -779,15 +733,9 @@ export default function DashboardPage() {
       <section className="dash-metrics">
         <MetricCard
           icon="building"
-<<<<<<< HEAD
-          label="Edifícios"
-          value={String(predios.length).padStart(2, "0")}
-          description="Unidades cadastradas"
-=======
           label="Prédio atual"
           value={predios.length ? "01" : "00"}
           description="Edifício vinculado à conta"
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           color="blue"
           footer={
             <span>
@@ -829,8 +777,6 @@ export default function DashboardPage() {
         />
       </section>
 
-<<<<<<< HEAD
-=======
       <section className="dash-panel dash-tarifa-panel">
         <div className="dash-panel-heading">
           <div>
@@ -867,7 +813,6 @@ export default function DashboardPage() {
         )}
       </section>
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       <section className="dash-analytics">
         <div className="dash-panel dash-chart-panel">
           <div className="dash-panel-heading">
@@ -919,8 +864,4 @@ export default function DashboardPage() {
       )}
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import { obterPredioAtual } from "@/services/predioAtual";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./ocorrencias.css";
 
 function Icon({ name, size = 18 }) {
@@ -90,10 +87,7 @@ const TIPO_LABEL = {
 };
 
 export default function Ocorrencias() {
-<<<<<<< HEAD
-=======
   const [usuarioLogado, setUsuarioLogado] = useState(null);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   const [rawOccurrences, setRawOccurrences] = useState([]);
   const [dispositivos, setDispositivos] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
@@ -124,24 +118,6 @@ export default function Ocorrencias() {
 
   const carregarDados = useCallback(async () => {
     try {
-<<<<<<< HEAD
-      const [resOc, resDisp, resAmb, resEq] = await Promise.all([
-        requisicaoAPI("/ocorrencias?limite=200"),
-        requisicaoAPI("/dispositivos?limite=200"),
-        requisicaoAPI("/ambientes?limite=200"),
-        requisicaoAPI("/equipes"),
-      ]);
-
-      const listaOc = resOc.dados || [];
-      const listaDisp = resDisp.dados || [];
-      const listaEq = resEq.dados || [];
-
-      setRawOccurrences(listaOc);
-      setDispositivos(listaDisp);
-      setAmbientes(resAmb.dados || []);
-      setEquipes(listaEq);
-      setUsuarios(resEq.usuarios || []);
-=======
       const [resPerfil, resOc, resDisp, resAmb, resAndares, resEq] = await Promise.all([
         requisicaoAPI("/auth/me"),
         requisicaoAPI("/ocorrencias?limite=200"),
@@ -178,16 +154,11 @@ export default function Ocorrencias() {
       setAmbientes(listaAmb);
       setEquipes(listaEq);
       setUsuarios((resEq.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
       setForm((prev) => ({
         ...prev,
         id_dispositivo: prev.id_dispositivo || (listaDisp[0]?.id_dispositivo ? String(listaDisp[0].id_dispositivo) : ""),
-<<<<<<< HEAD
-        responsibleKey: prev.responsibleKey || (listaEq[0]?.id_equipe ? `eq:${listaEq[0].id_equipe}` : ""),
-=======
         responsibleKey: prev.responsibleKey || "",
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       }));
     } catch (erro) {
       setToast(erro.message || "Erro ao carregar ocorrências.");
@@ -203,13 +174,8 @@ export default function Ocorrencias() {
     equipes.forEach((eq) => {
       opts.push({ key: `eq:${eq.id_equipe}`, label: eq.nome_equipe });
     });
-<<<<<<< HEAD
-    usuarios.forEach((u) => {
-      opts.push({ key: `tec:${u.id_usuario}`, label: `${u.nome} (Técnico)` });
-=======
     usuarios.filter((u) => String(u.perfil || '').toLowerCase() === 'manutencao').forEach((u) => {
       opts.push({ key: `tec:${u.id_usuario}`, label: `${u.nome} (Funcionário)` });
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     });
     return opts;
   }, [equipes, usuarios]);
@@ -385,19 +351,12 @@ export default function Ocorrencias() {
           </p>
         </div>
 
-<<<<<<< HEAD
-        <button className="oc-primary-button" onClick={() => setModalOpen(true)}>
-          <Icon name="plus" size={17} />
-          Nova ocorrência
-        </button>
-=======
         {usuarioLogado?.perfil === "administrador" && (
           <button className="oc-primary-button" onClick={() => setModalOpen(true)}>
             <Icon name="plus" size={17} />
             Nova ocorrência
           </button>
         )}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </div>
 
       <section className="oc-stats">
@@ -562,10 +521,7 @@ export default function Ocorrencias() {
                       <select
                         className="oc-responsible-select"
                         value={item.responsibleKey}
-<<<<<<< HEAD
-=======
                         disabled={usuarioLogado?.perfil !== 'administrador'}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                         onChange={(e) => updateResponsible(item, e.target.value)}
                       >
                         {responsibleOptions.map((opt) => (
@@ -662,11 +618,7 @@ export default function Ocorrencias() {
         )}
       </section>
 
-<<<<<<< HEAD
-      {modalOpen && (
-=======
       {modalOpen && usuarioLogado?.perfil === "administrador" && (
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         <div className="oc-modal-overlay" onMouseDown={() => setModalOpen(false)}>
           <section
             className="oc-modal"
@@ -870,8 +822,4 @@ export default function Ocorrencias() {
       )}
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

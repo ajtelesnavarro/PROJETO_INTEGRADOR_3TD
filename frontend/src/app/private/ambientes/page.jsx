@@ -3,10 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import { obterPredioAtual } from "@/services/predioAtual";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./ambientes.css";
 
 const emptyForm = {
@@ -19,8 +16,6 @@ const emptyForm = {
   opening: "08:00",
   closing: "18:00",
   reservation: false,
-<<<<<<< HEAD
-=======
   temperaturaMinima: "",
   temperaturaMaxima: "",
   iluminacaoMinima: "",
@@ -28,7 +23,6 @@ const emptyForm = {
   consumoMinimo: "",
   consumoMaximo: "",
   potenciaMaxima: "",
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 };
 
 function Icon({ name, size = 18 }) {
@@ -174,10 +168,7 @@ function AmbientesConteudo({ toast }) {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [message, setMessage] = useState("");
-<<<<<<< HEAD
-=======
   const [perfilAtual, setPerfilAtual] = useState("");
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
   const notify = useCallback(
     (text) => {
@@ -203,21 +194,6 @@ function AmbientesConteudo({ toast }) {
           requisicaoAPI("/dispositivos?limite=200"),
         ]);
 
-<<<<<<< HEAD
-      setPredios(
-        deduplicarPor(resPredios.dados, "id_predio").sort(
-          (a, b) => a.id_predio - b.id_predio
-        )
-      );
-      setAndares(
-        deduplicarPor(resAndares.dados, "id_andar").sort(
-          (a, b) => a.numero_andar - b.numero_andar
-        )
-      );
-      setAmbientesBrutos(deduplicarPor(resAmbientes.dados, "id_ambiente"));
-      setDispositivosBrutos(
-        deduplicarPor(resDispositivos.dados, "id_dispositivo")
-=======
       const predioAtual = obterPredioAtual();
       const idPredioAtual = Number(predioAtual?.id_predio);
       const prediosAtuais = deduplicarPor(resPredios.dados, "id_predio")
@@ -236,7 +212,6 @@ function AmbientesConteudo({ toast }) {
       setDispositivosBrutos(
         deduplicarPor(resDispositivos.dados, "id_dispositivo")
           .filter((dispositivo) => idsAmbientes.has(dispositivo.id_ambiente))
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       );
     } catch (erro) {
       notify(erro.message || "Erro ao carregar ambientes do banco de dados.");
@@ -247,10 +222,7 @@ function AmbientesConteudo({ toast }) {
 
   useEffect(() => {
     carregarDados();
-<<<<<<< HEAD
-=======
     requisicaoAPI("/auth/me").then((res) => setPerfilAtual(res?.dados?.perfil || "")).catch(() => {});
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   }, [carregarDados]);
 
   const suportaReserva = useMemo(() => {
@@ -445,13 +417,10 @@ function AmbientesConteudo({ toast }) {
   }, [predios, predioFilter]);
 
   const openNew = () => {
-<<<<<<< HEAD
-=======
     if (perfilAtual === "manutencao") {
       notify("O perfil Manutenção não pode cadastrar novos ambientes.");
       return;
     }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     const predioPadrao =
       predioFilter !== "Todos"
         ? String(predioFilter)
@@ -477,10 +446,7 @@ function AmbientesConteudo({ toast }) {
   const openEdit = (item) => {
     setEditingId(item.id);
     setForm({
-<<<<<<< HEAD
-=======
       ...emptyForm,
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       id_predio: item.id_predio ? String(item.id_predio) : "",
       id_andar: item.id_andar ? String(item.id_andar) : "",
       id_setor: item.id_setor ? String(item.id_setor) : "",
@@ -515,14 +481,11 @@ function AmbientesConteudo({ toast }) {
   const saveEnvironment = async (event) => {
     event.preventDefault();
 
-<<<<<<< HEAD
-=======
     if (!editingId && perfilAtual === "manutencao") {
       notify("O perfil Manutenção não pode cadastrar novos ambientes.");
       return;
     }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     if (!form.name.trim() || !form.localizacao.trim() || !form.id_andar) {
       notify("Preencha o nome, o andar e a localização do ambiente.");
       return;
@@ -546,8 +509,6 @@ function AmbientesConteudo({ toast }) {
       horario_fechamento: fechamento,
     };
 
-<<<<<<< HEAD
-=======
     if (!editingId) {
       const limitesAmbiente = {};
       if (form.temperaturaMinima !== "" || form.temperaturaMaxima !== "") {
@@ -574,7 +535,6 @@ function AmbientesConteudo({ toast }) {
       }
     }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     if (suportaReserva) {
       payload.requer_reserva = form.reservation ? 1 : 0;
     }
@@ -638,11 +598,7 @@ function AmbientesConteudo({ toast }) {
 
   const limparFiltros = () => {
     setSearch("");
-<<<<<<< HEAD
-    setPredioFilter("Todos");
-=======
     setPredioFilter(String(predios[0]?.id_predio ?? "Todos"));
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     setFloorFilter("Todos");
     setReservationFilter("Todos");
     router.replace("/private/ambientes");
@@ -660,19 +616,12 @@ function AmbientesConteudo({ toast }) {
           </p>
         </div>
 
-<<<<<<< HEAD
-        <button className="amb-primary" onClick={openNew}>
-          <Icon name="plus" size={17} />
-          Novo ambiente
-        </button>
-=======
         {perfilAtual !== "manutencao" && (
           <button className="amb-primary" onClick={openNew}>
             <Icon name="plus" size={17} />
             Novo ambiente
           </button>
         )}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </header>
 
       <section className="amb-summary">
@@ -747,27 +696,7 @@ function AmbientesConteudo({ toast }) {
           </div>
 
           <div className="amb-filters" style={{ flexWrap: "wrap" }}>
-<<<<<<< HEAD
-            <label>
-              <Icon name="building" size={14} />
-              <select
-                value={predioFilter}
-                onChange={(event) => {
-                  setPredioFilter(event.target.value);
-                  setFloorFilter("Todos");
-                }}
-              >
-                <option value="Todos">Todos os prédios</option>
-                {predios.map((p) => (
-                  <option key={p.id_predio} value={String(p.id_predio)}>
-                    {p.nome_predio}
-                  </option>
-                ))}
-              </select>
-            </label>
-=======
             <span className="amb-current-building">{predios[0]?.nome_predio || "Nenhum prédio vinculado"}</span>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
             <label>
               <Icon name="filter" size={14} />
@@ -795,12 +724,7 @@ function AmbientesConteudo({ toast }) {
               </select>
             )}
 
-<<<<<<< HEAD
-            {(predioFilter !== "Todos" ||
-              floorFilter !== "Todos" ||
-=======
             {(floorFilter !== "Todos" ||
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
               reservationFilter !== "Todos" ||
               search) && (
               <button
@@ -1060,27 +984,6 @@ function AmbientesConteudo({ toast }) {
               </label>
 
               <label>
-<<<<<<< HEAD
-                Edifício *
-                <select
-                  value={form.id_predio}
-                  onChange={(event) =>
-                    updateForm("id_predio", event.target.value)
-                  }
-                  required
-                >
-                  <option value="">Selecione o prédio</option>
-                  {predios.map((p) => (
-                    <option key={p.id_predio} value={String(p.id_predio)}>
-                      {p.nome_predio}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-=======
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 Andar *
                 <select
                   value={form.id_andar}
@@ -1123,8 +1026,6 @@ function AmbientesConteudo({ toast }) {
                 />
               </label>
 
-<<<<<<< HEAD
-=======
               {!editingId && (
                 <div className="amb-limits-section full">
                   <div className="amb-limits-heading">
@@ -1168,7 +1069,6 @@ function AmbientesConteudo({ toast }) {
                 </div>
               )}
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
               {suportaReserva ? (
                 <label className="amb-checkbox-field">
                   <input

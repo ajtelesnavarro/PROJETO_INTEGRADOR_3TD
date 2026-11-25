@@ -12,8 +12,6 @@
   animation: amb-enter .35s ease;
 }
 
-<<<<<<< HEAD
-=======
 .amb-current-building {
   display: inline-flex;
   align-items: center;
@@ -27,7 +25,6 @@
   font-weight: 700;
 }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 @keyframes amb-enter {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -731,8 +728,6 @@
   grid-column: 1 / -1;
 }
 
-<<<<<<< HEAD
-=======
 .amb-limits-section.full {
   grid-column: 1 / -1;
   padding: 15px;
@@ -779,7 +774,6 @@
 .amb-limit-card label.full { grid-column: 1 / -1; }
 .amb-limits-grid input { font-size: 10px !important; }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .amb-form-grid input:not([type="checkbox"]),
 .amb-form-grid textarea {
   width: 100%;
@@ -974,14 +968,11 @@
     grid-template-columns: 1fr;
   }
 
-<<<<<<< HEAD
-=======
   .amb-limits-grid,
   .amb-limit-card {
     grid-template-columns: 1fr;
   }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   .amb-form-grid label.full {
     grid-column: auto;
   }

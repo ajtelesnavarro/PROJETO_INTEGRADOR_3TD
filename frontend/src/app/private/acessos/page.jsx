@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import { obterPredioAtual } from "@/services/predioAtual";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./acessos.css";
 
 function AccessIcon({ name, size = 18 }) {
@@ -135,16 +132,6 @@ export default function Acessos() {
 
   const carregarDados = useCallback(async () => {
     try {
-<<<<<<< HEAD
-      const [resEventos, resCredenciais] = await Promise.all([
-        requisicaoAPI("/acessos-detalhados"),
-        requisicaoAPI("/credenciais"),
-      ]);
-
-      const listaEv = resEventos.dados || [];
-      setRawEvents(listaEv);
-      setRawTokens(resCredenciais.dados || []);
-=======
       const [resEventos, resCredenciais, resAmbientes, resAndares, resUsuarios] = await Promise.all([
         requisicaoAPI("/acessos-detalhados"),
         requisicaoAPI("/credenciais"),
@@ -168,7 +155,6 @@ export default function Acessos() {
       setRawEvents(listaEv);
       setRawTokens((resCredenciais.dados || [])
         .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
       if (listaEv.length > 0) {
         setSelected((prev) => prev ?? listaEv[0].id_evento);
@@ -662,8 +648,4 @@ export default function Acessos() {
       </section>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

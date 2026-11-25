@@ -1,8 +1,5 @@
 import PrivateLayoutClient from "@/components/PrivateLayoutClient/index";
-<<<<<<< HEAD
-=======
 import RoleGuard from "@/components/RoleGuard";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./layout.css";
 
 export const metadata = {
@@ -13,14 +10,7 @@ export const metadata = {
 export default function PrivateLayout({ children }) {
   return (
     <PrivateLayoutClient>
-<<<<<<< HEAD
-      {children}
-    </PrivateLayoutClient>
-  );
-}
-=======
       <RoleGuard>{children}</RoleGuard>
     </PrivateLayoutClient>
   );
 }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

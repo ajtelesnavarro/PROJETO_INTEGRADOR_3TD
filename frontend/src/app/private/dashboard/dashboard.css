@@ -243,8 +243,6 @@
   box-shadow: 0 3px 12px rgba(29, 49, 86, 0.025);
 }
 
-<<<<<<< HEAD
-=======
 .dash-tarifa-panel { margin-bottom: 20px; }
 
 .dash-tarifa-atual {
@@ -310,7 +308,6 @@
 .dash-tarifa-form small,
 .dash-tarifa-empty { grid-column: 1 / -1; margin: 0; color: var(--dash-muted); font-size: 10px; }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 .dash-panel-heading {
   display: flex;
   align-items: flex-start;
@@ -838,12 +835,9 @@
   .dash-health-content {
     justify-content: flex-start;
   }
-<<<<<<< HEAD
-=======
 
   .dash-tarifa-form { grid-template-columns: 1fr 1fr; }
   .dash-tarifa-form button { grid-column: 1 / -1; }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 }
 
 @media (max-width: 600px) {
@@ -892,13 +886,10 @@
     flex-wrap: wrap;
   }
 
-<<<<<<< HEAD
-=======
   .dash-tarifa-form { grid-template-columns: 1fr; }
   .dash-tarifa-form button,
   .dash-tarifa-form small { grid-column: auto; }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   .dash-range {
     width: 100%;
     justify-content: space-between;
@@ -935,8 +926,6 @@
     grid-template-columns: 1fr;
   }
 }
-<<<<<<< HEAD
-=======
 
 
 /* Dashboard específico de manutenção */
@@ -953,4 +942,3 @@
 .maintenance-empty { padding: 20px; color: #78859a; font-size: 13px; }
 .maintenance-dashboard-note { margin: 16px 2px 0; color: #718096; font-size: 12px; line-height: 1.6; }
 @media (max-width: 760px) { .maintenance-device-grid { grid-template-columns: 1fr; } .maintenance-device-card { flex-wrap: wrap; } }
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)

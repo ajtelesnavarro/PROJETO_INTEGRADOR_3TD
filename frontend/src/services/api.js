@@ -22,11 +22,7 @@ export async function requisicaoAPI(endpoint, opcoes = {}) {
 
     if (!resposta.ok) {
         throw new Error(
-<<<<<<< HEAD
-            dados.erro || dados.mensagem || dados.message || "Erro na requisi??o."
-=======
             dados.erro || dados.mensagem || dados.message || "Erro na requisição."
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         );
     }
 

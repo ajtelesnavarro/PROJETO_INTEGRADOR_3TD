@@ -1,26 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-<<<<<<< HEAD
-=======
 import { requisicaoAPI } from "@/services/api";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 import "./header.css";
 
 function HeaderIcon({ name, size = 18 }) {
   const icons = {
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
-<<<<<<< HEAD
-    search: <>
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-4-4" />
-    </>,
-    bell: <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />,
-    building: <path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h1m6 0h1M8 12h1m6 0h1" />,
-    chevron: <path d="m8 10 4 4 4-4" />,
-    close: <path d="m6 6 12 12M18 6 6 18" />,
-    alert: <path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0Z" />,
-=======
     search: (
       <>
         <circle cx="11" cy="11" r="7" />
@@ -38,7 +24,6 @@ function HeaderIcon({ name, size = 18 }) {
     alert: (
       <path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0Z" />
     ),
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   };
 
   return (
@@ -63,15 +48,6 @@ export default function Header({
   sidebar,
   buildingName = "Edifício cadastrado",
   userName = "Usuário",
-<<<<<<< HEAD
-  userRole = "Administrador",
-  onLogout,
-}) {
-  const [alerts, setAlerts] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const searchRef = useRef(null);
-
-=======
   userRole = "Tanto faz",
   onLogout,
 }) {
@@ -81,7 +57,6 @@ export default function Header({
   const searchRef = useRef(null);
 
   // Atalho Ctrl + K
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   useEffect(() => {
     const handleShortcut = (event) => {
       if (
@@ -100,8 +75,6 @@ export default function Header({
     };
   }, []);
 
-<<<<<<< HEAD
-=======
   // Carrega os alertas automaticamente
   useEffect(() => {
     let ativo = true;
@@ -131,7 +104,6 @@ export default function Header({
     };
   }, []);
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   const initials = userName
     .trim()
     .split(" ")
@@ -144,18 +116,6 @@ export default function Header({
     <header className="lumora-header">
       <div className="lumora-header-left">
         {!sidebar && (
-<<<<<<< HEAD
-  <button
-    type="button"
-    className="lumora-open-sidebar"
-    onClick={() => setSidebar(true)}
-    aria-label="Abrir menu lateral"
-    title="Abrir menu"
-  >
-  <HeaderIcon name="menu" />
-  </button>
-)}
-=======
           <button
             type="button"
             className="lumora-open-sidebar"
@@ -166,31 +126,10 @@ export default function Header({
             <HeaderIcon name="menu" />
           </button>
         )}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </div>
 
       <div className="lumora-header-actions">
 
-<<<<<<< HEAD
-        <div className="lumora-header-divider" />
-
-        <div className="lumora-alert-wrapper">
-          <button
-            className={`lumora-header-icon ${alerts ? "selected" : ""}`}
-            onClick={() => setAlerts(!alerts)}
-            aria-label="Notificações"
-            aria-expanded={alerts}
-          >
-            <HeaderIcon name="bell" />
-            <i className="lumora-alert-count">3</i>
-          </button>
-
-          {alerts && (
-            <>
-              <button
-                className="lumora-dropdown-overlay"
-                onClick={() => setAlerts(false)}
-=======
         {/* PRÉDIO ATUAL */}
         <div className="lumora-building-info">
           <span className="lumora-building-icon">
@@ -249,61 +188,10 @@ export default function Header({
                 type="button"
                 className="lumora-dropdown-overlay"
                 onClick={() => setAlertasAbertos(false)}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 aria-label="Fechar notificações"
               />
 
               <div className="lumora-alert-dropdown">
-<<<<<<< HEAD
-                <div className="lumora-alert-heading">
-                  <div>
-                    <b>Notificações</b>
-                    <span>Atividades recentes do sistema</span>
-                  </div>
-
-                  <span className="lumora-alert-new">3 novas</span>
-                </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol danger">
-                    <HeaderIcon name="alert" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Dispositivo requer atenção</b>
-                    <p>Um dispositivo está com funcionamento irregular</p>
-                    <small>Há 4 minutos</small>
-                  </div>
-                </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol warning">
-                    <HeaderIcon name="alert" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Temperatura acima do limite</b>
-                    <p>Verifique as condições do ambiente monitorado</p>
-                    <small>Há 12 minutos</small>
-                  </div>
-                </div>
-
-                <div className="lumora-alert-item">
-                  <span className="lumora-alert-symbol info">
-                    <HeaderIcon name="building" size={16} />
-                  </span>
-
-                  <div>
-                    <b>Atualização do sistema</b>
-                    <p>Os dados operacionais foram atualizados</p>
-                    <small>Há 25 minutos</small>
-                  </div>
-                </div>
-
-                <button
-                  className="lumora-alert-footer"
-                  onClick={() => setAlerts(false)}
-=======
 
                 <div className="lumora-alert-heading">
                   <div>
@@ -420,7 +308,6 @@ export default function Header({
                   type="button"
                   className="lumora-alert-footer"
                   onClick={() => setAlertasAbertos(false)}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 >
                   Fechar notificações
                 </button>
@@ -429,31 +316,12 @@ export default function Header({
           )}
         </div>
 
-<<<<<<< HEAD
-=======
         {/* PERFIL */}
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         <div style={{ position: "relative" }}>
           <button
             type="button"
             className="lumora-profile"
             onClick={() => setProfileOpen(!profileOpen)}
-<<<<<<< HEAD
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
-          >
-          <span className="lumora-profile-avatar">
-            {initials || "U"}
-            <i />
-          </span>
-
-          <span className="lumora-profile-info">
-            <b>{userName}</b>
-            <small>{userRole}</small>
-          </span>
-
-          <HeaderIcon name="chevron" size={15} />
-        </button>
-=======
             style={{
               background: "transparent",
               border: "none",
@@ -473,7 +341,6 @@ export default function Header({
             <HeaderIcon name="chevron" size={15} />
           </button>
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
           {profileOpen && (
             <div
               style={{
@@ -485,12 +352,8 @@ export default function Header({
                 borderRadius: "10px",
                 padding: "6px",
                 minWidth: "160px",
-<<<<<<< HEAD
-                boxShadow: "0 10px 25px rgba(15, 23, 42, 0.12)",
-=======
                 boxShadow:
                   "0 10px 25px rgba(15, 23, 42, 0.12)",
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                 zIndex: 50,
               }}
             >

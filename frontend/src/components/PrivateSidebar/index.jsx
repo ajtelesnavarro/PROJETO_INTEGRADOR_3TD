@@ -3,20 +3,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-<<<<<<< HEAD
-import "./sidebar.css";
-
-// PÁGINAS DO SISTEMA
-const nav = [
-  { id: "dashboard", label: "Dashboard", meta: "Visão geral", icon: "grid", href: "/private/dashboard" },
-  { id: "buildings", label: "Prédios & Andares", meta: "Prédio · andar · setor", icon: "building", href: "/private/predios" },
-  { id: "rooms", label: "Ambientes & Climatização", meta: "Temperatura · energia", icon: "rooms", href: "/private/ambientes" },
-  { id: "devices", label: "Dispositivos IoT", meta: "Dispositivo · histórico", icon: "cpu", href: "/private/dispositivos" },
-  { id: "access", label: "Controle de Acesso", meta: "Credenciais · eventos", icon: "shield", href: "/private/acessos" },
-  { id: "tickets", label: "Ocorrências & Chamados", meta: "Ocorrências · reclamações", icon: "ticket", href: "/private/ocorrencias" },
-  { id: "finance", label: "Finanças & Orçamentos", meta: "Tarifas · pagamentos", icon: "wallet", href: "/private/orcamentos" },
-  { id: "teams", label: "Equipes & Usuários", meta: "Usuário · equipe", icon: "users", href: "/private/equipes" },
-=======
 import { podeAcessar } from "@/components/RoleGuard";
 import "./sidebar.css";
 
@@ -105,7 +91,6 @@ const nav = [
     icon: "user-round",
     href: "/private/perfil",
   },
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 ];
 
 const icons = {
@@ -136,9 +121,6 @@ const icons = {
   </>,
   users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8m13 18v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
   close: <path d="m6 6 12 12M18 6 6 18" />,
-<<<<<<< HEAD
-  arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
-=======
   "user-round": <>
     <path d="M20 21a8 8 0 0 0-16 0" />
     <circle cx="12" cy="8" r="4" />
@@ -147,7 +129,6 @@ const icons = {
     <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
     <path d="M12 8v4m0 3h.01" />
   </>,
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 };
 
 function Icon({ name, size = 19 }) {
@@ -183,11 +164,6 @@ function Logo() {
   );
 }
 
-<<<<<<< HEAD
-export default function Sidebar({ sidebar, setSidebar }) {
-  const pathname = usePathname();
-
-=======
 export default function Sidebar({ sidebar, setSidebar, perfil }) {
   const pathname = usePathname();
 
@@ -195,7 +171,6 @@ export default function Sidebar({ sidebar, setSidebar, perfil }) {
     podeAcessar(perfil, item.href)
   );
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
   return (
     <>
       <aside className={`lumora-sidebar ${sidebar ? "open" : ""}`}>
@@ -203,17 +178,6 @@ export default function Sidebar({ sidebar, setSidebar, perfil }) {
           <Logo />
 
           <button
-<<<<<<< HEAD
-  type="button"
-  className="lumora-mobile-close"
-  onClick={() => setSidebar(false)}
-  aria-label="Fechar menu"
-  title="Fechar menu"
->
-  <Icon name="close" />
-</button>
-
-=======
             type="button"
             className="lumora-mobile-close"
             onClick={() => setSidebar(false)}
@@ -222,20 +186,14 @@ export default function Sidebar({ sidebar, setSidebar, perfil }) {
           >
             <Icon name="close" />
           </button>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         </div>
 
         <nav className="lumora-navigation">
           <span className="lumora-nav-label">PLATAFORMA</span>
 
-<<<<<<< HEAD
-          {nav.map((item, index) => {
-            const active = pathname === item.href ||
-=======
           {itensVisiveis.map((item) => {
             const active =
               pathname === item.href ||
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
               pathname.startsWith(`${item.href}/`);
 
             return (
@@ -256,22 +214,13 @@ export default function Sidebar({ sidebar, setSidebar, perfil }) {
 
                 {active && <i className="lumora-nav-indicator" />}
 
-<<<<<<< HEAD
-                {index === 0 && (
-=======
                 {item.id === "dashboard" && (
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
                   <em className="lumora-live-tag">AO VIVO</em>
                 )}
               </Link>
             );
           })}
         </nav>
-<<<<<<< HEAD
-
-        
-=======
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
       </aside>
 
       {sidebar && (
