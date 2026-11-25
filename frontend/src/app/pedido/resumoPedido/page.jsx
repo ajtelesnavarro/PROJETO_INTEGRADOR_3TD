@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import "./styles.css";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 export default function ResumoPedidoPage() {
     const router = useRouter();
@@ -25,27 +22,6 @@ export default function ResumoPedidoPage() {
             .catch((erro) => setErro(erro.message));
     }, [id]);
 
-<<<<<<< HEAD
-    if (!pedido) return <p>{erro || "Carregando pedido..."}</p>;
-
-    return (
-        <div>
-            <h1>Resumo do Pedido</h1>
-
-            <p>N├║mero do pedido: {pedido.id_pedido}</p>
-            <p>Empresa: {pedido.nome_empresa}</p>
-            <p>Servi├ºos: {pedido.servicos_desejados}</p>
-            <p>Valor contratado: {pedido.valor_contratado}</p>
-            <p>Prazo estimado: {pedido.prazo_estimado_dias} dias</p>
-            <p>Status: {pedido.status_pedido}</p>
-
-            <button
-                onClick={() => router.push(`/pedido/pagamentoPedido?id=${id}`)}
-            >
-                Realizar pagamento
-            </button>
-        </div>
-=======
     if (!pedido) {
         return (
             <main className="pedido-resumo-page">
@@ -88,6 +64,5 @@ export default function ResumoPedidoPage() {
                 </button>
             </section>
         </main>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     );
 }

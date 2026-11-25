@@ -2107,8 +2107,6 @@
   outline-offset: 2px;
 }
 
-<<<<<<< HEAD
-=======
 .dv-current-building {
   display: inline-flex;
   align-items: center;
@@ -2122,7 +2120,6 @@
   font-weight: 700;
 }
 
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 @media (prefers-reduced-motion: reduce) {
   .dv-page *,
   .dv-page *::before,

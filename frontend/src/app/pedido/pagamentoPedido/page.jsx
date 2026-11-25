@@ -3,24 +3,11 @@
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
-<<<<<<< HEAD
-=======
 import "./styles.css";
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
 export default function PagamentoPedidoPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-<<<<<<< HEAD
-
-    const idPedido = searchParams.get("id");
-
-    const [metodoPagamento, setMetodoPagamento] = useState("pix");
-    const [erro, setErro] = useState("");
-
-    async function handlePayment(event) {
-        event.preventDefault();
-=======
     const idPedido = searchParams.get("id");
 
     const [metodoPagamento, setMetodoPagamento] = useState("pix");
@@ -39,21 +26,15 @@ export default function PagamentoPedidoPage() {
         event.preventDefault();
         setErro("");
         setProcessando(true);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
 
         try {
             const dados = await requisicaoAPI("/pagamentos", {
                 method: "POST",
                 body: JSON.stringify({
                     idPedido: Number(idPedido),
-<<<<<<< HEAD
-                    metodoPagamento
-                })
-=======
                     metodoPagamento,
                     dadosFicticios,
                 }),
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
             });
 
             router.push(
@@ -61,38 +42,11 @@ export default function PagamentoPedidoPage() {
             );
         } catch (erro) {
             setErro(erro.message);
-<<<<<<< HEAD
-=======
             setProcessando(false);
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
         }
     }
 
     return (
-<<<<<<< HEAD
-        <div>
-            <h1>Pagamento do Pedido</h1>
-
-            <form onSubmit={handlePayment}>
-                <label>M├®todo de pagamento:</label>
-
-                <select
-                    value={metodoPagamento}
-                    onChange={(event) => setMetodoPagamento(event.target.value)}
-                >
-                    <option value="pix">PIX</option>
-                    <option value="cartao_credito">Cart├úo de cr├®dito</option>
-                    <option value="cartao_debito">Cart├úo de d├®bito</option>
-                    <option value="boleto">Boleto</option>
-                    <option value="transferencia">Transfer├¬ncia</option>
-                </select>
-
-                {erro && <p>{erro}</p>}
-
-                <button type="submit">Continuar pagamento</button>
-            </form>
-        </div>
-=======
         <main className="pagamento-page">
             <section className="pagamento-card">
                 <span className="pagamento-kicker">PEDIDO {idPedido ? `#${idPedido}` : ""}</span>
@@ -213,6 +167,5 @@ export default function PagamentoPedidoPage() {
             </form>
             </section>
         </main>
->>>>>>> a33c4f6 (feat: Arrumando mudanças do André)
     );
 }
