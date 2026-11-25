@@ -139,7 +139,6 @@ export async function listarEquipes(req, res, next) {
                 eu.id_equipe_usuario,
                 eu.id_equipe,
                 eu.id_usuario,
-                eu.id_predio,
                 eu.data_entrada,
                 eu.data_saida,
                 u.nome,
@@ -149,7 +148,9 @@ export async function listarEquipes(req, res, next) {
             FROM equipe_usuario eu
             INNER JOIN usuario u
                 ON u.id_usuario = eu.id_usuario
-            WHERE eu.id_predio = ?
+            INNER JOIN equipe e
+                ON e.id_equipe = eu.id_equipe
+            WHERE e.id_predio = ?
             ORDER BY eu.id_equipe_usuario ASC
             `,
             [idPredio]
