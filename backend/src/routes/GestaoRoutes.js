@@ -13,6 +13,7 @@ const adminOuPorteiro = autorizarPerfis("administrador", "porteiro");
 
 gestaoRouter.get("/equipes", consulta, GestaoController.listarEquipes);
 gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
+gestaoRouter.get("/usuarios/contexto-cadastro", somenteAdmin, GestaoController.contextoCadastroUsuario);
 gestaoRouter.post("/usuarios", somenteAdmin, GestaoController.criarUsuario);
 gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
 gestaoRouter.get("/alertas-limites", consultaAlertas, GestaoController.listarAlertasLimites);
@@ -21,6 +22,7 @@ gestaoRouter.patch("/equipes/:id/integrantes/:idUsuario", adminOuManutencao, Ges
 gestaoRouter.delete("/equipes/:id/integrantes/:idUsuario", adminOuManutencao, GestaoController.removerIntegrante);
 
 gestaoRouter.get("/credenciais", consulta, GestaoController.listarCredenciais);
+gestaoRouter.get("/permissoes-acesso", consulta, GestaoController.listarPermissoesAcesso);
 gestaoRouter.patch("/credenciais/:id", adminOuPorteiro, GestaoController.atualizarCredencial);
 
 gestaoRouter.get("/acessos-detalhados", consulta, GestaoController.listarAcessosDetalhado);

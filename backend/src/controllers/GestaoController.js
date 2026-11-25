@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { pool } from "../config/database.js";
 
@@ -90,14 +91,37 @@ export async function listarUsuarios(req, res, next) {
     }
 }
 
+export async function contextoCadastroUsuario(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!idPredio) return res.json({ sucesso: true, dados: [] });
+
+        const [dados] = await pool.query(
+            `SELECT a.id_ambiente, a.nome, a.localizacao, an.numero_andar
+             FROM ambiente a
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE an.id_predio = ?
+             ORDER BY an.numero_andar, a.nome`,
+            [idPredio]
+        );
+        return res.json({ sucesso: true, dados });
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
 export async function criarUsuario(req, res, next) {
+    let conexao;
     try {
         const nome = String(req.body.nome || "").trim();
         const email = String(req.body.email || "").trim().toLowerCase();
         const cpf = String(req.body.cpf || "").replace(/\D/g, "");
         const telefone = String(req.body.telefone || "").trim();
         const senha = req.body.senha;
-        const perfil = String(req.body.perfil || "funcionario");
+        const perfil = String(req.body.perfil || "");
+        const ambientes = [...new Set((Array.isArray(req.body.ambientes) ? req.body.ambientes : []).map(Number))];
+        const tipoCredencial = String(req.body.tipo_credencial || "");
+        const tokenCredencial = String(req.body.token_credencial || "").trim();
         const idPredio = await obterPredioUsuario(req.usuario.id);
 
         if (!idPredio) return res.status(400).json({ sucesso: false, erro: "O administrador não está vinculado a um prédio." });
@@ -106,24 +130,66 @@ export async function criarUsuario(req, res, next) {
         if (cpf.length !== 11) return res.status(400).json({ sucesso: false, erro: "Informe um CPF com 11 números." });
         if (typeof senha !== "string" || senha.length < 8) return res.status(400).json({ sucesso: false, erro: "A senha deve ter pelo menos 8 caracteres." });
         if (telefone.length > 20) return res.status(400).json({ sucesso: false, erro: "O telefone deve ter no máximo 20 caracteres." });
-        if (!["manutencao", "porteiro", "funcionario"].includes(perfil)) return res.status(400).json({ sucesso: false, erro: "Selecione um perfil de funcionário válido." });
+        if (!["manutencao", "porteiro"].includes(perfil)) return res.status(400).json({ sucesso: false, erro: "O perfil deve ser Porteiro ou Manutenção." });
+        if (!ambientes.length || ambientes.some((id) => !Number.isInteger(id) || id <= 0)) return res.status(400).json({ sucesso: false, erro: "Selecione ao menos um ambiente para liberar acesso." });
+        if (!["cartao_rfid", "tag_nfc", "qr_code"].includes(tipoCredencial)) return res.status(400).json({ sucesso: false, erro: "Selecione um tipo de credencial válido." });
+        if (tokenCredencial.length < 4 || tokenCredencial.length > 255) return res.status(400).json({ sucesso: false, erro: "Informe um código de credencial entre 4 e 255 caracteres." });
 
-        const [[duplicado]] = await pool.query(
+        const senhaHash = (await bcrypt.hash(senha, 12)).replace(/^\$2b\$/, "$2y$");
+        const tokenHash = createHash("sha256").update(tokenCredencial).digest("hex");
+        const placeholders = ambientes.map(() => "?").join(", ");
+        conexao = await pool.getConnection();
+        await conexao.beginTransaction();
+
+        const [[duplicado]] = await conexao.query(
             "SELECT id_usuario FROM usuario WHERE email = ? OR cpf = ? LIMIT 1",
             [email, cpf]
         );
-        if (duplicado) return res.status(409).json({ sucesso: false, erro: "Já existe uma conta com este e-mail ou CPF." });
+        if (duplicado) {
+            await conexao.rollback();
+            return res.status(409).json({ sucesso: false, erro: "Já existe uma conta com este e-mail ou CPF." });
+        }
 
-        const senhaHash = (await bcrypt.hash(senha, 12)).replace(/^\$2b\$/, "$2y$");
-        const [resultado] = await pool.query(
+        const [ambientesValidos] = await conexao.query(
+            `SELECT a.id_ambiente
+             FROM ambiente a INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE an.id_predio = ? AND a.id_ambiente IN (${placeholders})`,
+            [idPredio, ...ambientes]
+        );
+        if (ambientesValidos.length !== ambientes.length) {
+            await conexao.rollback();
+            return res.status(400).json({ sucesso: false, erro: "Um ou mais ambientes não pertencem ao prédio atual." });
+        }
+
+        const [resultado] = await conexao.query(
             `INSERT INTO usuario (id_predio, nome, email, senha_hash, telefone, perfil, cpf)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [idPredio, nome, email, senhaHash, telefone || null, perfil, cpf]
         );
+        const idUsuario = resultado.insertId;
 
-        return res.status(201).json({ sucesso: true, id_usuario: resultado.insertId, mensagem: "Usuário cadastrado com segurança." });
+        for (const idAmbiente of ambientes) {
+            await conexao.query(
+                `INSERT INTO permissao_acesso (id_usuario, id_ambiente, status_permissao, data_inicio)
+                 VALUES (?, ?, 'ativa', CURRENT_DATE)`,
+                [idUsuario, idAmbiente]
+            );
+        }
+
+        await conexao.query(
+            `INSERT INTO credenciais_acesso (id_usuario, token_hash, tipo_credencial)
+             VALUES (?, ?, ?)`,
+            [idUsuario, tokenHash, tipoCredencial]
+        );
+        await conexao.commit();
+
+        return res.status(201).json({ sucesso: true, id_usuario: idUsuario, mensagem: "Usuário, permissões e credencial cadastrados." });
     } catch (erro) {
+        if (conexao) await conexao.rollback();
+        if (erro.code === "ER_DUP_ENTRY") return res.status(409).json({ sucesso: false, erro: "Este código de credencial já está cadastrado." });
         return next(erro);
+    } finally {
+        conexao?.release();
     }
 }
 
@@ -577,6 +643,14 @@ export async function listarAlertasLimites(req, res, next) {
                 [alerta.id_dispositivo, dataEvento, motivo, observacao,
                  alerta.id_dispositivo, dataEvento, motivo]
             );
+            const [[registro]] = await pool.query(
+                `SELECT id_historico_dispositivo
+                 FROM historico_dispositivo
+                 WHERE id_dispositivo = ? AND data_inicio_status = ? AND motivo = ?
+                 ORDER BY id_historico_dispositivo DESC LIMIT 1`,
+                [alerta.id_dispositivo, dataEvento, motivo]
+            );
+            alerta.id_historico_dispositivo = registro?.id_historico_dispositivo ?? null;
         }
 
         /* =========================================================
@@ -888,7 +962,7 @@ export async function listarCredenciais(
                     c.id_usuario,
                     c.status,
                     c.data_cadastro,
-                    c.token_hash,
+                    RIGHT(c.token_hash, 4) AS token_hash_sufixo,
                     c.tipo_credencial,
                     c.bloqueado_ate,
                     u.nome AS nome_usuario,
@@ -908,6 +982,32 @@ export async function listarCredenciais(
             dados
         });
 
+    } catch (erro) {
+        return next(erro);
+    }
+}
+
+export async function listarPermissoesAcesso(req, res, next) {
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!idPredio) return res.json({ sucesso: true, dados: [] });
+
+        const [dados] = await pool.query(
+            `SELECT pa.id_permissao, pa.id_usuario, pa.id_ambiente,
+                    pa.horario_inicio, pa.horario_fim, pa.status_permissao,
+                    pa.data_inicio, pa.data_fim, pa.dias_semana,
+                    u.nome AS nome_usuario, u.perfil,
+                    a.nome AS nome_ambiente, a.localizacao,
+                    an.numero_andar
+             FROM permissao_acesso pa
+             INNER JOIN usuario u ON u.id_usuario = pa.id_usuario
+             INNER JOIN ambiente a ON a.id_ambiente = pa.id_ambiente
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE u.id_predio = ? AND an.id_predio = ?
+             ORDER BY u.nome, a.nome, pa.data_inicio DESC`,
+            [idPredio, idPredio]
+        );
+        return res.json({ sucesso: true, dados });
     } catch (erro) {
         return next(erro);
     }
@@ -984,12 +1084,49 @@ export async function listarAcessosDetalhado(
             await pool.query(
                 `
                 SELECT
-                    e.*,
+                    e.id_evento,
+                    e.id_credencial,
+                    e.id_ambiente,
+                    e.tipo_acesso,
+                    e.decisao_acesso,
+                    e.status_evento,
+                    e.data_expiracao,
+                    e.data_utilizacao,
+                    e.motivo,
+                    RIGHT(e.token_tentado, 4) AS token_tentado_sufixo,
                     a.nome AS nome_ambiente,
+                    a.localizacao AS localizacao_ambiente,
                     c.tipo_credencial,
-                    c.token_hash,
                     u.nome AS nome_usuario,
-                    u.perfil AS perfil_usuario
+                    u.perfil AS perfil_usuario,
+                    (SELECT pa.id_permissao
+                     FROM permissao_acesso pa
+                     WHERE pa.id_usuario = u.id_usuario
+                       AND pa.id_ambiente = e.id_ambiente
+                       AND pa.data_inicio <= DATE(e.data_utilizacao)
+                       AND (pa.data_fim IS NULL OR pa.data_fim >= DATE(e.data_utilizacao))
+                     ORDER BY pa.id_permissao DESC LIMIT 1) AS id_permissao_evento,
+                    (SELECT pa.status_permissao
+                     FROM permissao_acesso pa
+                     WHERE pa.id_usuario = u.id_usuario
+                       AND pa.id_ambiente = e.id_ambiente
+                       AND pa.data_inicio <= DATE(e.data_utilizacao)
+                       AND (pa.data_fim IS NULL OR pa.data_fim >= DATE(e.data_utilizacao))
+                     ORDER BY pa.id_permissao DESC LIMIT 1) AS status_permissao_evento,
+                    (SELECT CONCAT_WS('–', pa.horario_inicio, pa.horario_fim)
+                     FROM permissao_acesso pa
+                     WHERE pa.id_usuario = u.id_usuario
+                       AND pa.id_ambiente = e.id_ambiente
+                       AND pa.data_inicio <= DATE(e.data_utilizacao)
+                       AND (pa.data_fim IS NULL OR pa.data_fim >= DATE(e.data_utilizacao))
+                     ORDER BY pa.id_permissao DESC LIMIT 1) AS horario_permissao_evento,
+                    (SELECT pa.dias_semana
+                     FROM permissao_acesso pa
+                     WHERE pa.id_usuario = u.id_usuario
+                       AND pa.id_ambiente = e.id_ambiente
+                       AND pa.data_inicio <= DATE(e.data_utilizacao)
+                       AND (pa.data_fim IS NULL OR pa.data_fim >= DATE(e.data_utilizacao))
+                     ORDER BY pa.id_permissao DESC LIMIT 1) AS dias_permissao_evento
                 FROM eventos_acessos e
                 LEFT JOIN ambiente a
                     ON a.id_ambiente = e.id_ambiente
@@ -1134,6 +1271,16 @@ export async function criarHistoricoDispositivo(
         });
     }
 
+    const inicioNormalizado = String(data_inicio_status || "").replace("T", " ");
+    const fimNormalizado = data_fim_status ? String(data_fim_status).replace("T", " ") : null;
+    const formatoDataHora = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(?::\d{2})?$/;
+    if (!formatoDataHora.test(inicioNormalizado) || (fimNormalizado && !formatoDataHora.test(fimNormalizado))) {
+        return res.status(400).json({ sucesso: false, erro: "Informe datas de início e fim válidas." });
+    }
+    if (fimNormalizado && fimNormalizado < inicioNormalizado) {
+        return res.status(400).json({ sucesso: false, erro: "A data de fim não pode ser anterior à data de início." });
+    }
+
 
     const conexao =
         await pool.getConnection();
@@ -1199,7 +1346,7 @@ export async function criarHistoricoDispositivo(
         await conexao.query("SET @data_registro_historico = CURRENT_TIMESTAMP");
 
 
-        await conexao.query(
+        const [resultadoHistorico] = await conexao.query(
             `
             INSERT INTO historico_dispositivo
             (
@@ -1219,13 +1366,8 @@ export async function criarHistoricoDispositivo(
                 idDispositivo,
                 status_dispositivo,
 
-                String(data_inicio_status)
-                    .replace("T", " "),
-
-                data_fim_status
-                    ? String(data_fim_status)
-                        .replace("T", " ")
-                    : null,
+                inicioNormalizado,
+                fimNormalizado,
 
                 motivo?.trim() || null,
 
@@ -1292,6 +1434,7 @@ export async function criarHistoricoDispositivo(
 
         return res.status(201).json({
             sucesso: true,
+            id_historico_dispositivo: resultadoHistorico.insertId,
             mensagem: "Histórico registrado."
         });
 

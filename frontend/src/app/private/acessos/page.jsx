@@ -105,6 +105,22 @@ const MOTIVO_LABEL = {
   falha_de_comunicacao: "Falha de comunicação com o leitor.",
 };
 
+const STATUS_EVENTO_LABEL = {
+  processando: "Processando",
+  concluido: "Concluído",
+  pendente: "Pendente",
+  falha_comunicacao: "Falha de comunicação",
+  bloqueado: "Bloqueado",
+  falha: "Falha",
+};
+
+const STATUS_PERMISSAO_LABEL = {
+  ativa: "Ativa",
+  inativa: "Inativa",
+  suspensa: "Suspensa",
+  expirada: "Expirada",
+};
+
 function iniciais(nome) {
   return String(nome || "?")
     .split(" ")
@@ -115,6 +131,15 @@ function iniciais(nome) {
     .toUpperCase();
 }
 
+function formatarData(valor) {
+  if (!valor) return "—";
+  const texto = String(valor);
+  const data = /^\d{4}-\d{2}-\d{2}/.test(texto)
+    ? new Date(`${texto.slice(0, 10)}T00:00:00`)
+    : new Date(valor);
+  return Number.isNaN(data.getTime()) ? "—" : data.toLocaleDateString("pt-BR");
+}
+
 export default function Acessos() {
   const [filter, setFilter] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -122,6 +147,7 @@ export default function Acessos() {
   const [showCredentials, setShowCredentials] = useState(true);
   const [rawEvents, setRawEvents] = useState([]);
   const [rawTokens, setRawTokens] = useState([]);
+  const [rawPermissions, setRawPermissions] = useState([]);
   const [toast, setToast] = useState("");
 
   useEffect(() => {
@@ -132,9 +158,10 @@ export default function Acessos() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resEventos, resCredenciais, resAmbientes, resAndares, resUsuarios] = await Promise.all([
+      const [resEventos, resCredenciais, resPermissoes, resAmbientes, resAndares, resUsuarios] = await Promise.all([
         requisicaoAPI("/acessos-detalhados"),
         requisicaoAPI("/credenciais"),
+        requisicaoAPI("/permissoes-acesso"),
         requisicaoAPI("/ambientes?limite=200"),
         requisicaoAPI("/andares?limite=200"),
         requisicaoAPI("/usuarios?limite=200"),
@@ -155,6 +182,8 @@ export default function Acessos() {
       setRawEvents(listaEv);
       setRawTokens((resCredenciais.dados || [])
         .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
+      setRawPermissions((resPermissoes.dados || [])
+        .filter((permissao) => idsUsuarios.has(Number(permissao.id_usuario)) && idsAmbientes.has(Number(permissao.id_ambiente))));
 
       if (listaEv.length > 0) {
         setSelected((prev) => prev ?? listaEv[0].id_evento);
@@ -176,7 +205,7 @@ export default function Acessos() {
         : "--:--:--";
       const date = dt ? dt.toLocaleDateString("pt-BR") : "—";
 
-      const person = ev.nome_usuario || (ev.token_tentado ? `Token ${ev.token_tentado.slice(0, 6)}...` : "Token desconhecido");
+      const person = ev.nome_usuario || (ev.token_tentado_sufixo ? `Token …${ev.token_tentado_sufixo}` : "Token desconhecido");
 
       return {
         id: ev.id_evento,
@@ -187,7 +216,17 @@ export default function Acessos() {
         method: METODO_LABEL[ev.tipo_credencial] || "RFID",
         result: ev.decisao_acesso === "permitido" ? "Permitido" : "Negado",
         place: ev.nome_ambiente || `Ambiente #${ev.id_ambiente}`,
-        device: `Leitor #${ev.id_ambiente}`,
+        device: ev.id_credencial ? "Leitor de acesso" : "Tentativa sem credencial",
+        eventId: ev.id_evento,
+        credentialId: ev.id_credencial,
+        tokenSuffix: ev.token_tentado_sufixo || "",
+        eventStatus: STATUS_EVENTO_LABEL[ev.status_evento] || ev.status_evento || "—",
+        expiresAt: ev.data_expiracao ? new Date(ev.data_expiracao).toLocaleString("pt-BR") : "—",
+        permissionStatus: ev.status_permissao_evento ? STATUS_PERMISSAO_LABEL[ev.status_permissao_evento] || ev.status_permissao_evento : "Sem permissão cadastrada para a data",
+        permissionHours: ev.horario_permissao_evento || "Sem restrição de horário",
+        permissionDays: ev.dias_permissao_evento || "Dias não especificados",
+        permissionId: ev.id_permissao_evento,
+        location: ev.localizacao_ambiente || "Localização não cadastrada",
         date,
         detail: MOTIVO_LABEL[ev.motivo] || "Evento registrado pelo controlador de acesso.",
         category: PERFIL_LABEL[ev.perfil_usuario] || "Não identificado",
@@ -198,12 +237,13 @@ export default function Acessos() {
   const tokens = useMemo(() => {
     return rawTokens.map((t) => {
       const tipo = METODO_LABEL[t.tipo_credencial] || "RFID";
-      const sufixo = String(t.token_hash || "").slice(-4).toUpperCase();
+      const sufixo = String(t.token_hash_sufixo || "").toUpperCase();
       return {
         id: t.id_credencial,
         name: t.nome_usuario || `Usuário #${t.id_usuario}`,
         role: PERFIL_LABEL[t.perfil] || "Funcionário",
         hash: `${tipo} •••• ${sufixo || "0000"}`,
+        validityLabel: t.bloqueado_ate ? "Bloqueio até" : "Cadastrada em",
         expires: t.bloqueado_ate
           ? new Date(t.bloqueado_ate).toLocaleDateString("pt-BR")
           : t.data_cadastro
@@ -213,6 +253,19 @@ export default function Acessos() {
       };
     });
   }, [rawTokens]);
+
+  const permissions = useMemo(() => rawPermissions.map((permission) => ({
+    id: permission.id_permissao,
+    person: permission.nome_usuario,
+    role: PERFIL_LABEL[permission.perfil] || permission.perfil,
+    environment: permission.nome_ambiente,
+    location: permission.localizacao,
+    floor: permission.numero_andar,
+    status: STATUS_PERMISSAO_LABEL[permission.status_permissao] || permission.status_permissao,
+    period: `${formatarData(permission.data_inicio)} · ${permission.data_fim ? formatarData(permission.data_fim) : "sem validade final"}`,
+    hours: permission.horario_inicio && permission.horario_fim ? `${String(permission.horario_inicio).slice(0, 5)}–${String(permission.horario_fim).slice(0, 5)}` : "Sem restrição de horário",
+    days: permission.dias_semana || "Dias não especificados",
+  })), [rawPermissions]);
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -507,21 +560,43 @@ export default function Acessos() {
 
                 <div className="ac-detail-info">
                   <div>
-                    <span>Movimentação</span>
-                    <b>{selectedEvent.action}</b>
+                    <span>Evento</span>
+                    <b>#{selectedEvent.eventId}</b>
                   </div>
                   <div>
-                    <span>Credencial</span>
-                    <b>{selectedEvent.method}</b>
+                    <span>Movimentação</span>
+                    <b>{selectedEvent.action}</b>
                   </div>
                   <div>
                     <span>Local</span>
                     <b>{selectedEvent.place}</b>
                   </div>
                   <div>
-                    <span>Dispositivo</span>
-                    <b>{selectedEvent.device}</b>
+                    <span>Credencial</span>
+                    <b>{selectedEvent.credentialId ? `#${selectedEvent.credentialId} · ${selectedEvent.method}` : "Não identificada"}</b>
                   </div>
+                  <div>
+                    <span>Status do evento</span>
+                    <b>{selectedEvent.eventStatus}</b>
+                  </div>
+                  <div>
+                    <span>Validade do evento</span>
+                    <b>{selectedEvent.expiresAt}</b>
+                  </div>
+                  <div>
+                    <span>Código tentado</span>
+                    <b>{selectedEvent.tokenSuffix ? `•••• ${selectedEvent.tokenSuffix}` : "—"}</b>
+                  </div>
+                  <div>
+                    <span>Localização</span>
+                    <b>{selectedEvent.location}</b>
+                  </div>
+                </div>
+
+                <div className="ac-event-permission">
+                  <span>PERMISSÃO DE ACESSO NA DATA DO EVENTO</span>
+                  <b>{selectedEvent.permissionStatus}</b>
+                  <small>{selectedEvent.permissionId ? `Permissão #${selectedEvent.permissionId} · ` : ""}{selectedEvent.permissionHours} · {selectedEvent.permissionDays}</small>
                 </div>
 
                 <div className="ac-detail-message">
@@ -600,7 +675,7 @@ export default function Acessos() {
                   </div>
 
                   <div className="ac-token-expiry">
-                    <span>CADASTRO</span>
+                    <span>{token.validityLabel}</span>
                     <b>{token.expires}</b>
                   </div>
 
@@ -634,6 +709,36 @@ export default function Acessos() {
             )}
           </div>
         )}
+      </section>
+
+      <section className="panel ac-permissions-panel">
+        <div className="ac-section-heading">
+          <div>
+            <span>CONTROLE POR AMBIENTE</span>
+            <h2>Permissões de acesso</h2>
+            <p>Ambientes, horários e validade liberados para cada usuário.</p>
+          </div>
+          <span className="ac-event-counter">{permissions.length} permissões</span>
+        </div>
+        <div className="ac-permission-list">
+          {permissions.length ? permissions.map((permission) => (
+            <article className="ac-permission-row" key={permission.id}>
+              <div className="ac-permission-person">
+                <b>{permission.person}</b>
+                <small>{permission.role}</small>
+              </div>
+              <div className="ac-permission-place">
+                <b>{permission.environment}</b>
+                <small>{permission.floor}º andar · {permission.location}</small>
+              </div>
+              <div className="ac-permission-schedule">
+                <b>{permission.hours}</b>
+                <small>{permission.days} · {permission.period}</small>
+              </div>
+              <span className={`ac-permission-status ${permission.status === "Ativa" ? "active" : "inactive"}`}>{permission.status}</span>
+            </article>
+          )) : <p className="ac-permission-empty">Nenhuma permissão de acesso cadastrada.</p>}
+        </div>
       </section>
     </div>
   );

@@ -20,6 +20,7 @@ export default function PrivateLayoutClient({ children }) {
   const [autorizado, setAutorizado] = useState(false);
   const [usuario, setUsuario] = useState({ nome: "Usuário", perfil: "Administrador" });
   const [perfil, setPerfil] = useState("");
+  const [fotoUsuario, setFotoUsuario] = useState("");
   const [predioAtual, setPredioAtual] = useState(null);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function PrivateLayoutClient({ children }) {
     try {
       const salvo = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
       if (salvo.nome) {
+        setFotoUsuario(salvo.foto || "");
         setUsuario({
           nome: salvo.nome,
           perfil: PERFIS_LABEL[salvo.perfil] || salvo.perfil || "Administrador",
@@ -52,6 +54,7 @@ export default function PrivateLayoutClient({ children }) {
         const resposta = await requisicaoAPI("/auth/me");
         if (!ativo) return;
         const dados = resposta.dados || {};
+        setFotoUsuario(dados.foto || "");
         setUsuario({
           nome: dados.nome || "Usuário",
           perfil: PERFIS_LABEL[dados.perfil] || dados.perfil || "Usuário",
@@ -96,6 +99,7 @@ export default function PrivateLayoutClient({ children }) {
           sidebar={sidebar}
           userName={usuario.nome}
           userRole={usuario.perfil}
+          userPhoto={fotoUsuario}
           buildingName={predioAtual?.nome_predio || (predioAtual ? "Prédio cadastrado" : "Nenhum prédio vinculado")}
           onLogout={handleLogout}
         />

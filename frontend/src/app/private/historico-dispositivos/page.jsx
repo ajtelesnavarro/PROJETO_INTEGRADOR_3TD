@@ -41,6 +41,7 @@ export default function HistoricoDispositivosPage() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
+  const [registroAlvo, setRegistroAlvo] = useState("");
   const [form, setForm] = useState({
     id_dispositivo: "",
     status_dispositivo: "ativo",
@@ -81,6 +82,21 @@ export default function HistoricoDispositivosPage() {
   }, []);
 
   useEffect(() => { carregarDados(); }, [carregarDados]);
+
+  useEffect(() => {
+    if (carregando) return;
+    const parametros = new URLSearchParams(window.location.search);
+    const idRegistro = parametros.get("registro");
+    const idDispositivo = parametros.get("dispositivo");
+    const alvo = historico.find((item) => String(item.id_historico_dispositivo) === idRegistro)
+      || historico.find((item) => String(item.id_dispositivo) === idDispositivo);
+    if (!alvo) return;
+    setRegistroAlvo(String(alvo.id_historico_dispositivo));
+    setForm((atual) => ({ ...atual, id_dispositivo: String(alvo.id_dispositivo) }));
+    window.requestAnimationFrame(() => {
+      document.getElementById(`historico-${alvo.id_historico_dispositivo}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [carregando, historico]);
 
   function atualizar(campo, valor) {
     setForm((atual) => ({ ...atual, [campo]: valor }));
@@ -131,6 +147,7 @@ export default function HistoricoDispositivosPage() {
 
       <section className="dh-card">
         <h2>Adicionar registro</h2>
+        {erro && <p className="dh-alert error" role="alert">{erro}</p>}
         <form className="dh-form" onSubmit={salvar}>
           <label>Dispositivo
             <select required value={form.id_dispositivo} onChange={(e) => atualizar("id_dispositivo", e.target.value)}>
@@ -185,10 +202,9 @@ export default function HistoricoDispositivosPage() {
 
       <section className="dh-card">
         <div className="dh-list-heading"><h2>Registros recentes</h2><span>{historico.length} registros</span></div>
-        {erro && <p className="dh-alert error">{erro}</p>}
         {carregando ? <p>Carregando histórico...</p> : dispositivos.length === 0 ? <p>Nenhum dispositivo cadastrado no prédio atual foi encontrado.</p> : historico.length === 0 ? <p>Nenhum histórico registrado.</p> : (
           <div className="dh-table-wrap"><table className="dh-table"><thead><tr><th>Data</th><th>Dispositivo</th><th>Leitura</th><th>Status</th><th>Motivo</th><th>Observação</th></tr></thead>
-            <tbody>{historico.map((item) => <tr key={item.id_historico_dispositivo}>
+            <tbody>{historico.map((item) => <tr id={`historico-${item.id_historico_dispositivo}`} className={registroAlvo === String(item.id_historico_dispositivo) ? "dh-row-target" : ""} key={item.id_historico_dispositivo}>
               <td>{new Date(item.data_historico_dispositivo).toLocaleString("pt-BR")}</td>
               <td>{item.nome_dispositivo} · #{item.id_dispositivo}</td>
               <td>{formatarLeitura(item)}</td>

@@ -90,6 +90,7 @@
 .dh-table tbody tr:nth-child(even) { background: #fafbfe; }
 .dh-table tbody tr { transition: background .18s ease; }
 .dh-table tbody tr:hover { background: #f1f6ff; }
+.dh-table tbody tr.dh-row-target { background: #eaf1ff; outline: 2px solid #6786e7; outline-offset: -2px; }
 .dh-table tbody tr:last-child td { border-bottom: 0; }
 .dh-table td { line-height: 1.55; }
 .dh-table td:first-child { color: #536783; font-variant-numeric: tabular-nums; white-space: nowrap; }

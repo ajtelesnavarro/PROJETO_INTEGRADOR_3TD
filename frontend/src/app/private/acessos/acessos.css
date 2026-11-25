@@ -1000,6 +1000,32 @@
   }
 }
 
+/* Vínculo explícito entre credenciais, permissões e os eventos gravados. */
+.ac-event-permission { display: grid; gap: 6px; margin: 0 17px 16px; padding: 13px 14px; border: 1px solid #dce6f7; border-radius: 10px; background: #f5f8ff; }
+.ac-event-permission > span { color: #7283a0; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.ac-event-permission > b { color: #2d4778; font-size: 14px; }
+.ac-event-permission > small { color: #78869c; font-size: 12px; line-height: 1.5; }
+.ac-permissions-panel { overflow: hidden; }
+.ac-permission-list { padding: 0 22px 16px; }
+.ac-permission-row { display: grid; grid-template-columns: minmax(140px, .9fr) minmax(150px, 1fr) minmax(220px, 1.3fr) auto; align-items: center; gap: 16px; padding: 16px 10px; border-top: 1px solid #edf0f5; }
+.ac-permission-row > div { display: grid; gap: 5px; min-width: 0; }
+.ac-permission-row b { overflow-wrap: anywhere; color: #344761; font-size: 14px; }
+.ac-permission-row small { color: #8390a4; font-size: 12px; line-height: 1.45; }
+.ac-permission-status { padding: 7px 10px; border-radius: 999px; font-size: 12px; font-weight: 750; white-space: nowrap; }
+.ac-permission-status.active { color: #16845f; background: #eaf8f1; }
+.ac-permission-status.inactive { color: #9b6a2a; background: #fff5e8; }
+.ac-permission-empty { margin: 0; padding: 20px 5px; color: #8390a4; font-size: 14px; }
+
+@media (max-width: 760px) {
+  .ac-permission-list { padding: 0 16px 14px; }
+  .ac-permission-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ac-permission-status { justify-self: start; }
+}
+
+@media (max-width: 420px) {
+  .ac-permission-row { grid-template-columns: 1fr; }
+}
+
 /* Leitura ampliada em eventos, detalhes e credenciais. */
 .ac-page .ac-eyebrow,
 .ac-page .ac-welcome > div > span,

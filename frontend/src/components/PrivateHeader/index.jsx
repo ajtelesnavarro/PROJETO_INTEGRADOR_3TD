@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { requisicaoAPI } from "@/services/api";
 import "./header.css";
 
@@ -49,12 +50,20 @@ export default function Header({
   buildingName = "Edifício cadastrado",
   userName = "Usuário",
   userRole = "Tanto faz",
+  userPhoto = "",
   onLogout,
 }) {
+  const router = useRouter();
   const [alertasAbertos, setAlertasAbertos] = useState(false);
   const [alertas, setAlertas] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
   const searchRef = useRef(null);
+
+  useEffect(() => setPhotoFailed(false), [userPhoto]);
+  const photoUrl = userPhoto && !/^(https?:|data:|blob:)/i.test(userPhoto)
+    ? `${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "").replace(/\/api\/v1$/, "")}${userPhoto.startsWith("/") ? "" : "/"}${userPhoto}`
+    : userPhoto;
 
   // Atalho Ctrl + K
   useEffect(() => {
@@ -224,14 +233,11 @@ export default function Header({
                       titulo = "Consumo de energia";
                     }
 
-                    const direcao =
-                      alerta.direcao ||
-                      (
-                        Number(alerta.valor) >
-                        Number(alerta.limite_maximo)
-                      )
+                    const direcao = alerta.direcao || (
+                      Number(alerta.valor) > Number(alerta.limite_maximo)
                         ? "acima"
-                        : "abaixo";
+                        : "abaixo"
+                    );
 
                     let limite;
 
@@ -257,7 +263,8 @@ export default function Header({
                     }
 
                     return (
-                      <div
+                      <button
+                        type="button"
                         className="lumora-alert-item"
                         key={
                           alerta.id_dispositivo +
@@ -268,12 +275,16 @@ export default function Header({
                           "-" +
                           indice
                         }
+                        onClick={() => {
+                          setAlertasAbertos(false);
+                          router.push(`/private/historico-dispositivos?registro=${alerta.id_historico_dispositivo || ""}&dispositivo=${alerta.id_dispositivo}`);
+                        }}
                       >
                         <span className="lumora-alert-symbol danger">
                           <HeaderIcon name="alert" size={16} />
                         </span>
 
-                        <div>
+                        <span className="lumora-alert-copy">
                           <b>
                             {titulo} {direcao} do limite
                           </b>
@@ -294,8 +305,8 @@ export default function Header({
                                 ).toLocaleString("pt-BR")
                               : "Leitura recente"}
                           </small>
-                        </div>
-                      </div>
+                        </span>
+                      </button>
                     );
                   })
                 ) : (
@@ -329,7 +340,9 @@ export default function Header({
             }}
           >
             <span className="lumora-profile-avatar">
-              {initials || "U"}
+              {photoUrl && !photoFailed ? (
+                <img src={photoUrl} alt={`Foto de ${userName}`} onError={() => setPhotoFailed(true)} />
+              ) : (initials || "U")}
               <i />
             </span>
 

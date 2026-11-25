@@ -448,6 +448,25 @@
     background: #F7F9FC;
 }
 
+/* Tabela ampliada para leitura direta sem depender do zoom do navegador. */
+.oc-table { min-width: 1120px; }
+.oc-table th { padding: 17px 15px; font-size: 12px; }
+.oc-table td { padding: 19px 15px; font-size: 14px; }
+.oc-occurrence-link { gap: 7px; }
+.oc-occurrence-link strong { font-size: 15px; }
+.oc-occurrence-link small { font-size: 13px; }
+.oc-responsible-select { max-width: 220px; min-height: 42px; padding: 8px 10px; font-size: 13px; }
+.oc-table .oc-status, .oc-table .oc-priority { font-size: 13px; }
+
+/* Segundo ajuste: aumenta a área de leitura da listagem e dos controles. */
+.oc-panel .oc-table { min-width: 1360px; }
+.oc-panel .oc-table th { padding: 20px 18px; font-size: 14px; }
+.oc-panel .oc-table td { padding: 23px 18px; font-size: 16px; }
+.oc-panel .oc-occurrence-link strong { font-size: 17px; }
+.oc-panel .oc-occurrence-link small { font-size: 14px; }
+.oc-panel .oc-responsible-select { max-width: 260px; min-height: 48px; font-size: 15px; }
+.oc-panel .oc-action-button { min-height: 44px; padding: 9px 13px; font-size: 14px; }
+
 .oc-action-button {
     display: inline-flex;
     align-items: center;

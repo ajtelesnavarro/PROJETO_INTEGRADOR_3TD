@@ -87,6 +87,15 @@ export default function Orcamentos() {
     return () => clearTimeout(t);
   }, [toast]);
 
+  useEffect(() => {
+    if (!showForm) return;
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [showForm]);
+
   const carregarOrcamentos = useCallback(async () => {
     try {
       const res = await requisicaoAPI("/orcamentos");

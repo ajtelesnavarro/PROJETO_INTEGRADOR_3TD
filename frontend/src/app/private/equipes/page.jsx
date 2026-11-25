@@ -115,11 +115,13 @@ const emptyForm = {
   since: new Date().toLocaleDateString("pt-BR"),
 };
 
-const usuarioVazio = { nome: "", email: "", cpf: "", telefone: "", senha: "", perfil: "funcionario" };
+const usuarioVazio = { nome: "", email: "", cpf: "", telefone: "", senha: "", perfil: "porteiro", ambientes: [], tipo_credencial: "cartao_rfid", token_credencial: "" };
 
 export default function Page() {
   const [teams, setTeams] = useState([]);
   const [usuariosDisponiveis, setUsuariosDisponiveis] = useState([]);
+  const [ambientesDisponiveis, setAmbientesDisponiveis] = useState([]);
+  const [carregandoAmbientes, setCarregandoAmbientes] = useState(false);
   const [activeTeam, setActiveTeam] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null);
   const [search, setSearch] = useState("");
@@ -129,6 +131,7 @@ export default function Page() {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [perfilAtual, setPerfilAtual] = useState("");
   const [userForm, setUserForm] = useState(usuarioVazio);
+  const [erroUsuario, setErroUsuario] = useState("");
   const [teamForm, setTeamForm] = useState({ nome_equipe: "", descricao: "" });
   const [editingMember, setEditingMember] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -331,6 +334,11 @@ export default function Page() {
   async function criarUsuario(event) {
     event.preventDefault();
     if (perfilAtual !== "administrador") return;
+    setErroUsuario("");
+    if (!userForm.ambientes.length) {
+      setErroUsuario("Selecione ao menos um ambiente para liberar acesso.");
+      return;
+    }
     try {
       await requisicaoAPI("/usuarios", { method: "POST", body: JSON.stringify(userForm) });
       setUserModalOpen(false);
@@ -338,7 +346,24 @@ export default function Page() {
       setFeedback("Usuário cadastrado. Ele já pode ser vinculado a uma equipe.");
       await carregarEquipes();
     } catch (erro) {
-      setFeedback(erro.message || "Erro ao cadastrar usuário.");
+      setErroUsuario(erro.message || "Erro ao cadastrar usuário.");
+    }
+  }
+
+  async function abrirCadastroUsuario() {
+    if (perfilAtual !== "administrador") return;
+    setErroUsuario("");
+    setUserForm(usuarioVazio);
+    setUserModalOpen(true);
+    setCarregandoAmbientes(true);
+    try {
+      const resposta = await requisicaoAPI("/usuarios/contexto-cadastro");
+      setAmbientesDisponiveis(resposta.dados || []);
+    } catch (erro) {
+      setAmbientesDisponiveis([]);
+      setErroUsuario(erro.message || "Não foi possível carregar os ambientes.");
+    } finally {
+      setCarregandoAmbientes(false);
     }
   }
 
@@ -389,7 +414,7 @@ export default function Page() {
         </div>
 
         <div className="tm-page-actions">
-          {perfilAtual === "administrador" && <button className="tm-primary-button tm-user-action" onClick={() => setUserModalOpen(true)}>
+          {perfilAtual === "administrador" && <button className="tm-primary-button tm-user-action" onClick={abrirCadastroUsuario}>
             <Icon name="plus" size={17} />
             Cadastrar usuário
           </button>}
@@ -946,17 +971,35 @@ export default function Page() {
               <button type="button" className="tm-modal-close" onClick={() => setUserModalOpen(false)} aria-label="Fechar"><Icon name="close" size={19} /></button>
             </div>
             <form onSubmit={criarUsuario}>
+              {erroUsuario && <p className="tm-user-error" role="alert">{erroUsuario}</p>}
               <div className="tm-form-grid">
                 <label className="tm-form-full">Nome completo<input required minLength={3} maxLength={100} value={userForm.nome} onChange={(event) => setUserForm((atual) => ({ ...atual, nome: event.target.value }))} /></label>
                 <label>E-mail<input required type="email" value={userForm.email} onChange={(event) => setUserForm((atual) => ({ ...atual, email: event.target.value }))} /></label>
                 <label>CPF<input required inputMode="numeric" maxLength={14} placeholder="11 números" value={userForm.cpf} onChange={(event) => setUserForm((atual) => ({ ...atual, cpf: event.target.value.replace(/\D/g, "").slice(0, 11) }))} /></label>
                 <label>Telefone (opcional)<input maxLength={20} value={userForm.telefone} onChange={(event) => setUserForm((atual) => ({ ...atual, telefone: event.target.value }))} /></label>
-                <label>Perfil<select value={userForm.perfil} onChange={(event) => setUserForm((atual) => ({ ...atual, perfil: event.target.value }))}><option value="funcionario">Funcionário</option><option value="manutencao">Manutenção</option><option value="porteiro">Portaria / Segurança</option></select></label>
+                <label>Perfil<select required value={userForm.perfil} onChange={(event) => setUserForm((atual) => ({ ...atual, perfil: event.target.value }))}><option value="porteiro">Porteiro</option><option value="manutencao">Manutenção</option></select></label>
+                <label>Tipo de credencial<select required value={userForm.tipo_credencial} onChange={(event) => setUserForm((atual) => ({ ...atual, tipo_credencial: event.target.value }))}><option value="cartao_rfid">Cartão RFID</option><option value="tag_nfc">Tag NFC</option><option value="qr_code">QR Code</option></select></label>
+                <label className="tm-form-full">Código da credencial<input required minLength={4} maxLength={255} autoComplete="off" value={userForm.token_credencial} onChange={(event) => setUserForm((atual) => ({ ...atual, token_credencial: event.target.value }))} /><small>O código será convertido em hash. O valor original não será exibido na lista.</small></label>
+                <fieldset className="tm-form-full tm-environment-access">
+                  <legend>Ambientes com acesso permitido</legend>
+                  {carregandoAmbientes ? <p>Carregando ambientes…</p> : ambientesDisponiveis.length ? (
+                    <div className="tm-environment-list">
+                      {ambientesDisponiveis.map((ambiente) => {
+                        const ambienteId = Number(ambiente.id_ambiente);
+                        const marcado = userForm.ambientes.includes(ambienteId);
+                        return <label className="tm-environment-option" key={ambienteId}>
+                          <input type="checkbox" checked={marcado} onChange={() => setUserForm((atual) => ({ ...atual, ambientes: marcado ? atual.ambientes.filter((id) => id !== ambienteId) : [...atual.ambientes, ambienteId] }))} />
+                          <span><strong>{ambiente.nome}</strong><small>{ambiente.numero_andar}º andar · {ambiente.localizacao}</small></span>
+                        </label>;
+                      })}
+                    </div>
+                  ) : <p>Nenhum ambiente disponível neste prédio.</p>}
+                </fieldset>
                 <label className="tm-form-full">Senha inicial<input required type="password" minLength={8} autoComplete="new-password" value={userForm.senha} onChange={(event) => setUserForm((atual) => ({ ...atual, senha: event.target.value }))} /><small>A senha será armazenada como hash. Use pelo menos 8 caracteres.</small></label>
               </div>
               <div className="tm-modal-footer">
                 <button type="button" className="tm-cancel-button" onClick={() => setUserModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Cadastrar usuário</button>
+                <button type="submit" className="tm-primary-button" disabled={carregandoAmbientes || !ambientesDisponiveis.length}><Icon name="check" size={16} />Cadastrar usuário</button>
               </div>
             </form>
           </section>

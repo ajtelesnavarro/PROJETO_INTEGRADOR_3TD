@@ -1174,7 +1174,12 @@
 }
 
 /* Leitura ampliada para a tabela e o painel de funcionário. */
-.tm-page-actions { gap: 12px; flex-wrap: wrap; }
+.tm-page-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.tm-page-actions .tm-primary-button { min-height: 46px; padding: 0 18px; border: 1px solid transparent; border-radius: 10px; box-shadow: 0 5px 14px #284f9f18; }
+.tm-page-actions .tm-user-action { border-color: #d7e2f6; background: #fff; color: #3158a5; }
+.tm-page-actions .tm-user-action:hover { background: #f2f6ff; }
+.tm-page-actions .tm-secondary-action { background: #2b559d; }
+.tm-page-actions > .tm-primary-button:not(.tm-user-action):not(.tm-secondary-action) { background: linear-gradient(115deg, #3e63d6, #7152cf); }
 .tm-management { grid-template-columns: 245px minmax(0, 1fr) 310px; min-height: 620px; }
 .tm-members-area { padding: 26px; }
 .tm-members-table { min-width: 700px; }
@@ -1208,6 +1213,16 @@
 .tm-form-grid label { font-size: 13px; }
 .tm-form-grid input, .tm-form-grid select { height: 46px; font-size: 14px; }
 .tm-form-grid label > small { color: #8490a4; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.tm-form-grid .tm-environment-access { display: grid; gap: 10px; min-width: 0; margin: 0; padding: 14px; border: 1px solid #dfe7f3; border-radius: 10px; }
+.tm-environment-access legend { padding: 0 5px; color: #344967; font-size: 14px; font-weight: 750; }
+.tm-environment-access > p { margin: 0; color: #71809a; font-size: 13px; }
+.tm-environment-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 230px; overflow-y: auto; }
+.tm-environment-option { display: flex !important; align-items: flex-start; flex-direction: row !important; gap: 10px !important; min-width: 0; padding: 10px; border: 1px solid #e4eaf3; border-radius: 8px; background: #fbfcff; cursor: pointer; }
+.tm-environment-option input { flex: 0 0 17px; width: 17px; height: 17px; margin: 2px 0 0; accent-color: #4268c9; }
+.tm-environment-option span { display: grid; gap: 4px; min-width: 0; }
+.tm-environment-option strong { color: #304563; font-size: 13px; }
+.tm-environment-option small { color: #8290a7; font-size: 11px; line-height: 1.4; }
+.tm-user-error { margin: 0 0 14px; padding: 11px 13px; border: 1px solid #f1caca; border-radius: 8px; background: #fff4f4; color: #a84646; font-size: 13px; }
 
 @media (max-width: 1250px) {
   .tm-management { grid-template-columns: 205px minmax(0, 1fr); }
@@ -1224,4 +1239,6 @@
   .tm-page-actions button { width: 100%; }
   .tm-members-area { padding: 20px 14px; }
   .tm-inspector { display: flex; flex-direction: column; gap: 0; }
+  .tm-page-actions { align-items: stretch; }
+  .tm-environment-list { grid-template-columns: 1fr; max-height: 190px; }
 }
