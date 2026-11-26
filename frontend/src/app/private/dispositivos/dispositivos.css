@@ -2234,3 +2234,181 @@
 
   .dv-page .dv-drawer-reading > div:not(.dv-chart-labels) { font-size: 34px; }
 }
+
+.dv-page .dv-drawer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.dv-page .dv-drawer-top > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dv-page .dv-drawer-top .dv-cancel {
+  position: relative;
+  z-index: 3;
+  white-space: nowrap;
+}
+
+.dv-page .dv-drawer-device {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+
+.dv-page .dv-drawer-device > div {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.dv-page .dv-drawer-device > .dv-status {
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   CORREÇÃO DO PAINEL DE INSPEÇÃO
+========================================= */
+
+.dv-page .dv-drawer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dv-page .dv-drawer-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(147, 167, 208, .2);
+  flex-shrink: 0;
+}
+
+.dv-page .dv-drawer-top > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.dv-page .dv-drawer-top > div:last-child {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dv-page .dv-drawer-top button {
+  position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.dv-page .dv-drawer-device {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 22px 0;
+  flex-wrap: nowrap;
+}
+
+.dv-page .dv-drawer-device > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.dv-page .dv-drawer-device h2 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.dv-page .dv-drawer-device > div > span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.dv-page .dv-drawer-device > .dv-status {
+  flex-shrink: 0;
+}
+
+.dv-page .dv-drawer-section,
+.dv-page .dv-drawer-reading,
+.dv-page .dv-drawer-controls {
+  width: 100%;
+  min-width: 0;
+}
+
+.dv-page .dv-info-grid {
+  width: 100%;
+  min-width: 0;
+}
+
+.dv-page .dv-info-grid > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dv-page .dv-info-grid b {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 480px) {
+  .dv-page .dv-drawer {
+    width: calc(100vw - 16px);
+    padding: 18px;
+  }
+
+  .dv-page .dv-drawer-device {
+    flex-wrap: wrap;
+  }
+
+  .dv-page .dv-drawer-device > .dv-status {
+    margin-left: 0;
+  }
+}
+
+/* Corrige o painel que fica escondido atrás do cabeçalho superior */
+
+.dv-page .dv-drawer {
+  top: 76px !important;
+  bottom: 18px !important;
+  height: auto;
+  max-height: calc(100vh - 94px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 700px) {
+  .dv-page .dv-drawer {
+    top: 76px !important;
+    right: 8px;
+    bottom: 8px !important;
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 84px);
+    padding: 18px;
+  }
+}

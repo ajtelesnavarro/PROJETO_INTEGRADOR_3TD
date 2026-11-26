@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { obterPredioAtual } from "@/services/predioAtual";
 import "./reclamacoes.css";
 
-
 const statusChamado = {
   aberto: { rotulo: "Aberto", cor: "amber" },
   em_andamento: { rotulo: "Em andamento", cor: "blue" },
@@ -40,7 +39,12 @@ const etapas = [
   { status: "concluido", rotulo: "Concluída" },
 ];
 
-const filtrosIniciais = { busca: "", status: "todos", prioridade: "todos", categoria: "todos" };
+const filtrosIniciais = {
+  busca: "",
+  status: "todos",
+  prioridade: "todos",
+  categoria: "todos",
+};
 
 const formularioVazio = {
   id_ambiente: "",
@@ -53,7 +57,6 @@ const formularioVazio = {
 
 /* ---------- Funções auxiliares ---------- */
 
-
 function obterUrlApi() {
   const base = (
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1"
@@ -65,7 +68,6 @@ function obterUrlApi() {
   return `${base}/api/v1`;
 }
 
-
 // Chamada à API com o token do login. Devolve o campo "dados" da resposta.
 async function chamarApi(caminho, metodo = "GET", corpo) {
   const token = localStorage.getItem("lumora_token");
@@ -73,16 +75,22 @@ async function chamarApi(caminho, metodo = "GET", corpo) {
 
   const resposta = await fetch(`${obterUrlApi()}${caminho}`, {
     method: metodo,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: corpo ? JSON.stringify(corpo) : undefined,
   });
   const resultado = await resposta.json().catch(() => ({}));
-  if (!resposta.ok) throw new Error(resultado.erro || "Não foi possível concluir a operação.");
+  if (!resposta.ok)
+    throw new Error(resultado.erro || "Não foi possível concluir a operação.");
   return resultado.dados;
 }
 
 function mensagemDoErro(e) {
-  return e.message === "Failed to fetch" ? "Não foi possível conectar à API." : e.message;
+  return e.message === "Failed to fetch"
+    ? "Não foi possível conectar à API."
+    : e.message;
 }
 
 function formatarData(valor) {
@@ -111,7 +119,8 @@ function validarFormulario(formulario) {
 
 // Converte os textos do formulário em números/null para enviar à API.
 function montarDados(formulario) {
-  const numero = (valor) => (valor === "" || valor == null ? null : Number(valor));
+  const numero = (valor) =>
+    valor === "" || valor == null ? null : Number(valor);
   return {
     id_ambiente: numero(formulario.id_ambiente),
     id_dispositivo: numero(formulario.id_dispositivo),
@@ -124,29 +133,89 @@ function montarDados(formulario) {
 
 function Icone({ nome, tamanho = 18 }) {
   const desenhos = {
-    busca: <><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></>,
+    busca: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </>
+    ),
     mais: <path d="M12 5v14M5 12h14" />,
-    alerta: <><path d="M12 3 2 20h20L12 3Z" /><path d="M12 10v4m0 3h.01" /></>,
-    relogio: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    alerta: (
+      <>
+        <path d="M12 3 2 20h20L12 3Z" />
+        <path d="M12 10v4m0 3h.01" />
+      </>
+    ),
+    relogio: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
     check: <path d="m5 12 4 4L19 6" />,
-    bandeira: <><path d="M5 21V4" /><path d="M5 4h12l-2 4 2 4H5" /></>,
-    ambiente: <><path d="M3 21h18M5 21V7h14v14M8 10h3v3H8zm5 0h3v3h-3zM8 16h3m2 0h3" /></>,
-    dispositivo: <><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m12 0h4M2 15h4m12 0h4" /></>,
-    usuario: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
-    ferramenta: <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" />,
+    bandeira: (
+      <>
+        <path d="M5 21V4" />
+        <path d="M5 4h12l-2 4 2 4H5" />
+      </>
+    ),
+    ambiente: (
+      <>
+        <path d="M3 21h18M5 21V7h14v14M8 10h3v3H8zm5 0h3v3h-3zM8 16h3m2 0h3" />
+      </>
+    ),
+    dispositivo: (
+      <>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m12 0h4M2 15h4m12 0h4" />
+      </>
+    ),
+    usuario: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </>
+    ),
+    ferramenta: (
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4 2.6-2.6Z" />
+    ),
     filtro: <path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z" />,
     seta: <path d="M5 12h14m-5-5 5 5-5 5" />,
     editar: <path d="m15 5 4 4M4 20l4-.8L19 8a2.8 2.8 0 0 0-4-4L4 15z" />,
     fechar: <path d="m6 6 12 12M18 6 6 18" />,
-    proibido: <><circle cx="12" cy="12" r="9" /><path d="m5.7 5.7 12.6 12.6" /></>,
+    proibido: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="m5.7 5.7 12.6 12.6" />
+      </>
+    ),
     iniciar: <path d="M7 4v16l13-8L7 4Z" />,
-    info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5m0-8h.01" /></>,
-    caixa: <><path d="M3 13h5l1 3h6l1-3h5" /><path d="M5 5h14l2 8v6H3v-6l2-8Z" /></>,
+    info: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 11v5m0-8h.01" />
+      </>
+    ),
+    caixa: (
+      <>
+        <path d="M3 13h5l1 3h6l1-3h5" />
+        <path d="M5 5h14l2 8v6H3v-6l2-8Z" />
+      </>
+    ),
   };
 
   return (
-    <svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width={tamanho}
+      height={tamanho}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       {desenhos[nome]}
     </svg>
   );
@@ -190,22 +259,49 @@ export default function Reclamacoes({ toast }) {
                 chamarApi("/ambientes"),
                 chamarApi("/dispositivos"),
                 chamarApi("/andares"),
-              ]).then(([usuarios, ambientes, dispositivos, andares]) => ({ usuarios, ambientes, dispositivos, andares })),
+              ]).then(([usuarios, ambientes, dispositivos, andares]) => ({
+                usuarios,
+                ambientes,
+                dispositivos,
+                andares,
+              })),
         ]);
         if (!ativo) return;
-        const idPredioAtual = Number(obterPredioAtual()?.id_predio ?? eu?.id_predio);
-        const idsAndares = new Set((contexto.andares || [])
-          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
-          .map((andar) => Number(andar.id_andar)));
-        const locaisAtuais = (contexto.ambientes || []).filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)));
-        const idsAmbientes = new Set(locaisAtuais.map((ambiente) => Number(ambiente.id_ambiente)));
-        const aparelhosAtuais = (contexto.dispositivos || []).filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
-        const idsDispositivos = new Set(aparelhosAtuais.map((dispositivo) => Number(dispositivo.id_dispositivo)));
+        const idPredioAtual = Number(
+          obterPredioAtual()?.id_predio ?? eu?.id_predio,
+        );
+        const idsAndares = new Set(
+          (contexto.andares || [])
+            .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+            .map((andar) => Number(andar.id_andar)),
+        );
+        const locaisAtuais = (contexto.ambientes || []).filter((ambiente) =>
+          idsAndares.has(Number(ambiente.id_andar)),
+        );
+        const idsAmbientes = new Set(
+          locaisAtuais.map((ambiente) => Number(ambiente.id_ambiente)),
+        );
+        const aparelhosAtuais = (contexto.dispositivos || []).filter(
+          (dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)),
+        );
+        const idsDispositivos = new Set(
+          aparelhosAtuais.map((dispositivo) =>
+            Number(dispositivo.id_dispositivo),
+          ),
+        );
         setUsuarioLogado(eu);
-        setReclamacoes(lista.filter((reclamacao) =>
-          idsAmbientes.has(Number(reclamacao.id_ambiente)) || idsDispositivos.has(Number(reclamacao.id_dispositivo))
-        ));
-        setUsuarios((contexto.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
+        setReclamacoes(
+          lista.filter(
+            (reclamacao) =>
+              idsAmbientes.has(Number(reclamacao.id_ambiente)) ||
+              idsDispositivos.has(Number(reclamacao.id_dispositivo)),
+          ),
+        );
+        setUsuarios(
+          (contexto.usuarios || []).filter(
+            (usuario) => Number(usuario.id_predio) === idPredioAtual,
+          ),
+        );
         setAmbientes(locaisAtuais);
         setDispositivos(aparelhosAtuais);
       } catch (e) {
@@ -216,7 +312,9 @@ export default function Reclamacoes({ toast }) {
     }
 
     carregarDados();
-    return () => { ativo = false; };
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   function mostrarAviso(texto) {
@@ -227,7 +325,7 @@ export default function Reclamacoes({ toast }) {
 
   function atualizarNaLista(id, alteracoes) {
     setReclamacoes((lista) =>
-      lista.map((r) => (r.id_reclamacao === id ? { ...r, ...alteracoes } : r))
+      lista.map((r) => (r.id_reclamacao === id ? { ...r, ...alteracoes } : r)),
     );
   }
 
@@ -277,7 +375,11 @@ export default function Reclamacoes({ toast }) {
 
     try {
       if (idEditando) {
-        const atualizada = await chamarApi(`/reclamacoes/${idEditando}`, "PUT", dados);
+        const atualizada = await chamarApi(
+          `/reclamacoes/${idEditando}`,
+          "PUT",
+          dados,
+        );
         atualizarNaLista(idEditando, atualizada ?? dados);
         setIdSelecionado(idEditando);
         mostrarAviso("Reclamação atualizada.");
@@ -295,16 +397,28 @@ export default function Reclamacoes({ toast }) {
 
   async function mudarStatus(novoStatus) {
     try {
-      await chamarApi(`/reclamacoes/${selecionada.id_reclamacao}/status`, "PATCH", { status_chamado: novoStatus });
-      atualizarNaLista(selecionada.id_reclamacao, { status_chamado: novoStatus });
-      mostrarAviso(`Status alterado para "${statusChamado[novoStatus].rotulo}".`);
+      await chamarApi(
+        `/reclamacoes/${selecionada.id_reclamacao}/status`,
+        "PATCH",
+        { status_chamado: novoStatus },
+      );
+      atualizarNaLista(selecionada.id_reclamacao, {
+        status_chamado: novoStatus,
+      });
+      mostrarAviso(
+        `Status alterado para "${statusChamado[novoStatus].rotulo}".`,
+      );
     } catch (e) {
       mostrarAviso(mensagemDoErro(e));
     }
   }
 
   function cancelarReclamacao() {
-    if (window.confirm(`Deseja cancelar a reclamação #${selecionada.id_reclamacao}?`)) {
+    if (
+      window.confirm(
+        `Deseja cancelar a reclamação #${selecionada.id_reclamacao}?`,
+      )
+    ) {
       mudarStatus("cancelado");
     }
   }
@@ -312,8 +426,14 @@ export default function Reclamacoes({ toast }) {
   async function mudarResponsavel(valor) {
     const idResponsavel = valor === "" ? null : Number(valor);
     try {
-      await chamarApi(`/reclamacoes/${selecionada.id_reclamacao}/responsavel`, "PATCH", { id_usuario_responsavel: idResponsavel });
-      atualizarNaLista(selecionada.id_reclamacao, { id_usuario_responsavel: idResponsavel });
+      await chamarApi(
+        `/reclamacoes/${selecionada.id_reclamacao}/responsavel`,
+        "PATCH",
+        { id_usuario_responsavel: idResponsavel },
+      );
+      atualizarNaLista(selecionada.id_reclamacao, {
+        id_usuario_responsavel: idResponsavel,
+      });
       mostrarAviso("Responsável atualizado.");
     } catch (e) {
       mostrarAviso(mensagemDoErro(e));
@@ -321,54 +441,103 @@ export default function Reclamacoes({ toast }) {
   }
 
   if (carregando) {
-    return <div className="rec-page"><div className="rec-empty-list"><b>Carregando reclamações...</b></div></div>;
+    return (
+      <div className="rec-page">
+        <div className="rec-empty-list">
+          <b>Carregando reclamações...</b>
+        </div>
+      </div>
+    );
   }
 
   if (erro) {
-    return <div className="rec-page"><div className="rec-empty-list"><b>{erro}</b></div></div>;
+    return (
+      <div className="rec-page">
+        <div className="rec-empty-list">
+          <b>{erro}</b>
+        </div>
+      </div>
+    );
   }
 
   /* ----- Dados calculados para a tela ----- */
 
-  const ehLocador = usuarioLogado?.perfil === "locador";
+  const ehLocador = ["locador", "funcionario"].includes(
+    String(usuarioLogado?.perfil || "").toLowerCase(),
+  );
 
   // o locador só vê as dele (o backend também deve garantir isso)
   const minhas = ehLocador
-    ? reclamacoes.filter((r) => r.id_usuario_abertura === usuarioLogado.id_usuario)
+    ? reclamacoes.filter(
+        (r) =>
+          Number(r.id_usuario_abertura) === Number(usuarioLogado?.id_usuario),
+      )
     : reclamacoes;
-
+    
   const termo = filtros.busca.toLowerCase().trim();
   const filtradas = minhas
     .filter((r) => {
-      const ambiente = acharPorId(ambientes, "id_ambiente", r.id_ambiente)?.nome ?? "";
-      const solicitante = acharPorId(usuarios, "id_usuario", r.id_usuario_abertura)?.nome ?? "";
+      const ambiente =
+        acharPorId(ambientes, "id_ambiente", r.id_ambiente)?.nome ?? "";
+      const solicitante =
+        acharPorId(usuarios, "id_usuario", r.id_usuario_abertura)?.nome ?? "";
       return (
         (r.descricao_usuario.toLowerCase().includes(termo) ||
           ambiente.toLowerCase().includes(termo) ||
           solicitante.toLowerCase().includes(termo) ||
           `#${r.id_reclamacao}`.includes(termo)) &&
         (filtros.status === "todos" || r.status_chamado === filtros.status) &&
-        (filtros.prioridade === "todos" || r.prioridade === filtros.prioridade) &&
-        (filtros.categoria === "todos" || r.categoria_problema === filtros.categoria)
+        (filtros.prioridade === "todos" ||
+          r.prioridade === filtros.prioridade) &&
+        (filtros.categoria === "todos" ||
+          r.categoria_problema === filtros.categoria)
       );
     })
     .sort((a, b) => b.data_hora_recebido.localeCompare(a.data_hora_recebido));
 
-  const contar = (status) => minhas.filter((r) => r.status_chamado === status).length;
+  const contar = (status) =>
+    minhas.filter((r) => r.status_chamado === status).length;
   const altaPrioridade = minhas.filter(
-    (r) => r.prioridade === "alta" && ["aberto", "em_andamento"].includes(r.status_chamado)
+    (r) =>
+      r.prioridade === "alta" &&
+      ["aberto", "em_andamento"].includes(r.status_chamado),
   ).length;
 
-  const selecionada = minhas.find((r) => r.id_reclamacao === idSelecionado) ?? filtradas[0];
-  const solicitante = acharPorId(usuarios, "id_usuario", selecionada?.id_usuario_abertura);
-  const responsavel = acharPorId(usuarios, "id_usuario", selecionada?.id_usuario_responsavel);
-  const ambiente = acharPorId(ambientes, "id_ambiente", selecionada?.id_ambiente);
-  const dispositivo = acharPorId(dispositivos, "id_dispositivo", selecionada?.id_dispositivo);
+  const selecionada =
+    minhas.find((r) => r.id_reclamacao === idSelecionado) ?? filtradas[0];
+  const solicitante = acharPorId(
+    usuarios,
+    "id_usuario",
+    selecionada?.id_usuario_abertura,
+  );
+  const responsavel = acharPorId(
+    usuarios,
+    "id_usuario",
+    selecionada?.id_usuario_responsavel,
+  );
+  const ambiente = acharPorId(
+    ambientes,
+    "id_ambiente",
+    selecionada?.id_ambiente,
+  );
+  const dispositivo = acharPorId(
+    dispositivos,
+    "id_dispositivo",
+    selecionada?.id_dispositivo,
+  );
 
-  const etapaAtual = etapas.findIndex((e) => e.status === selecionada?.status_chamado);
-  const equipe = usuarios.filter((u) => u.perfil !== "locador");
+  const etapaAtual = etapas.findIndex(
+    (e) => e.status === selecionada?.status_chamado,
+  );
+
+  const equipe = usuarios.filter((u) =>
+    ["manutencao", "porteiro"].includes(String(u.perfil || "").toLowerCase()),
+  );
+
   const dispositivosDoAmbiente = dispositivos.filter(
-    (d) => !formulario.id_ambiente || d.id_ambiente === Number(formulario.id_ambiente)
+    (d) =>
+      !formulario.id_ambiente ||
+      d.id_ambiente === Number(formulario.id_ambiente),
   );
 
   // locador só edita e cancela enquanto o atendimento não começou
@@ -378,18 +547,22 @@ export default function Reclamacoes({ toast }) {
     : !["cancelado", "concluido"].includes(selecionada?.status_chamado);
 
   const mensagemLocador = {
-    aberto: "Recebemos sua reclamação. Ela está aguardando o início do atendimento.",
+    aberto:
+      "Recebemos sua reclamação. Ela está aguardando o início do atendimento.",
     em_andamento: responsavel
       ? `${responsavel.nome} está cuidando do seu chamado.`
       : "A equipe já está cuidando do seu chamado.",
-    concluido: "O problema foi resolvido. Se ele voltar, abra uma nova reclamação.",
+    concluido:
+      "O problema foi resolvido. Se ele voltar, abra uma nova reclamação.",
   }[selecionada?.status_chamado];
 
   return (
     <div className="rec-page">
       <header className="rec-heading">
         <div>
-          <span className="rec-eyebrow">{ehLocador ? "SUPORTE AO LOCADOR" : "CENTRAL DE CHAMADOS"}</span>
+          <span className="rec-eyebrow">
+            {ehLocador ? "SUPORTE AO LOCADOR" : "CENTRAL DE CHAMADOS"}
+          </span>
           <h1>{ehLocador ? "Minhas reclamações" : "Reclamações"}</h1>
           <p>
             {ehLocador
@@ -406,21 +579,41 @@ export default function Reclamacoes({ toast }) {
 
       <section className={`rec-summary ${ehLocador ? "three" : ""}`}>
         <div className="rec-summary-item">
-          <span className="rec-summary-icon amber"><Icone nome="caixa" /></span>
-          <div><strong>{contar("aberto")}</strong><span>Abertas</span></div>
+          <span className="rec-summary-icon amber">
+            <Icone nome="caixa" />
+          </span>
+          <div>
+            <strong>{contar("aberto")}</strong>
+            <span>Abertas</span>
+          </div>
         </div>
         <div className="rec-summary-item">
-          <span className="rec-summary-icon blue"><Icone nome="ferramenta" /></span>
-          <div><strong>{contar("em_andamento")}</strong><span>Em andamento</span></div>
+          <span className="rec-summary-icon blue">
+            <Icone nome="ferramenta" />
+          </span>
+          <div>
+            <strong>{contar("em_andamento")}</strong>
+            <span>Em andamento</span>
+          </div>
         </div>
         <div className="rec-summary-item">
-          <span className="rec-summary-icon green"><Icone nome="check" /></span>
-          <div><strong>{contar("concluido")}</strong><span>Concluídas</span></div>
+          <span className="rec-summary-icon green">
+            <Icone nome="check" />
+          </span>
+          <div>
+            <strong>{contar("concluido")}</strong>
+            <span>Concluídas</span>
+          </div>
         </div>
         {!ehLocador && (
           <div className="rec-summary-item">
-            <span className="rec-summary-icon red"><Icone nome="alerta" /></span>
-            <div><strong>{altaPrioridade}</strong><span>Alta prioridade em aberto</span></div>
+            <span className="rec-summary-icon red">
+              <Icone nome="alerta" />
+            </span>
+            <div>
+              <strong>{altaPrioridade}</strong>
+              <span>Alta prioridade em aberto</span>
+            </div>
           </div>
         )}
       </section>
@@ -430,8 +623,14 @@ export default function Reclamacoes({ toast }) {
         <section className="rec-list-panel">
           <div className="rec-list-heading">
             <div>
-              <span className="rec-section-label">{ehLocador ? "SEUS CHAMADOS" : "FILA DE ATENDIMENTO"}</span>
-              <h2>{ehLocador ? "Reclamações que você abriu" : "Reclamações registradas"}</h2>
+              <span className="rec-section-label">
+                {ehLocador ? "SEUS CHAMADOS" : "FILA DE ATENDIMENTO"}
+              </span>
+              <h2>
+                {ehLocador
+                  ? "Reclamações que você abriu"
+                  : "Reclamações registradas"}
+              </h2>
             </div>
             <span className="rec-count">{filtradas.length} registros</span>
           </div>
@@ -448,10 +647,15 @@ export default function Reclamacoes({ toast }) {
           <div className="rec-filters">
             <label>
               <Icone nome="filtro" tamanho={14} />
-              <select value={filtros.status} onChange={(e) => alterarFiltro("status", e.target.value)}>
+              <select
+                value={filtros.status}
+                onChange={(e) => alterarFiltro("status", e.target.value)}
+              >
                 <option value="todos">Todos os status</option>
                 {Object.entries(statusChamado).map(([valor, item]) => (
-                  <option key={valor} value={valor}>{item.rotulo}</option>
+                  <option key={valor} value={valor}>
+                    {item.rotulo}
+                  </option>
                 ))}
               </select>
             </label>
@@ -459,10 +663,15 @@ export default function Reclamacoes({ toast }) {
             {!ehLocador && (
               <label>
                 <Icone nome="bandeira" tamanho={14} />
-                <select value={filtros.prioridade} onChange={(e) => alterarFiltro("prioridade", e.target.value)}>
+                <select
+                  value={filtros.prioridade}
+                  onChange={(e) => alterarFiltro("prioridade", e.target.value)}
+                >
                   <option value="todos">Todas as prioridades</option>
                   {Object.entries(prioridades).map(([valor, item]) => (
-                    <option key={valor} value={valor}>{item.rotulo}</option>
+                    <option key={valor} value={valor}>
+                      {item.rotulo}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -470,10 +679,15 @@ export default function Reclamacoes({ toast }) {
 
             <label>
               <Icone nome="ferramenta" tamanho={14} />
-              <select value={filtros.categoria} onChange={(e) => alterarFiltro("categoria", e.target.value)}>
+              <select
+                value={filtros.categoria}
+                onChange={(e) => alterarFiltro("categoria", e.target.value)}
+              >
                 <option value="todos">Todas as categorias</option>
                 {Object.entries(categorias).map(([valor, rotulo]) => (
-                  <option key={valor} value={valor}>{rotulo}</option>
+                  <option key={valor} value={valor}>
+                    {rotulo}
+                  </option>
                 ))}
               </select>
             </label>
@@ -483,7 +697,11 @@ export default function Reclamacoes({ toast }) {
             {filtradas.length === 0 ? (
               <div className="rec-empty-list">
                 <Icone nome="busca" tamanho={25} />
-                <b>{ehLocador && minhas.length === 0 ? "Você ainda não abriu reclamações" : "Nenhuma reclamação encontrada"}</b>
+                <b>
+                  {ehLocador && minhas.length === 0
+                    ? "Você ainda não abriu reclamações"
+                    : "Nenhuma reclamação encontrada"}
+                </b>
                 <span>
                   {ehLocador && minhas.length === 0
                     ? 'Use o botão "Nova reclamação" para relatar um problema.'
@@ -497,16 +715,27 @@ export default function Reclamacoes({ toast }) {
                   className={`rec-list-item ${selecionada?.id_reclamacao === r.id_reclamacao ? "selected" : ""}`}
                   onClick={() => setIdSelecionado(r.id_reclamacao)}
                 >
-                  <span className={`rec-list-symbol ${prioridades[r.prioridade].cor}`}>
+                  <span
+                    className={`rec-list-symbol ${prioridades[r.prioridade].cor}`}
+                  >
                     <Icone nome="alerta" tamanho={19} />
                   </span>
                   <span className="rec-list-copy">
                     <strong>{r.descricao_usuario}</strong>
                     <small>
-                      #{r.id_reclamacao} · {acharPorId(ambientes, "id_ambiente", r.id_ambiente)?.nome ?? acharPorId(dispositivos, "id_dispositivo", r.id_dispositivo)?.nome}
+                      #{r.id_reclamacao} ·{" "}
+                      {acharPorId(ambientes, "id_ambiente", r.id_ambiente)
+                        ?.nome ??
+                        acharPorId(
+                          dispositivos,
+                          "id_dispositivo",
+                          r.id_dispositivo,
+                        )?.nome}
                     </small>
                     <span className="rec-list-meta">
-                      <Selo cor={statusChamado[r.status_chamado].cor}>{statusChamado[r.status_chamado].rotulo}</Selo>
+                      <Selo cor={statusChamado[r.status_chamado].cor}>
+                        {statusChamado[r.status_chamado].rotulo}
+                      </Selo>
                       <span>{formatarData(r.data_hora_recebido)}</span>
                     </span>
                   </span>
@@ -527,32 +756,54 @@ export default function Reclamacoes({ toast }) {
           {selecionada ? (
             <>
               <div className="rec-detail-top">
-                <div className={`rec-detail-symbol ${prioridades[selecionada.prioridade].cor}`}>
+                <div
+                  className={`rec-detail-symbol ${prioridades[selecionada.prioridade].cor}`}
+                >
                   <Icone nome="alerta" tamanho={25} />
                 </div>
                 <div className="rec-detail-actions">
                   {podeEditar && (
-                    <button className="rec-icon-button" onClick={abrirEdicao} title="Editar reclamação">
+                    <button
+                      className="rec-icon-button"
+                      onClick={abrirEdicao}
+                      title="Editar reclamação"
+                    >
                       <Icone nome="editar" tamanho={17} />
                     </button>
                   )}
-                  <button className="rec-icon-button danger" onClick={cancelarReclamacao} disabled={!podeCancelar} title="Cancelar reclamação">
+                  <button
+                    className="rec-icon-button danger"
+                    onClick={cancelarReclamacao}
+                    disabled={!podeCancelar}
+                    title="Cancelar reclamação"
+                  >
                     <Icone nome="proibido" tamanho={17} />
                   </button>
                 </div>
               </div>
 
-              <span className="rec-section-label">CHAMADO #{selecionada.id_reclamacao}</span>
-              <h2 className="rec-detail-title">{selecionada.descricao_usuario}</h2>
+              <span className="rec-section-label">
+                CHAMADO #{selecionada.id_reclamacao}
+              </span>
+              <h2 className="rec-detail-title">
+                {selecionada.descricao_usuario}
+              </h2>
 
               <div className="rec-badges">
-                <Selo cor={statusChamado[selecionada.status_chamado].cor}>{statusChamado[selecionada.status_chamado].rotulo}</Selo>
+                <Selo cor={statusChamado[selecionada.status_chamado].cor}>
+                  {statusChamado[selecionada.status_chamado].rotulo}
+                </Selo>
                 {!ehLocador && (
                   <Selo cor={prioridades[selecionada.prioridade].cor}>
-                    Prioridade {prioridades[selecionada.prioridade].rotulo.toLowerCase()}
+                    Prioridade{" "}
+                    {prioridades[selecionada.prioridade].rotulo.toLowerCase()}
                   </Selo>
                 )}
-                {selecionada.categoria_problema && <Selo cor="slate">{categorias[selecionada.categoria_problema]}</Selo>}
+                {selecionada.categoria_problema && (
+                  <Selo cor="slate">
+                    {categorias[selecionada.categoria_problema]}
+                  </Selo>
+                )}
               </div>
 
               {selecionada.status_chamado === "cancelado" ? (
@@ -567,7 +818,11 @@ export default function Reclamacoes({ toast }) {
                       key={etapa.status}
                       className={`rec-step ${indice < etapaAtual ? "done" : ""} ${indice === etapaAtual ? "current" : ""}`}
                     >
-                      <span className="rec-step-dot">{indice <= etapaAtual && <Icone nome="check" tamanho={11} />}</span>
+                      <span className="rec-step-dot">
+                        {indice <= etapaAtual && (
+                          <Icone nome="check" tamanho={11} />
+                        )}
+                      </span>
                       <small>{etapa.rotulo}</small>
                     </div>
                   ))}
@@ -583,34 +838,48 @@ export default function Reclamacoes({ toast }) {
 
               <div className="rec-detail-grid">
                 <div className="rec-info-box">
-                  <span><Icone nome="ambiente" tamanho={17} /></span>
+                  <span>
+                    <Icone nome="ambiente" tamanho={17} />
+                  </span>
                   <small>AMBIENTE</small>
                   <strong>{ambiente?.nome ?? "Não informado"}</strong>
                 </div>
                 <div className="rec-info-box">
-                  <span><Icone nome="dispositivo" tamanho={17} /></span>
+                  <span>
+                    <Icone nome="dispositivo" tamanho={17} />
+                  </span>
                   <small>DISPOSITIVO</small>
                   <strong>{dispositivo?.nome ?? "Não informado"}</strong>
                 </div>
                 {ehLocador ? (
                   <div className="rec-info-box">
-                    <span><Icone nome="ferramenta" tamanho={17} /></span>
+                    <span>
+                      <Icone nome="ferramenta" tamanho={17} />
+                    </span>
                     <small>RESPONSÁVEL</small>
-                    <strong>{responsavel?.nome ?? "Aguardando definição"}</strong>
+                    <strong>
+                      {responsavel?.nome ?? "Aguardando definição"}
+                    </strong>
                     {responsavel && <em>{perfis[responsavel.perfil]}</em>}
                   </div>
                 ) : (
                   <div className="rec-info-box">
-                    <span><Icone nome="usuario" tamanho={17} /></span>
+                    <span>
+                      <Icone nome="usuario" tamanho={17} />
+                    </span>
                     <small>ABERTA POR</small>
                     <strong>{solicitante?.nome ?? "—"}</strong>
                     {solicitante && <em>{perfis[solicitante.perfil]}</em>}
                   </div>
                 )}
                 <div className="rec-info-box">
-                  <span><Icone nome="relogio" tamanho={17} /></span>
+                  <span>
+                    <Icone nome="relogio" tamanho={17} />
+                  </span>
                   <small>RECEBIDA EM</small>
-                  <strong>{formatarData(selecionada.data_hora_recebido)}</strong>
+                  <strong>
+                    {formatarData(selecionada.data_hora_recebido)}
+                  </strong>
                 </div>
               </div>
 
@@ -629,39 +898,56 @@ export default function Reclamacoes({ toast }) {
                     >
                       <option value="">Sem responsável</option>
                       {equipe.map((u) => (
-                        <option key={u.id_usuario} value={u.id_usuario}>{u.nome} · {perfis[u.perfil]}</option>
+                        <option key={u.id_usuario} value={u.id_usuario}>
+                          {u.nome} · {perfis[u.perfil]}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="rec-status-actions">
                     {selecionada.status_chamado === "aberto" && (
-                      <button className="rec-primary" onClick={() => mudarStatus("em_andamento")}>
+                      <button
+                        className="rec-primary"
+                        onClick={() => mudarStatus("em_andamento")}
+                      >
                         <Icone nome="iniciar" tamanho={14} />
                         Iniciar atendimento
                       </button>
                     )}
                     {selecionada.status_chamado === "em_andamento" && (
-                      <button className="rec-primary" onClick={() => mudarStatus("concluido")}>
+                      <button
+                        className="rec-primary"
+                        onClick={() => mudarStatus("concluido")}
+                      >
                         <Icone nome="check" tamanho={16} />
                         Concluir chamado
                       </button>
                     )}
-                    {["concluido", "cancelado"].includes(selecionada.status_chamado) && (
-                      <button className="rec-cancel" onClick={() => mudarStatus("aberto")}>
+                    {["concluido", "cancelado"].includes(
+                      selecionada.status_chamado,
+                    ) && (
+                      <button
+                        className="rec-cancel"
+                        onClick={() => mudarStatus("aberto")}
+                      >
                         Reabrir chamado
                       </button>
                     )}
                   </div>
                 </>
               )}
-
             </>
           ) : (
             <div className="rec-no-selection">
-              <span><Icone nome="caixa" tamanho={30} /></span>
+              <span>
+                <Icone nome="caixa" tamanho={30} />
+              </span>
               <h2>Selecione uma reclamação</h2>
-              <p>Escolha um chamado na lista para ver os detalhes e atualizar o status.</p>
+              <p>
+                Escolha um chamado na lista para ver os detalhes e atualizar o
+                status.
+              </p>
             </div>
           )}
         </section>
@@ -669,15 +955,26 @@ export default function Reclamacoes({ toast }) {
 
       {/* ---------- Modal ---------- */}
       {modalAberto && (
-        <div className="rec-modal-overlay" onMouseDown={(e) => e.target === e.currentTarget && fecharModal()}>
+        <div
+          className="rec-modal-overlay"
+          onMouseDown={(e) => e.target === e.currentTarget && fecharModal()}
+        >
           <form className="rec-modal" onSubmit={salvarReclamacao}>
             <div className="rec-modal-header">
               <div>
                 <span className="rec-section-label">CENTRAL DE CHAMADOS</span>
                 <h2>{idEditando ? "Editar reclamação" : "Nova reclamação"}</h2>
-                <p>{idEditando ? "Atualize as informações do chamado." : `Será aberta em nome de ${usuarioLogado.nome}.`}</p>
+                <p>
+                  {idEditando
+                    ? "Atualize as informações do chamado."
+                    : `Será aberta em nome de ${usuarioLogado.nome}.`}
+                </p>
               </div>
-              <button type="button" className="rec-icon-button" onClick={fecharModal}>
+              <button
+                type="button"
+                className="rec-icon-button"
+                onClick={fecharModal}
+              >
                 <Icone nome="fechar" />
               </button>
             </div>
@@ -685,30 +982,49 @@ export default function Reclamacoes({ toast }) {
             <div className="rec-form-grid">
               <label>
                 Ambiente
-                <select value={formulario.id_ambiente} onChange={(e) => alterarCampo("id_ambiente", e.target.value)}>
+                <select
+                  value={formulario.id_ambiente}
+                  onChange={(e) => alterarCampo("id_ambiente", e.target.value)}
+                >
                   <option value="">Selecione o ambiente</option>
                   {ambientes.map((a) => (
-                    <option key={a.id_ambiente} value={a.id_ambiente}>{a.nome}</option>
+                    <option key={a.id_ambiente} value={a.id_ambiente}>
+                      {a.nome}
+                    </option>
                   ))}
                 </select>
               </label>
 
               <label>
                 Dispositivo
-                <select value={formulario.id_dispositivo} onChange={(e) => alterarCampo("id_dispositivo", e.target.value)}>
+                <select
+                  value={formulario.id_dispositivo}
+                  onChange={(e) =>
+                    alterarCampo("id_dispositivo", e.target.value)
+                  }
+                >
                   <option value="">Selecione o dispositivo</option>
                   {dispositivosDoAmbiente.map((d) => (
-                    <option key={d.id_dispositivo} value={d.id_dispositivo}>{d.nome}</option>
+                    <option key={d.id_dispositivo} value={d.id_dispositivo}>
+                      {d.nome}
+                    </option>
                   ))}
                 </select>
               </label>
 
               <label className={ehLocador ? "full" : undefined}>
                 Categoria
-                <select value={formulario.categoria_problema} onChange={(e) => alterarCampo("categoria_problema", e.target.value)}>
+                <select
+                  value={formulario.categoria_problema}
+                  onChange={(e) =>
+                    alterarCampo("categoria_problema", e.target.value)
+                  }
+                >
                   <option value="">Sem categoria</option>
                   {Object.entries(categorias).map(([valor, rotulo]) => (
-                    <option key={valor} value={valor}>{rotulo}</option>
+                    <option key={valor} value={valor}>
+                      {rotulo}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -717,19 +1033,33 @@ export default function Reclamacoes({ toast }) {
                 <>
                   <label>
                     Prioridade
-                    <select value={formulario.prioridade} onChange={(e) => alterarCampo("prioridade", e.target.value)}>
+                    <select
+                      value={formulario.prioridade}
+                      onChange={(e) =>
+                        alterarCampo("prioridade", e.target.value)
+                      }
+                    >
                       {Object.entries(prioridades).map(([valor, item]) => (
-                        <option key={valor} value={valor}>{item.rotulo}</option>
+                        <option key={valor} value={valor}>
+                          {item.rotulo}
+                        </option>
                       ))}
                     </select>
                   </label>
 
                   <label className="full">
                     Responsável pelo atendimento
-                    <select value={formulario.id_usuario_responsavel} onChange={(e) => alterarCampo("id_usuario_responsavel", e.target.value)}>
+                    <select
+                      value={formulario.id_usuario_responsavel}
+                      onChange={(e) =>
+                        alterarCampo("id_usuario_responsavel", e.target.value)
+                      }
+                    >
                       <option value="">Definir depois</option>
                       {equipe.map((u) => (
-                        <option key={u.id_usuario} value={u.id_usuario}>{u.nome} · {perfis[u.perfil]}</option>
+                        <option key={u.id_usuario} value={u.id_usuario}>
+                          {u.nome} · {perfis[u.perfil]}
+                        </option>
                       ))}
                     </select>
                   </label>
@@ -740,7 +1070,9 @@ export default function Reclamacoes({ toast }) {
                 Descrição do problema *
                 <textarea
                   value={formulario.descricao_usuario}
-                  onChange={(e) => alterarCampo("descricao_usuario", e.target.value)}
+                  onChange={(e) =>
+                    alterarCampo("descricao_usuario", e.target.value)
+                  }
                   placeholder="Ex.: O ar-condicionado da sala não está resfriando."
                   rows="3"
                   required
@@ -751,7 +1083,13 @@ export default function Reclamacoes({ toast }) {
             <div className="rec-form-footer">
               <span>* Informe ao menos o ambiente ou o dispositivo</span>
               <div>
-                <button type="button" className="rec-cancel" onClick={fecharModal}>Cancelar</button>
+                <button
+                  type="button"
+                  className="rec-cancel"
+                  onClick={fecharModal}
+                >
+                  Cancelar
+                </button>
                 <button type="submit" className="rec-primary">
                   <Icone nome="check" tamanho={16} />
                   {idEditando ? "Salvar alterações" : "Registrar reclamação"}
@@ -762,7 +1100,12 @@ export default function Reclamacoes({ toast }) {
         </div>
       )}
 
-      {aviso && <div className="rec-toast"><Icone nome="check" tamanho={16} />{aviso}</div>}
+      {aviso && (
+        <div className="rec-toast">
+          <Icone nome="check" tamanho={16} />
+          {aviso}
+        </div>
+      )}
     </div>
   );
 }

@@ -8,18 +8,58 @@ import "./dashboard.css";
 
 function Icon({ name, size = 18 }) {
   const paths = {
-    building: <><path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h1m6 0h1M8 12h1m6 0h1" /></>,
-    rooms: <><path d="M3 21h18M5 21V7h14v14M8 10h3v3H8zm5 0h3v3h-3zM8 16h3m2 0h3" /></>,
-    cpu: <><rect x="6" y="6" width="12" height="12" rx="2" /><rect x="9" y="9" width="6" height="6" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m12 0h4M2 15h4m12 0h4" /></>,
+    building: (
+      <>
+        <path d="M4 21V5l8-3 8 3v16M9 21v-4h6v4M8 8h1m6 0h1M8 12h1m6 0h1" />
+      </>
+    ),
+    rooms: (
+      <>
+        <path d="M3 21h18M5 21V7h14v14M8 10h3v3H8zm5 0h3v3h-3zM8 16h3m2 0h3" />
+      </>
+    ),
+    cpu: (
+      <>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <rect x="9" y="9" width="6" height="6" />
+        <path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m12 0h4M2 15h4m12 0h4" />
+      </>
+    ),
     bolt: <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />,
-    thermo: <><path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z" /><path d="M10 7v9" /></>,
+    thermo: (
+      <>
+        <path d="M14 14.8V5a4 4 0 0 0-8 0v9.8a6 6 0 1 0 8 0Z" />
+        <path d="M10 7v9" />
+      </>
+    ),
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     check: <path d="m5 12 4 4L19 6" />,
-    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    alert: <><path d="M12 9v4m0 4h.01" /><path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0Z" /></>,
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
+    alert: (
+      <>
+        <path d="M12 9v4m0 4h.01" />
+        <path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+      </>
+    ),
     activity: <path d="M3 12h4l3-8 4 16 3-8h4" />,
-    more: <><circle cx="5" cy="12" r="1" fill="currentColor" /><circle cx="12" cy="12" r="1" fill="currentColor" /><circle cx="19" cy="12" r="1" fill="currentColor" /></>,
-    pin: <><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2" /></>,
+    more: (
+      <>
+        <circle cx="5" cy="12" r="1" fill="currentColor" />
+        <circle cx="12" cy="12" r="1" fill="currentColor" />
+        <circle cx="19" cy="12" r="1" fill="currentColor" />
+      </>
+    ),
+    pin: (
+      <>
+        <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+        <circle cx="12" cy="10" r="2" />
+      </>
+    ),
   };
 
   return (
@@ -62,13 +102,13 @@ function MetricCard({ icon, label, value, description, color, footer }) {
 
 function Status({ value }) {
   const classes = {
-    "Aberta": "open",
+    Aberta: "open",
     "Em andamento": "progress",
-    "Resolvida": "success",
-    "Cancelada": "normal",
-    "Alta": "danger",
-    "Média": "warning",
-    "Baixa": "normal",
+    Resolvida: "success",
+    Cancelada: "normal",
+    Alta: "danger",
+    Média: "warning",
+    Baixa: "normal",
   };
 
   return (
@@ -119,18 +159,27 @@ function EnergyChart({ range, leituras }) {
     const eVals = Array.from({ length: buckets }, (_, i) => {
       if (!energia.length) return 0;
       const start = Math.floor((i * energia.length) / buckets);
-      const end = Math.max(start + 1, Math.floor(((i + 1) * energia.length) / buckets));
+      const end = Math.max(
+        start + 1,
+        Math.floor(((i + 1) * energia.length) / buckets),
+      );
       const slice = energia.slice(start, end);
-      return slice.length ? slice.reduce((s, item) => s + Number(item.valor || 0), 0) : 0;
+      return slice.length
+        ? slice.reduce((s, item) => s + Number(item.valor || 0), 0)
+        : 0;
     });
 
     const tVals = Array.from({ length: buckets }, (_, i) => {
       if (!temp.length) return 0;
       const start = Math.floor((i * temp.length) / buckets);
-      const end = Math.max(start + 1, Math.floor(((i + 1) * temp.length) / buckets));
+      const end = Math.max(
+        start + 1,
+        Math.floor(((i + 1) * temp.length) / buckets),
+      );
       const slice = temp.slice(start, end);
       return slice.length
-        ? slice.reduce((s, item) => s + Number(item.valor || 0), 0) / slice.length
+        ? slice.reduce((s, item) => s + Number(item.valor || 0), 0) /
+            slice.length
         : 0;
     });
 
@@ -167,23 +216,21 @@ function EnergyChart({ range, leituras }) {
           </defs>
 
           {[1, 48, 95, 142, 189].map((y) => (
-            <line key={y} x1="0" x2="700" y1={y} y2={y} className="dash-grid-line" />
+            <line
+              key={y}
+              x1="0"
+              x2="700"
+              y1={y}
+              y2={y}
+              className="dash-grid-line"
+            />
           ))}
 
-          <path
-            d={`${energyPath} L700 190 L0 190 Z`}
-            fill="url(#dashArea)"
-          />
+          <path d={`${energyPath} L700 190 L0 190 Z`} fill="url(#dashArea)" />
 
-          <path
-            d={energyPath}
-            className="dash-energy-line"
-          />
+          <path d={energyPath} className="dash-energy-line" />
 
-          <path
-            d={tempPath}
-            className="dash-temp-line"
-          />
+          <path d={tempPath} className="dash-temp-line" />
         </svg>
 
         <div className="dash-chart-x">
@@ -199,18 +246,39 @@ function EnergyChart({ range, leituras }) {
 function DeviceHealth({ dispositivos }) {
   const counts = useMemo(() => {
     return {
-      ativos: dispositivos.filter((d) => d.status_dispositivo === "ativo").length,
-      instaveis: dispositivos.filter((d) => d.status_dispositivo === "instavel").length,
-      manutencao: dispositivos.filter((d) => d.status_dispositivo === "manutencao").length,
-      offline: dispositivos.filter((d) => d.status_dispositivo === "offline").length,
+      ativos: dispositivos.filter((d) => d.status_dispositivo === "ativo")
+        .length,
+      instaveis: dispositivos.filter((d) => d.status_dispositivo === "instavel")
+        .length,
+      manutencao: dispositivos.filter(
+        (d) => d.status_dispositivo === "manutencao",
+      ).length,
+      offline: dispositivos.filter((d) => d.status_dispositivo === "offline")
+        .length,
     };
   }, [dispositivos]);
 
   const rows = [
-    { label: "Ativos", value: String(counts.ativos).padStart(2, "0"), color: "green" },
-    { label: "Instáveis", value: String(counts.instaveis).padStart(2, "0"), color: "yellow" },
-    { label: "Manutenção", value: String(counts.manutencao).padStart(2, "0"), color: "blue" },
-    { label: "Offline", value: String(counts.offline).padStart(2, "0"), color: "red" },
+    {
+      label: "Ativos",
+      value: String(counts.ativos).padStart(2, "0"),
+      color: "green",
+    },
+    {
+      label: "Instáveis",
+      value: String(counts.instaveis).padStart(2, "0"),
+      color: "yellow",
+    },
+    {
+      label: "Manutenção",
+      value: String(counts.manutencao).padStart(2, "0"),
+      color: "blue",
+    },
+    {
+      label: "Offline",
+      value: String(counts.offline).padStart(2, "0"),
+      color: "red",
+    },
   ];
 
   return (
@@ -229,10 +297,34 @@ function DeviceHealth({ dispositivos }) {
         <div className="dash-ring">
           <svg viewBox="0 0 120 120">
             <circle className="dash-ring-track" cx="60" cy="60" r="47" />
-            <circle className="dash-ring-online" cx="60" cy="60" r="47" pathLength="100" />
-            <circle className="dash-ring-warning" cx="60" cy="60" r="47" pathLength="100" />
-            <circle className="dash-ring-maintenance" cx="60" cy="60" r="47" pathLength="100" />
-            <circle className="dash-ring-offline" cx="60" cy="60" r="47" pathLength="100" />
+            <circle
+              className="dash-ring-online"
+              cx="60"
+              cy="60"
+              r="47"
+              pathLength="100"
+            />
+            <circle
+              className="dash-ring-warning"
+              cx="60"
+              cy="60"
+              r="47"
+              pathLength="100"
+            />
+            <circle
+              className="dash-ring-maintenance"
+              cx="60"
+              cy="60"
+              r="47"
+              pathLength="100"
+            />
+            <circle
+              className="dash-ring-offline"
+              cx="60"
+              cy="60"
+              r="47"
+              pathLength="100"
+            />
           </svg>
           <div className="dash-ring-center">
             <strong>{dispositivos.length}</strong>
@@ -291,7 +383,10 @@ function Incidents({ items, onResolve }) {
           <tbody>
             {items.length > 0 ? (
               items.map((item) => (
-                <tr key={item.rawId} className={item.status === "Resolvida" ? "is-resolved" : ""}>
+                <tr
+                  key={item.rawId}
+                  className={item.status === "Resolvida" ? "is-resolved" : ""}
+                >
                   <td>
                     <strong>{item.id}</strong>
                     <small>{item.opened}</small>
@@ -302,8 +397,12 @@ function Incidents({ items, onResolve }) {
                   </td>
                   <td>{item.location}</td>
                   <td>{item.owner}</td>
-                  <td><Status value={item.priority} /></td>
-                  <td><Status value={item.status} /></td>
+                  <td>
+                    <Status value={item.priority} />
+                  </td>
+                  <td>
+                    <Status value={item.status} />
+                  </td>
                   <td>
                     <button
                       className="dash-resolve"
@@ -311,15 +410,22 @@ function Incidents({ items, onResolve }) {
                       onClick={() => onResolve(item)}
                     >
                       {item.status === "Resolvida" ? (
-                        <><Icon name="check" size={14} /> Resolvida</>
-                      ) : "Resolver"}
+                        <>
+                          <Icon name="check" size={14} /> Resolvida
+                        </>
+                      ) : (
+                        "Resolver"
+                      )}
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: "24px", opacity: 0.7 }}>
+                <td
+                  colSpan={7}
+                  style={{ textAlign: "center", padding: "24px", opacity: 0.7 }}
+                >
                   Nenhuma ocorrência registrada no banco de dados.
                 </td>
               </tr>
@@ -334,10 +440,16 @@ function Incidents({ items, onResolve }) {
 export default function DashboardPage() {
   const [range, setRange] = useState("7 dias");
   const [perfilAtual, setPerfilAtual] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || ""; }
-    catch { return ""; }
+    try {
+      return (
+        JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || ""
+      );
+    } catch {
+      return "";
+    }
   });
   const [eventosAcesso, setEventosAcesso] = useState([]);
+  const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [toast, setToast] = useState("");
   const [predios, setPredios] = useState([]);
   const [ambientes, setAmbientes] = useState([]);
@@ -364,9 +476,10 @@ export default function DashboardPage() {
       if (!resultado || resultado.status !== "fulfilled") return [];
       return Array.isArray(resultado.value?.dados) ? resultado.value.dados : [];
     };
-    const erroDa = (resultado) => resultado?.status === "rejected"
-      ? (resultado.reason?.message || "Falha na consulta")
-      : null;
+    const erroDa = (resultado) =>
+      resultado?.status === "rejected"
+        ? resultado.reason?.message || "Falha na consulta"
+        : null;
 
     try {
       // O prédio é obtido primeiro da sessão e, como fallback, do perfil autenticado.
@@ -379,7 +492,10 @@ export default function DashboardPage() {
               id_predio: perfil.dados.id_predio,
               nome_predio: perfil.dados.nome_predio || "",
             };
-            sessionStorage.setItem("lumora_predio_atual", JSON.stringify(predioSelecionado));
+            sessionStorage.setItem(
+              "lumora_predio_atual",
+              JSON.stringify(predioSelecionado),
+            );
           }
         } catch {
           // As demais consultas ainda podem ser exibidas mesmo sem os dados do perfil.
@@ -397,21 +513,35 @@ export default function DashboardPage() {
         const [rPredios, rAndares, rAmbientes, rEventos] = resultados;
         const andares = lerLista(rAndares);
         const ambientesRecebidos = lerLista(rAmbientes);
-        const idsAndares = new Set(andares
-          .filter((a) => Number(a.id_predio) === idPredioAtual)
-          .map((a) => Number(a.id_andar)));
-        const ambientesAtuais = ambientesRecebidos
-          .filter((a) => idsAndares.has(Number(a.id_andar)));
-        const idsAmbientes = new Set(ambientesAtuais.map((a) => Number(a.id_ambiente)));
+        const idsAndares = new Set(
+          andares
+            .filter((a) => Number(a.id_predio) === idPredioAtual)
+            .map((a) => Number(a.id_andar)),
+        );
+        const ambientesAtuais = ambientesRecebidos.filter((a) =>
+          idsAndares.has(Number(a.id_andar)),
+        );
+        const idsAmbientes = new Set(
+          ambientesAtuais.map((a) => Number(a.id_ambiente)),
+        );
         const eventos = lerLista(rEventos)
           .filter((e) => idsAmbientes.has(Number(e.id_ambiente)))
-          .sort((a, b) => new Date(b.data_utilizacao || 0) - new Date(a.data_utilizacao || 0));
+          .sort(
+            (a, b) =>
+              new Date(b.data_utilizacao || 0) -
+              new Date(a.data_utilizacao || 0),
+          );
 
-        setPredios(lerLista(rPredios).filter((p) => Number(p.id_predio) === idPredioAtual));
+        setPredios(
+          lerLista(rPredios).filter(
+            (p) => Number(p.id_predio) === idPredioAtual,
+          ),
+        );
         setAmbientes(ambientesAtuais);
         setEventosAcesso(eventos.slice(0, 8));
         const falhas = resultados.map(erroDa).filter(Boolean);
-        if (falhas.length) showToast(`Parte dos dados da portaria não carregou: ${falhas[0]}`);
+        if (falhas.length)
+          showToast(`Parte dos dados da portaria não carregou: ${falhas[0]}`);
         return;
       }
 
@@ -426,7 +556,16 @@ export default function DashboardPage() {
         requisicaoAPI("/usuarios"),
         requisicaoAPI("/leituras?limite=200"),
       ]);
-      const [rPredios, rAndares, rAmbientes, rDispositivos, rOcorrencias, rEquipes, rUsuarios, rLeituras] = resultados;
+      const [
+        rPredios,
+        rAndares,
+        rAmbientes,
+        rDispositivos,
+        rOcorrencias,
+        rEquipes,
+        rUsuarios,
+        rLeituras,
+      ] = resultados;
 
       const prediosRecebidos = lerLista(rPredios);
       const andaresRecebidos = lerLista(rAndares);
@@ -437,25 +576,67 @@ export default function DashboardPage() {
       const usuariosRecebidos = lerLista(rUsuarios);
       const leiturasRecebidas = lerLista(rLeituras);
 
-      const idsAndares = new Set(andaresRecebidos
-        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
-        .map((andar) => Number(andar.id_andar)));
-      const ambientesAtuais = ambientesRecebidos
-        .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)));
-      const idsAmbientes = new Set(ambientesAtuais.map((ambiente) => Number(ambiente.id_ambiente)));
-      const dispositivosAtuais = dispositivosRecebidos
-        .filter((dispositivo) => idsAmbientes.has(Number(dispositivo.id_ambiente)));
-      const idsDispositivos = new Set(dispositivosAtuais.map((dispositivo) => Number(dispositivo.id_dispositivo)));
+      const idsAndares = new Set(
+        andaresRecebidos
+          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+          .map((andar) => Number(andar.id_andar)),
+      );
+      const ambientesAtuais = ambientesRecebidos.filter((ambiente) =>
+        idsAndares.has(Number(ambiente.id_andar)),
+      );
+      const idsAmbientes = new Set(
+        ambientesAtuais.map((ambiente) => Number(ambiente.id_ambiente)),
+      );
+      const dispositivosAtuais = dispositivosRecebidos.filter((dispositivo) =>
+        idsAmbientes.has(Number(dispositivo.id_ambiente)),
+      );
+      const idsDispositivos = new Set(
+        dispositivosAtuais.map((dispositivo) =>
+          Number(dispositivo.id_dispositivo),
+        ),
+      );
 
-      setPredios(prediosRecebidos.filter((predio) => Number(predio.id_predio) === idPredioAtual));
+      setPredios(
+        prediosRecebidos.filter(
+          (predio) => Number(predio.id_predio) === idPredioAtual,
+        ),
+      );
       setAmbientes(ambientesAtuais);
       setDispositivos(dispositivosAtuais);
-      setOcorrencias(perfilAtual === "manutencao"
-        ? ocorrenciasRecebidas
-        : ocorrenciasRecebidas.filter((ocorrencia) => idsDispositivos.has(Number(ocorrencia.id_dispositivo))));
-      setEquipes(equipesRecebidas.filter((equipe) => Number(equipe.id_predio) === idPredioAtual));
-      setUsuarios(usuariosRecebidos.filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
-      setLeituras(leiturasRecebidas.filter((leitura) => idsDispositivos.has(Number(leitura.dispositivo_id))));
+      if (perfilAtual === "funcionario") {
+        const idUsuario = Number(usuarioAtual?.id_usuario || 0);
+
+        setOcorrencias(
+          ocorrenciasRecebidas.filter(
+            (ocorrencia) =>
+              Number(ocorrencia.id_usuario) === idUsuario &&
+              idsDispositivos.has(Number(ocorrencia.id_dispositivo)),
+          ),
+        );
+      } else if (perfilAtual === "manutencao") {
+        setOcorrencias(ocorrenciasRecebidas);
+      } else {
+        setOcorrencias(
+          ocorrenciasRecebidas.filter((ocorrencia) =>
+            idsDispositivos.has(Number(ocorrencia.id_dispositivo)),
+          ),
+        );
+      }
+      setEquipes(
+        equipesRecebidas.filter(
+          (equipe) => Number(equipe.id_predio) === idPredioAtual,
+        ),
+      );
+      setUsuarios(
+        usuariosRecebidos.filter(
+          (usuario) => Number(usuario.id_predio) === idPredioAtual,
+        ),
+      );
+      setLeituras(
+        leiturasRecebidas.filter((leitura) =>
+          idsDispositivos.has(Number(leitura.dispositivo_id)),
+        ),
+      );
 
       const falhas = resultados.map(erroDa).filter(Boolean);
       if (falhas.length) {
@@ -464,13 +645,20 @@ export default function DashboardPage() {
     } catch (erro) {
       showToast(erro.message || "Erro ao carregar indicadores.");
     }
-  }, [showToast, perfilAtual]);
+  }, [showToast, perfilAtual, usuarioAtual]);
 
   useEffect(() => {
-    requisicaoAPI("/auth/me").then((res) => {
-      const perfil = res?.dados?.perfil || "";
-      if (perfil) setPerfilAtual(perfil);
-    }).catch(() => {});
+    requisicaoAPI("/auth/me")
+      .then((res) => {
+        const usuario = res?.dados || {};
+
+        if (usuario.perfil) {
+          setPerfilAtual(usuario.perfil);
+        }
+
+        setUsuarioAtual(usuario);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -479,7 +667,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     try {
-      const predio = JSON.parse(sessionStorage.getItem("lumora_predio_atual") || "null");
+      const predio = JSON.parse(
+        sessionStorage.getItem("lumora_predio_atual") || "null",
+      );
       setPredioTarifaId(predio?.id_predio ? String(predio.id_predio) : "");
       setPredioTarifaNome(predio?.nome_predio || "");
     } catch {
@@ -504,13 +694,16 @@ export default function DashboardPage() {
         setValorTarifa(resposta.dados?.valor_kwh ?? "");
       })
       .catch((erro) => {
-        if (ativo) showToast(erro.message || "Não foi possível carregar a tarifa.");
+        if (ativo)
+          showToast(erro.message || "Não foi possível carregar a tarifa.");
       })
       .finally(() => {
         if (ativo) setCarregandoTarifa(false);
       });
 
-    return () => { ativo = false; };
+    return () => {
+      ativo = false;
+    };
   }, [predioTarifaId, showToast, perfilAtual]);
 
   async function salvarTarifa(event) {
@@ -519,10 +712,15 @@ export default function DashboardPage() {
 
     try {
       setSalvandoTarifa(true);
-      const resposta = await requisicaoAPI(`/tarifa-energia/${predioTarifaId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ valor_kwh: Number(String(valorTarifa).replace(",", ".")) }),
-      });
+      const resposta = await requisicaoAPI(
+        `/tarifa-energia/${predioTarifaId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            valor_kwh: Number(String(valorTarifa).replace(",", ".")),
+          }),
+        },
+      );
       setTarifaAtual(resposta.dados || null);
       setValorTarifa(resposta.dados?.valor_kwh ?? valorTarifa);
       showToast("Tarifa de energia atualizada.");
@@ -534,15 +732,21 @@ export default function DashboardPage() {
   }
 
   const resumoIndicadores = useMemo(() => {
-    const ativos = dispositivos.filter((d) => d.status_dispositivo === "ativo").length;
+    const ativos = dispositivos.filter(
+      (d) => d.status_dispositivo === "ativo",
+    ).length;
     const atencao = dispositivos.length - ativos;
 
     const leiturasEnergia = leituras.filter((l) => l.tipo === "energia");
-    const totalEnergia = leiturasEnergia.reduce((acc, l) => acc + Number(l.valor || 0), 0);
+    const totalEnergia = leiturasEnergia.reduce(
+      (acc, l) => acc + Number(l.valor || 0),
+      0,
+    );
 
     const leiturasTemp = leituras.filter((l) => l.tipo === "temperatura");
     const mediaTemp = leiturasTemp.length
-      ? leiturasTemp.reduce((acc, l) => acc + Number(l.valor || 0), 0) / leiturasTemp.length
+      ? leiturasTemp.reduce((acc, l) => acc + Number(l.valor || 0), 0) /
+        leiturasTemp.length
       : 0;
 
     return {
@@ -567,10 +771,14 @@ export default function DashboardPage() {
     };
 
     return ocorrencias.slice(0, 6).map((oc) => {
-      const disp = dispositivos.find((d) => d.id_dispositivo === oc.id_dispositivo);
+      const disp = dispositivos.find(
+        (d) => d.id_dispositivo === oc.id_dispositivo,
+      );
       const amb = ambientes.find((a) => a.id_ambiente === disp?.id_ambiente);
       const eq = equipes.find((e) => e.id_equipe === oc.id_equipe_responsavel);
-      const tec = usuarios.find((u) => u.id_usuario === oc.id_tecnico_responsavel);
+      const tec = usuarios.find(
+        (u) => u.id_usuario === oc.id_tecnico_responsavel,
+      );
 
       const data = oc.data_ocorrencia
         ? new Date(oc.data_ocorrencia).toLocaleString("pt-BR", {
@@ -613,12 +821,395 @@ export default function DashboardPage() {
     }
   }
 
+  if (perfilAtual === "funcionario") {
+    const tipoPredio = String(predios[0]?.tipo_predio || "").toLowerCase();
+
+    const nomePerfil =
+      tipoPredio === "residencial"
+        ? "Residente"
+        : ["comercial", "corporativo"].includes(tipoPredio)
+          ? "Locador"
+          : "Funcionário";
+
+    const ocorrenciasAbertas = ocorrencias.filter(
+      (item) =>
+        item.status_ocorrencia === "aberta" ||
+        item.status_ocorrencia === "em_andamento",
+    ).length;
+
+    const normalizarStatus = (status) =>
+      String(status || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+
+    const dispositivosAtivos = dispositivos.filter(
+      (item) => normalizarStatus(item.status_dispositivo) === "ativo",
+    );
+
+    const dispositivosAtencao = dispositivos.filter(
+      (item) => normalizarStatus(item.status_dispositivo) !== "ativo",
+    );
+
+    const percentualAtivos = dispositivos.length
+      ? (dispositivosAtivos.length / dispositivos.length) * 100
+      : 0;
+
+    const percentualAtencao = dispositivos.length
+      ? (dispositivosAtencao.length / dispositivos.length) * 100
+      : 0;
+
+    return (
+      <div className="lumora-dashboard">
+        <div className="dash-title">
+          <div>
+            <span className="dash-eyebrow">ÁREA DO FUNCIONÁRIO</span>
+            <h1>Painel do {nomePerfil}</h1>
+            <p>
+              Consulte as informações e acompanhe a situação do seu edifício.
+            </p>
+          </div>
+
+          <div className="dash-title-right">
+            <span className="dash-date">
+              <Icon name="pin" size={15} />
+              {predios[0]?.nome_predio || "Prédio não identificado"}
+            </span>
+          </div>
+        </div>
+
+        <section className="dash-metrics">
+          <MetricCard
+            icon="building"
+            label="Meu prédio"
+            value={predios.length ? "01" : "00"}
+            description="Edifício vinculado à sua conta"
+            color="blue"
+            footer={
+              <span>
+                <Icon name="pin" size={13} />
+                {predios[0]?.nome_predio || "Não identificado"}
+              </span>
+            }
+          />
+
+          <MetricCard
+            icon="rooms"
+            label="Ambientes"
+            value={String(ambientes.length).padStart(2, "0")}
+            description="Espaços cadastrados no edifício"
+            color="purple"
+            footer={<span>Consulta dos ambientes</span>}
+          />
+
+          <MetricCard
+            icon="cpu"
+            label="Dispositivos"
+            value={String(dispositivos.length).padStart(2, "0")}
+            description="Dispositivos cadastrados"
+            color="cyan"
+            footer={<span>{resumoIndicadores.ativos} ativos</span>}
+          />
+
+          <MetricCard
+            icon="alert"
+            label="Minhas ocorrências"
+            value={String(ocorrencias.length).padStart(2, "0")}
+            description="Registros vinculados à sua conta"
+            color="orange"
+            footer={<span>{ocorrenciasAbertas} aguardando acompanhamento</span>}
+          />
+        </section>
+
+        <section className="dash-analytics">
+          <div className="dash-panel dash-health">
+            <div className="dash-panel-heading">
+              <div>
+                <span className="dash-section-label">SITUAÇÃO DO EDIFÍCIO</span>
+                <h2>Estado dos dispositivos</h2>
+                <p>Resumo dos equipamentos cadastrados no seu prédio.</p>
+              </div>
+
+              <span className="dash-heading-icon">
+                <Icon name="activity" />
+              </span>
+            </div>
+
+            <div className="dash-health-content">
+              <div className="dash-ring">
+                <svg viewBox="0 0 120 120">
+                  <circle className="dash-ring-track" cx="60" cy="60" r="47" />
+
+                  {/* Parte dos dispositivos ativos */}
+                  <circle
+                    className="dash-ring-online"
+                    cx="60"
+                    cy="60"
+                    r="47"
+                    pathLength="100"
+                    style={{
+                      strokeDasharray: `${percentualAtivos} ${100 - percentualAtivos}`,
+                      strokeDashoffset: 0,
+                      transform: "rotate(-90deg)",
+                      transformOrigin: "60px 60px",
+                    }}
+                  />
+
+                  {/* Parte dos dispositivos que precisam de atenção */}
+                  <circle
+                    className="dash-ring-warning"
+                    cx="60"
+                    cy="60"
+                    r="47"
+                    pathLength="100"
+                    style={{
+                      strokeDasharray: `${percentualAtencao} ${100 - percentualAtencao}`,
+                      strokeDashoffset: -percentualAtivos,
+                      transform: "rotate(-90deg)",
+                      transformOrigin: "60px 60px",
+                    }}
+                  />
+                </svg>
+
+                <div className="dash-ring-center">
+                  <strong>{dispositivos.length}</strong>
+                  <span>Dispositivos</span>
+                </div>
+              </div>
+
+              <div className="dash-health-legend">
+                <div>
+                  <span className="dash-legend-dot green" />
+                  <span>Dispositivos ativos</span>
+                  <strong>{dispositivosAtivos.length}</strong>
+                </div>
+
+                <div>
+                  <span className="dash-legend-dot yellow" />
+                  <span>Precisam de atenção</span>
+                  <strong>{dispositivosAtencao.length}</strong>
+                </div>
+
+                <div>
+                  <span className="dash-legend-dot blue" />
+                  <span>Total de dispositivos</span>
+                  <strong>{dispositivos.length}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="dash-panel">
+            <div className="dash-panel-heading">
+              <div>
+                <span className="dash-section-label">
+                  INFORMAÇÕES DO PRÉDIO
+                </span>
+                <h2>Meu ambiente</h2>
+                <p>Informações gerais do edifício vinculado à sua conta.</p>
+              </div>
+
+              <span className="dash-heading-icon">
+                <Icon name="building" />
+              </span>
+            </div>
+
+            <div style={{ padding: "12px 0" }}>
+              <p style={{ marginBottom: 12 }}>
+                <strong>Edifício:</strong>{" "}
+                {predios[0]?.nome_predio || "Não identificado"}
+              </p>
+
+              <p style={{ marginBottom: 12 }}>
+                <strong>Perfil de acesso:</strong> {nomePerfil}
+              </p>
+
+              <p style={{ marginBottom: 12 }}>
+                <strong>Ambientes cadastrados:</strong> {ambientes.length}
+              </p>
+
+              <p>
+                <strong>Dispositivos cadastrados:</strong> {dispositivos.length}
+              </p>
+            </div>
+          </div>
+
+          <section className="dash-panel maintenance-devices-panel">
+            <div className="dash-panel-heading">
+              <div>
+                <span className="dash-section-label">MONITORAMENTO</span>
+                <h2>Dispositivos que precisam de atenção</h2>
+                <p>Equipamentos que não estão com status ativo no edifício.</p>
+              </div>
+
+              <span className="dash-heading-icon">
+                <Icon name="cpu" />
+              </span>
+            </div>
+
+            <div className="maintenance-device-grid">
+              {dispositivosAtencao.length > 0 ? (
+                dispositivosAtencao.map((device) => {
+                  const ambiente = ambientes.find(
+                    (item) =>
+                      Number(item.id_ambiente) === Number(device.id_ambiente),
+                  );
+
+                  const status = normalizarStatus(device.status_dispositivo);
+
+                  const statusLabel =
+                    {
+                      instavel: "Instável",
+                      manutencao: "Em manutenção",
+                      offline: "Offline",
+                      inativo: "Inativo",
+                    }[status] ||
+                    device.status_dispositivo ||
+                    "Status não identificado";
+
+                  return (
+                    <article
+                      className="maintenance-device-card"
+                      key={device.id_dispositivo}
+                    >
+                      <span className={`maintenance-device-status ${status}`} />
+
+                      <div>
+                        <strong>{device.nome || "Dispositivo sem nome"}</strong>
+                        <small>
+                          {ambiente?.nome || "Ambiente não identificado"}
+                        </small>
+                      </div>
+
+                      <span className="maintenance-device-label">
+                        {statusLabel}
+                      </span>
+                    </article>
+                  );
+                })
+              ) : (
+                <p className="maintenance-empty">
+                  <Icon name="check" size={16} /> Todos os dispositivos estão
+                  ativos.
+                </p>
+              )}
+            </div>
+          </section>
+        </section>
+
+        <section className="dash-panel dash-incidents">
+          <div className="dash-panel-heading dash-incidents-heading">
+            <div>
+              <span className="dash-section-label">ACOMPANHAMENTO</span>
+
+              <h2>
+                Minhas ocorrências
+                <span className="dash-count">{ocorrencias.length}</span>
+              </h2>
+
+              <p>Consulte os registros vinculados ao seu usuário.</p>
+            </div>
+          </div>
+
+          <div className="dash-table-wrapper">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>IDENTIFICAÇÃO</th>
+                  <th>OCORRÊNCIA</th>
+                  <th>DISPOSITIVO / LOCAL</th>
+                  <th>PRIORIDADE</th>
+                  <th>STATUS</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {ocorrenciasFormatadas.length > 0 ? (
+                  ocorrenciasFormatadas.map((item) => (
+                    <tr key={item.rawId}>
+                      <td>
+                        <strong>{item.id}</strong>
+                        <small>{item.opened}</small>
+                      </td>
+
+                      <td>
+                        <strong>{item.title}</strong>
+                        <small>{item.category}</small>
+                      </td>
+
+                      <td>{item.location}</td>
+
+                      <td>
+                        <Status value={item.priority} />
+                      </td>
+
+                      <td>
+                        <Status value={item.status} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{
+                        textAlign: "center",
+                        padding: "24px",
+                      }}
+                    >
+                      Nenhuma ocorrência vinculada ao seu usuário.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <p
+          style={{
+            marginTop: 16,
+            color: "#718096",
+            fontSize: 13,
+          }}
+        >
+          Este painel permite somente a consulta das informações do edifício.
+          Configurações administrativas e ações de gerenciamento não estão
+          disponíveis para este perfil.
+        </p>
+
+        {toast && (
+          <div className="dash-toast">
+            <span>
+              <Icon name="check" size={16} />
+            </span>
+            {toast}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (perfilAtual === "manutencao") {
-    const abertas = ocorrencias.filter((item) => item.status_ocorrencia === "aberta").length;
-    const andamento = ocorrencias.filter((item) => item.status_ocorrencia === "em_andamento").length;
-    const resolvidas = ocorrencias.filter((item) => item.status_ocorrencia === "resolvida").length;
-    const altaPrioridade = ocorrencias.filter((item) => item.prioridade === "alta" && item.status_ocorrencia !== "resolvida").length;
-    const dispositivosAtencao = dispositivos.filter((item) => ["instavel", "manutencao", "offline", "inativo"].includes(item.status_dispositivo));
+    const abertas = ocorrencias.filter(
+      (item) => item.status_ocorrencia === "aberta",
+    ).length;
+    const andamento = ocorrencias.filter(
+      (item) => item.status_ocorrencia === "em_andamento",
+    ).length;
+    const resolvidas = ocorrencias.filter(
+      (item) => item.status_ocorrencia === "resolvida",
+    ).length;
+    const altaPrioridade = ocorrencias.filter(
+      (item) =>
+        item.prioridade === "alta" && item.status_ocorrencia !== "resolvida",
+    ).length;
+    const dispositivosAtencao = dispositivos.filter((item) =>
+      ["instavel", "manutencao", "offline", "inativo"].includes(
+        item.status_dispositivo,
+      ),
+    );
 
     return (
       <div className="lumora-dashboard">
@@ -626,89 +1217,325 @@ export default function DashboardPage() {
           <div>
             <span className="dash-eyebrow">CENTRAL TÉCNICA</span>
             <h1>Painel de Manutenção</h1>
-            <p>Acompanhe suas ocorrências, dispositivos e atividades técnicas do edifício.</p>
+            <p>
+              Acompanhe suas ocorrências, dispositivos e atividades técnicas do
+              edifício.
+            </p>
           </div>
           <div className="dash-title-right">
-            <Link href="/private/ocorrencias" className="dash-link">Gerenciar ocorrências <Icon name="arrow" size={15} /></Link>
+            <Link href="/private/ocorrencias" className="dash-link">
+              Gerenciar ocorrências <Icon name="arrow" size={15} />
+            </Link>
           </div>
         </div>
 
         <section className="dash-metrics">
-          <MetricCard icon="alert" label="Ocorrências abertas" value={String(abertas).padStart(2, "0")} description="Aguardando início do atendimento" color="orange" footer={<span>Priorize os chamados pendentes</span>} />
-          <MetricCard icon="clock" label="Em andamento" value={String(andamento).padStart(2, "0")} description="Atividades em execução" color="blue" footer={<span>Atividades em execução</span>} />
-          <MetricCard icon="check" label="Resolvidas" value={String(resolvidas).padStart(2, "0")} description="Ocorrências finalizadas" color="green" footer={<span>Histórico de atendimentos</span>} />
-          <MetricCard icon="alert" label="Alta prioridade" value={String(altaPrioridade).padStart(2, "0")} description="Ocorrências que exigem atenção" color="purple" footer={<span>{dispositivosAtencao.length} dispositivos em atenção</span>} />
+          <MetricCard
+            icon="alert"
+            label="Ocorrências abertas"
+            value={String(abertas).padStart(2, "0")}
+            description="Aguardando início do atendimento"
+            color="orange"
+            footer={<span>Priorize os chamados pendentes</span>}
+          />
+          <MetricCard
+            icon="clock"
+            label="Em andamento"
+            value={String(andamento).padStart(2, "0")}
+            description="Atividades em execução"
+            color="blue"
+            footer={<span>Atividades em execução</span>}
+          />
+          <MetricCard
+            icon="check"
+            label="Resolvidas"
+            value={String(resolvidas).padStart(2, "0")}
+            description="Ocorrências finalizadas"
+            color="green"
+            footer={<span>Histórico de atendimentos</span>}
+          />
+          <MetricCard
+            icon="alert"
+            label="Alta prioridade"
+            value={String(altaPrioridade).padStart(2, "0")}
+            description="Ocorrências que exigem atenção"
+            color="purple"
+            footer={
+              <span>{dispositivosAtencao.length} dispositivos em atenção</span>
+            }
+          />
         </section>
 
         <section className="dash-panel maintenance-devices-panel">
           <div className="dash-panel-heading">
-            <div><span className="dash-section-label">MONITORAMENTO TÉCNICO</span><h2>Dispositivos que precisam de atenção</h2><p>Equipamentos instáveis, offline ou em manutenção.</p></div>
-            <Link href="/private/dispositivos" className="dash-link">Ver dispositivos <Icon name="arrow" size={15} /></Link>
+            <div>
+              <span className="dash-section-label">MONITORAMENTO TÉCNICO</span>
+              <h2>Dispositivos que precisam de atenção</h2>
+              <p>Equipamentos instáveis, offline ou em manutenção.</p>
+            </div>
+            <Link href="/private/dispositivos" className="dash-link">
+              Ver dispositivos <Icon name="arrow" size={15} />
+            </Link>
           </div>
           <div className="maintenance-device-grid">
-            {dispositivosAtencao.length ? dispositivosAtencao.slice(0, 6).map((device) => {
-              const ambiente = ambientes.find((item) => Number(item.id_ambiente) === Number(device.id_ambiente));
-              const statusLabel = { instavel: "Instável", manutencao: "Em manutenção", offline: "Offline", inativo: "Inativo" }[device.status_dispositivo] || device.status_dispositivo;
-              return <article className="maintenance-device-card" key={device.id_dispositivo}>
-                <span className={`maintenance-device-status ${device.status_dispositivo}`}></span>
-                <div><strong>{device.nome}</strong><small>{ambiente?.nome || "Ambiente não identificado"}</small></div>
-                <span className="maintenance-device-label">{statusLabel}</span>
-              </article>;
-            }) : <p className="maintenance-empty">Nenhum dispositivo requer atenção no momento.</p>}
+            {dispositivosAtencao.length ? (
+              dispositivosAtencao.slice(0, 6).map((device) => {
+                const ambiente = ambientes.find(
+                  (item) =>
+                    Number(item.id_ambiente) === Number(device.id_ambiente),
+                );
+                const statusLabel =
+                  {
+                    instavel: "Instável",
+                    manutencao: "Em manutenção",
+                    offline: "Offline",
+                    inativo: "Inativo",
+                  }[device.status_dispositivo] || device.status_dispositivo;
+                return (
+                  <article
+                    className="maintenance-device-card"
+                    key={device.id_dispositivo}
+                  >
+                    <span
+                      className={`maintenance-device-status ${device.status_dispositivo}`}
+                    ></span>
+                    <div>
+                      <strong>{device.nome}</strong>
+                      <small>
+                        {ambiente?.nome || "Ambiente não identificado"}
+                      </small>
+                    </div>
+                    <span className="maintenance-device-label">
+                      {statusLabel}
+                    </span>
+                  </article>
+                );
+              })
+            ) : (
+              <p className="maintenance-empty">
+                Nenhum dispositivo requer atenção no momento.
+              </p>
+            )}
           </div>
         </section>
 
         <section className="dash-panel dash-incidents maintenance-occurrences-panel">
           <div className="dash-panel-heading dash-incidents-heading">
-            <div><span className="dash-section-label">FILA DE ATENDIMENTO</span><h2>Minhas ocorrências <span className="dash-count">{ocorrencias.length}</span></h2><p>Acompanhe os chamados vinculados aos seus dispositivos.</p></div>
-            <Link href="/private/ocorrencias" className="dash-link">Abrir painel <Icon name="arrow" size={15} /></Link>
+            <div>
+              <span className="dash-section-label">FILA DE ATENDIMENTO</span>
+              <h2>
+                Minhas ocorrências{" "}
+                <span className="dash-count">{ocorrencias.length}</span>
+              </h2>
+              <p>Acompanhe os chamados vinculados aos seus dispositivos.</p>
+            </div>
+            <Link href="/private/ocorrencias" className="dash-link">
+              Abrir painel <Icon name="arrow" size={15} />
+            </Link>
           </div>
           <div className="dash-table-wrapper">
-            <table className="dash-table"><thead><tr><th>OCORRÊNCIA</th><th>DISPOSITIVO</th><th>AMBIENTE</th><th>PRIORIDADE</th><th>STATUS</th></tr></thead>
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>OCORRÊNCIA</th>
+                  <th>DISPOSITIVO</th>
+                  <th>AMBIENTE</th>
+                  <th>PRIORIDADE</th>
+                  <th>STATUS</th>
+                </tr>
+              </thead>
               <tbody>
-                {ocorrenciasFormatadas.length ? ocorrenciasFormatadas.map((item) => (
-                  <tr key={item.rawId}><td><strong>{item.id}</strong><small>{item.title}</small></td><td>{item.category}</td><td>{item.location}</td><td><Status value={item.priority} /></td><td><Status value={item.status} /></td></tr>
-                )) : <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>Nenhuma ocorrência vinculada aos seus dispositivos.</td></tr>}
+                {ocorrenciasFormatadas.length ? (
+                  ocorrenciasFormatadas.map((item) => (
+                    <tr key={item.rawId}>
+                      <td>
+                        <strong>{item.id}</strong>
+                        <small>{item.title}</small>
+                      </td>
+                      <td>{item.category}</td>
+                      <td>{item.location}</td>
+                      <td>
+                        <Status value={item.priority} />
+                      </td>
+                      <td>
+                        <Status value={item.status} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 24 }}
+                    >
+                      Nenhuma ocorrência vinculada aos seus dispositivos.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </section>
-        <p className="maintenance-dashboard-note">Este painel é voltado ao acompanhamento e à execução da manutenção. A abertura manual de novas ocorrências fica restrita ao administrador; alertas automáticos continuam sendo registrados pelo sistema.</p>
-        {toast && <div className="dash-toast"><span><Icon name="check" size={16} /></span>{toast}</div>}
+        <p className="maintenance-dashboard-note">
+          Este painel é voltado ao acompanhamento e à execução da manutenção. A
+          abertura manual de novas ocorrências fica restrita ao administrador;
+          alertas automáticos continuam sendo registrados pelo sistema.
+        </p>
+        {toast && (
+          <div className="dash-toast">
+            <span>
+              <Icon name="check" size={16} />
+            </span>
+            {toast}
+          </div>
+        )}
       </div>
     );
   }
 
   if (perfilAtual === "porteiro") {
-    const permitidos = eventosAcesso.filter((e) => e.decisao_acesso === "permitido").length;
-    const negados = eventosAcesso.filter((e) => e.decisao_acesso !== "permitido").length;
+    const permitidos = eventosAcesso.filter(
+      (e) => e.decisao_acesso === "permitido",
+    ).length;
+    const negados = eventosAcesso.filter(
+      (e) => e.decisao_acesso !== "permitido",
+    ).length;
     return (
       <div className="lumora-dashboard">
         <div className="dash-title">
           <div>
             <span className="dash-eyebrow">CENTRAL DA PORTARIA</span>
             <h1>Painel da Portaria</h1>
-            <p>Resumo dos ambientes e das movimentações de acesso do edifício.</p>
+            <p>
+              Resumo dos ambientes e das movimentações de acesso do edifício.
+            </p>
           </div>
-          <div className="dash-title-right"><span className="dash-date"><Icon name="clock" size={15} /> Consulta de registros</span></div>
+          <div className="dash-title-right">
+            <span className="dash-date">
+              <Icon name="clock" size={15} /> Consulta de registros
+            </span>
+          </div>
         </div>
         <section className="dash-metrics">
-          <MetricCard icon="building" label="Prédio vinculado" value={predios.length ? "01" : "00"} description="Edifício da sua portaria" color="blue" footer={<span><Icon name="pin" size={13} /> {predios[0]?.nome_predio || "Não identificado"}</span>} />
-          <MetricCard icon="rooms" label="Ambientes" value={String(ambientes.length).padStart(2, "0")} description="Espaços cadastrados" color="purple" footer={<span>Consulta de localização</span>} />
-          <MetricCard icon="check" label="Acessos permitidos" value={String(permitidos).padStart(2, "0")} description="Entre os últimos registros" color="cyan" footer={<span>Registros recentes</span>} />
-          <MetricCard icon="alert" label="Acessos negados" value={String(negados).padStart(2, "0")} description="Entre os últimos registros" color="orange" footer={<span>Verifique o motivo no controle</span>} />
+          <MetricCard
+            icon="building"
+            label="Prédio vinculado"
+            value={predios.length ? "01" : "00"}
+            description="Edifício da sua portaria"
+            color="blue"
+            footer={
+              <span>
+                <Icon name="pin" size={13} />{" "}
+                {predios[0]?.nome_predio || "Não identificado"}
+              </span>
+            }
+          />
+          <MetricCard
+            icon="rooms"
+            label="Ambientes"
+            value={String(ambientes.length).padStart(2, "0")}
+            description="Espaços cadastrados"
+            color="purple"
+            footer={<span>Consulta de localização</span>}
+          />
+          <MetricCard
+            icon="check"
+            label="Acessos permitidos"
+            value={String(permitidos).padStart(2, "0")}
+            description="Entre os últimos registros"
+            color="cyan"
+            footer={<span>Registros recentes</span>}
+          />
+          <MetricCard
+            icon="alert"
+            label="Acessos negados"
+            value={String(negados).padStart(2, "0")}
+            description="Entre os últimos registros"
+            color="orange"
+            footer={<span>Verifique o motivo no controle</span>}
+          />
         </section>
         <section className="dash-panel" style={{ marginTop: 22 }}>
           <div className="dash-panel-heading">
-            <div><span className="dash-section-label">MOVIMENTAÇÕES RECENTES</span><h2>Últimos registros de acesso</h2><p>Visualização dos eventos vinculados ao prédio atual.</p></div>
-            <Link href="/private/acessos" className="dash-link">Abrir controle de acesso <Icon name="arrow" size={15} /></Link>
+            <div>
+              <span className="dash-section-label">MOVIMENTAÇÕES RECENTES</span>
+              <h2>Últimos registros de acesso</h2>
+              <p>Visualização dos eventos vinculados ao prédio atual.</p>
+            </div>
+            <Link href="/private/acessos" className="dash-link">
+              Abrir controle de acesso <Icon name="arrow" size={15} />
+            </Link>
           </div>
-          <div className="dash-table-wrapper"><table className="dash-table"><thead><tr><th>Data e hora</th><th>Pessoa / credencial</th><th>Ambiente</th><th>Movimento</th><th>Resultado</th></tr></thead><tbody>
-            {eventosAcesso.length ? eventosAcesso.map((evento) => <tr key={evento.id_evento}><td>{evento.data_utilizacao ? new Date(evento.data_utilizacao).toLocaleString("pt-BR") : "—"}</td><td>{evento.nome_usuario || "Credencial não identificada"}</td><td>{evento.nome_ambiente || `Ambiente #${evento.id_ambiente}`}</td><td>{evento.tipo_acesso === "saida" ? "Saída" : "Entrada"}</td><td><Status value={evento.decisao_acesso === "permitido" ? "Permitido" : "Negado"} /></td></tr>) : <tr><td colSpan={5} style={{ textAlign: "center", padding: 24 }}>Nenhum registro de acesso encontrado.</td></tr>}
-          </tbody></table></div>
+          <div className="dash-table-wrapper">
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>Data e hora</th>
+                  <th>Pessoa / credencial</th>
+                  <th>Ambiente</th>
+                  <th>Movimento</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {eventosAcesso.length ? (
+                  eventosAcesso.map((evento) => (
+                    <tr key={evento.id_evento}>
+                      <td>
+                        {evento.data_utilizacao
+                          ? new Date(evento.data_utilizacao).toLocaleString(
+                              "pt-BR",
+                            )
+                          : "—"}
+                      </td>
+                      <td>
+                        {evento.nome_usuario || "Credencial não identificada"}
+                      </td>
+                      <td>
+                        {evento.nome_ambiente ||
+                          `Ambiente #${evento.id_ambiente}`}
+                      </td>
+                      <td>
+                        {evento.tipo_acesso === "saida" ? "Saída" : "Entrada"}
+                      </td>
+                      <td>
+                        <Status
+                          value={
+                            evento.decisao_acesso === "permitido"
+                              ? "Permitido"
+                              : "Negado"
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      style={{ textAlign: "center", padding: 24 }}
+                    >
+                      Nenhum registro de acesso encontrado.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
-        <p style={{ marginTop: 16, color: "#718096", fontSize: 13 }}>Este painel é somente para consulta. Configurações, indicadores administrativos, tarifas e gestão de equipes não são exibidos para o perfil Porteiro.</p>
-        {toast && <div className="dash-toast"><span><Icon name="check" size={16} /></span>{toast}</div>}
+        <p style={{ marginTop: 16, color: "#718096", fontSize: 13 }}>
+          Este painel é somente para consulta. Configurações, indicadores
+          administrativos, tarifas e gestão de equipes não são exibidos para o
+          perfil Porteiro.
+        </p>
+        {toast && (
+          <div className="dash-toast">
+            <span>
+              <Icon name="check" size={16} />
+            </span>
+            {toast}
+          </div>
+        )}
       </div>
     );
   }
@@ -720,13 +1547,6 @@ export default function DashboardPage() {
           <span className="dash-eyebrow">CENTRAL DE OPERAÇÕES</span>
           <h1>Dashboard</h1>
           <p>Acompanhe os indicadores e a situação operacional do edifício.</p>
-        </div>
-
-        <div className="dash-title-right">
-          <span className="dash-date">
-            <Icon name="clock" size={15} />
-            Dados em tempo real
-          </span>
         </div>
       </div>
 
@@ -762,7 +1582,8 @@ export default function DashboardPage() {
           color="cyan"
           footer={
             <span>
-              {resumoIndicadores.ativos} ativos · {resumoIndicadores.atencao} em atenção
+              {resumoIndicadores.ativos} ativos · {resumoIndicadores.atencao} em
+              atenção
             </span>
           }
         />
@@ -773,7 +1594,9 @@ export default function DashboardPage() {
           value={resumoIndicadores.totalEnergia}
           description="kWh · acumulado registrado"
           color="orange"
-          footer={<span>Temperatura média: {resumoIndicadores.mediaTemp} °C</span>}
+          footer={
+            <span>Temperatura média: {resumoIndicadores.mediaTemp} °C</span>
+          }
         />
       </section>
 
@@ -797,19 +1620,34 @@ export default function DashboardPage() {
           <form className="dash-tarifa-form" onSubmit={salvarTarifa}>
             <label>
               Prédio atual
-              <input value={predioTarifaNome || `Prédio #${predioTarifaId}`} readOnly />
+              <input
+                value={predioTarifaNome || `Prédio #${predioTarifaId}`}
+                readOnly
+              />
             </label>
             <label>
               Valor por kWh (R$)
-              <input type="number" min="0" step="0.0001" value={valorTarifa} onChange={(event) => setValorTarifa(event.target.value)} placeholder="Ex.: 0.7350" required />
+              <input
+                type="number"
+                min="0"
+                step="0.0001"
+                value={valorTarifa}
+                onChange={(event) => setValorTarifa(event.target.value)}
+                placeholder="Ex.: 0.7350"
+                required
+              />
             </label>
             <button type="submit" disabled={salvandoTarifa || carregandoTarifa}>
               {salvandoTarifa ? "Salvando..." : "Salvar tarifa"}
             </button>
-            <small>A nova tarifa passa a valer hoje e encerra a anterior.</small>
+            <small>
+              A nova tarifa passa a valer hoje e encerra a anterior.
+            </small>
           </form>
         ) : (
-          <p className="dash-tarifa-empty">Seu usuário ainda não está vinculado a um prédio.</p>
+          <p className="dash-tarifa-empty">
+            Seu usuário ainda não está vinculado a um prédio.
+          </p>
         )}
       </section>
 
@@ -819,7 +1657,9 @@ export default function DashboardPage() {
             <div>
               <span className="dash-section-label">DESEMPENHO ENERGÉTICO</span>
               <h2>Consumo e temperatura</h2>
-              <p>Histórico consolidado das leituras dos sensores do edifício.</p>
+              <p>
+                Histórico consolidado das leituras dos sensores do edifício.
+              </p>
             </div>
 
             <div className="dash-range">
@@ -858,7 +1698,9 @@ export default function DashboardPage() {
 
       {toast && (
         <div className="dash-toast">
-          <span><Icon name="check" size={16} /></span>
+          <span>
+            <Icon name="check" size={16} />
+          </span>
           {toast}
         </div>
       )}

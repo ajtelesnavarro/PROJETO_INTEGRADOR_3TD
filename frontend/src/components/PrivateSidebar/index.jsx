@@ -206,10 +206,6 @@ export default function Sidebar({ sidebar, setSidebar, perfil }) {
                 </span>
 
                 {active && <i className="lumora-nav-indicator" />}
-
-                {item.id === "dashboard" && (
-                  <em className="lumora-live-tag">AO VIVO</em>
-                )}
               </Link>
             );
           })}

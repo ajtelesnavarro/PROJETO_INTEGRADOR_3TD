@@ -504,16 +504,6 @@ export default function Orcamentos() {
         </aside>
       </div>
 
-      <section className="orc-create-banner">
-        <div className="orc-banner-decoration">L</div>
-        <div>
-          <span>PROPOSTAS SOB MEDIDA</span>
-          <h2>Uma solução inteligente começa com um bom planejamento.</h2>
-          <p>Monte uma proposta selecionando os serviços e dimensionando a estrutura do edifício.</p>
-        </div>
-        <button onClick={() => setShowForm(true)}>Montar orçamento <span>→</span></button>
-      </section>
-
       {showForm && (
         <div className="orc-modal-overlay" onMouseDown={(event) => {
           if (event.target === event.currentTarget) setShowForm(false);

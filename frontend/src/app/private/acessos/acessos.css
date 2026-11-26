@@ -1176,3 +1176,51 @@
   .ac-page .ac-side-heading h2 { font-size: 18px; }
   .ac-page .ac-token { grid-template-columns: 36px minmax(80px, 1fr) auto; }
 }
+
+
+.ac-environment-selection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.ac-environment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.ac-environment-option input {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.ac-environment-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ac-environment-option strong {
+  font-size: 14px;
+}
+
+.ac-environment-option small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+  .ac-environment-selection {
+    grid-template-columns: 1fr;
+  }
+}

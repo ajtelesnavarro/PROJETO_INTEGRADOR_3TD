@@ -201,8 +201,12 @@ export default function Acessos() {
 
   useEffect(() => {
     try {
-      const usuario = JSON.parse(localStorage.getItem("lumora_usuario") || "{}");
-      setCanRegisterEvent(["administrador", "porteiro"].includes(usuario.perfil));
+      const usuario = JSON.parse(
+        localStorage.getItem("lumora_usuario") || "{}",
+      );
+      setCanRegisterEvent(
+        ["administrador", "porteiro"].includes(usuario.perfil),
+      );
     } catch {}
   }, []);
 
@@ -231,7 +235,14 @@ export default function Acessos() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resEventos, resCredenciais, resPermissoes, resAmbientes, resAndares, resUsuarios] = await Promise.all([
+      const [
+        resEventos,
+        resCredenciais,
+        resPermissoes,
+        resAmbientes,
+        resAndares,
+        resUsuarios,
+      ] = await Promise.all([
         requisicaoAPI("/acessos-detalhados"),
         requisicaoAPI("/credenciais"),
         requisicaoAPI("/permissoes-acesso"),
@@ -241,25 +252,47 @@ export default function Acessos() {
       ]);
 
       const idPredioAtual = Number(obterPredioAtual()?.id_predio);
-      const idsAndares = new Set((resAndares.dados || [])
-        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
-        .map((andar) => Number(andar.id_andar)));
-      const idsAmbientes = new Set((resAmbientes.dados || [])
-        .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)))
-        .map((ambiente) => Number(ambiente.id_ambiente)));
-      const idsUsuarios = new Set((resUsuarios.dados || [])
-        .filter((usuario) => Number(usuario.id_predio) === idPredioAtual)
-        .map((usuario) => Number(usuario.id_usuario)));
-      const listaEv = (resEventos.dados || [])
-        .filter((evento) => idsAmbientes.has(Number(evento.id_ambiente)));
+      const idsAndares = new Set(
+        (resAndares.dados || [])
+          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+          .map((andar) => Number(andar.id_andar)),
+      );
+      const idsAmbientes = new Set(
+        (resAmbientes.dados || [])
+          .filter((ambiente) => idsAndares.has(Number(ambiente.id_andar)))
+          .map((ambiente) => Number(ambiente.id_ambiente)),
+      );
+      const idsUsuarios = new Set(
+        (resUsuarios.dados || [])
+          .filter((usuario) => Number(usuario.id_predio) === idPredioAtual)
+          .map((usuario) => Number(usuario.id_usuario)),
+      );
+      const listaEv = (resEventos.dados || []).filter((evento) =>
+        idsAmbientes.has(Number(evento.id_ambiente)),
+      );
       setRawEvents(listaEv);
-      setRawTokens((resCredenciais.dados || [])
-        .filter((credencial) => idsUsuarios.has(Number(credencial.id_usuario))));
-      setRawEnvironments((resAmbientes.dados || [])
-        .filter((ambiente) => idsAmbientes.has(Number(ambiente.id_ambiente))));
-      setRawUsers((resUsuarios.dados || []).filter((usuario) => idsUsuarios.has(Number(usuario.id_usuario))));
-      setRawPermissions((resPermissoes.dados || [])
-        .filter((permissao) => idsUsuarios.has(Number(permissao.id_usuario)) && idsAmbientes.has(Number(permissao.id_ambiente))));
+      setRawTokens(
+        (resCredenciais.dados || []).filter((credencial) =>
+          idsUsuarios.has(Number(credencial.id_usuario)),
+        ),
+      );
+      setRawEnvironments(
+        (resAmbientes.dados || []).filter((ambiente) =>
+          idsAmbientes.has(Number(ambiente.id_ambiente)),
+        ),
+      );
+      setRawUsers(
+        (resUsuarios.dados || []).filter((usuario) =>
+          idsUsuarios.has(Number(usuario.id_usuario)),
+        ),
+      );
+      setRawPermissions(
+        (resPermissoes.dados || []).filter(
+          (permissao) =>
+            idsUsuarios.has(Number(permissao.id_usuario)) &&
+            idsAmbientes.has(Number(permissao.id_ambiente)),
+        ),
+      );
 
       if (listaEv.length > 0) {
         setSelected((prev) => prev ?? listaEv[0].id_evento);
@@ -278,11 +311,19 @@ export default function Acessos() {
     return rawEvents.map((ev) => {
       const dt = ev.data_utilizacao ? new Date(ev.data_utilizacao) : null;
       const time = dt
-        ? dt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+        ? dt.toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
         : "--:--:--";
       const date = dt ? dt.toLocaleDateString("pt-BR") : "—";
 
-      const person = ev.nome_usuario || (ev.token_tentado_sufixo ? `Token …${ev.token_tentado_sufixo}` : "Token desconhecido");
+      const person =
+        ev.nome_usuario ||
+        (ev.token_tentado_sufixo
+          ? `Token …${ev.token_tentado_sufixo}`
+          : "Token desconhecido");
 
       return {
         id: ev.id_evento,
@@ -293,19 +334,30 @@ export default function Acessos() {
         method: METODO_LABEL[ev.tipo_credencial] || "RFID",
         result: ev.decisao_acesso === "permitido" ? "Permitido" : "Negado",
         place: ev.nome_ambiente || `Ambiente #${ev.id_ambiente}`,
-        device: ev.id_credencial ? "Leitor de acesso" : "Tentativa sem credencial",
+        device: ev.id_credencial
+          ? "Leitor de acesso"
+          : "Tentativa sem credencial",
         eventId: ev.id_evento,
         credentialId: ev.id_credencial,
         tokenSuffix: ev.token_tentado_sufixo || "",
-        eventStatus: STATUS_EVENTO_LABEL[ev.status_evento] || ev.status_evento || "—",
-        expiresAt: ev.data_expiracao ? new Date(ev.data_expiracao).toLocaleString("pt-BR") : "—",
-        permissionStatus: ev.status_permissao_evento ? STATUS_PERMISSAO_LABEL[ev.status_permissao_evento] || ev.status_permissao_evento : "Sem permissão cadastrada para a data",
-        permissionHours: ev.horario_permissao_evento || "Sem restrição de horário",
+        eventStatus:
+          STATUS_EVENTO_LABEL[ev.status_evento] || ev.status_evento || "—",
+        expiresAt: ev.data_expiracao
+          ? new Date(ev.data_expiracao).toLocaleString("pt-BR")
+          : "—",
+        permissionStatus: ev.status_permissao_evento
+          ? STATUS_PERMISSAO_LABEL[ev.status_permissao_evento] ||
+            ev.status_permissao_evento
+          : "Sem permissão cadastrada para a data",
+        permissionHours:
+          ev.horario_permissao_evento || "Sem restrição de horário",
         permissionDays: ev.dias_permissao_evento || "Dias não especificados",
         permissionId: ev.id_permissao_evento,
         location: ev.localizacao_ambiente || "Localização não cadastrada",
         date,
-        detail: MOTIVO_LABEL[ev.motivo] || "Evento registrado pelo controlador de acesso.",
+        detail:
+          MOTIVO_LABEL[ev.motivo] ||
+          "Evento registrado pelo controlador de acesso.",
         category: PERFIL_LABEL[ev.perfil_usuario] || "Não identificado",
       };
     });
@@ -331,18 +383,27 @@ export default function Acessos() {
     });
   }, [rawTokens]);
 
-  const permissions = useMemo(() => rawPermissions.map((permission) => ({
-    id: permission.id_permissao,
-    person: permission.nome_usuario,
-    role: PERFIL_LABEL[permission.perfil] || permission.perfil,
-    environment: permission.nome_ambiente,
-    location: permission.localizacao,
-    floor: permission.numero_andar,
-    status: STATUS_PERMISSAO_LABEL[permission.status_permissao] || permission.status_permissao,
-    period: `${formatarData(permission.data_inicio)} · ${permission.data_fim ? formatarData(permission.data_fim) : "sem validade final"}`,
-    hours: permission.horario_inicio && permission.horario_fim ? `${String(permission.horario_inicio).slice(0, 5)}–${String(permission.horario_fim).slice(0, 5)}` : "Sem restrição de horário",
-    days: permission.dias_semana || "Dias não especificados",
-  })), [rawPermissions]);
+  const permissions = useMemo(
+    () =>
+      rawPermissions.map((permission) => ({
+        id: permission.id_permissao,
+        person: permission.nome_usuario,
+        role: PERFIL_LABEL[permission.perfil] || permission.perfil,
+        environment: permission.nome_ambiente,
+        location: permission.localizacao,
+        floor: permission.numero_andar,
+        status:
+          STATUS_PERMISSAO_LABEL[permission.status_permissao] ||
+          permission.status_permissao,
+        period: `${formatarData(permission.data_inicio)} · ${permission.data_fim ? formatarData(permission.data_fim) : "sem validade final"}`,
+        hours:
+          permission.horario_inicio && permission.horario_fim
+            ? `${String(permission.horario_inicio).slice(0, 5)}–${String(permission.horario_fim).slice(0, 5)}`
+            : "Sem restrição de horário",
+        days: permission.dias_semana || "Dias não especificados",
+      })),
+    [rawPermissions],
+  );
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -386,7 +447,7 @@ export default function Acessos() {
       setToast(
         `Credencial de ${token.name} ${
           token.active ? "bloqueada" : "desbloqueada"
-        }.`
+        }.`,
       );
       carregarDados();
     } catch (erro) {
@@ -395,7 +456,9 @@ export default function Acessos() {
   };
 
   function abrirEdicaoCredencial(id) {
-    const credencial = rawTokens.find((item) => Number(item.id_credencial) === Number(id));
+    const credencial = rawTokens.find(
+      (item) => Number(item.id_credencial) === Number(id),
+    );
     if (!credencial) return;
     setRecordError("");
     setEditRecord({ tipo: "credencial", id });
@@ -409,18 +472,39 @@ export default function Acessos() {
   }
 
   function abrirEdicaoPermissao(id) {
-    const permissao = rawPermissions.find((item) => Number(item.id_permissao) === Number(id));
+    const permissao = rawPermissions.find(
+      (item) => Number(item.id_permissao) === Number(id),
+    );
+
     if (!permissao) return;
+
+    // Busca todas as permissões vinculadas ao mesmo usuário.
+    const permissoesUsuario = rawPermissions.filter(
+      (item) => Number(item.id_usuario) === Number(permissao.id_usuario),
+    );
+
+    // Mantém selecionados os ambientes com permissão ativa.
+    const ambientesSelecionados = permissoesUsuario
+      .filter((item) => item.status_permissao === "ativa")
+      .map((item) => String(item.id_ambiente));
+
     setRecordError("");
     setEditRecord({ tipo: "permissao", id });
+
     setEditForm({
       id_usuario: String(permissao.id_usuario),
-      id_ambiente: String(permissao.id_ambiente),
-      horario_inicio: permissao.horario_inicio ? String(permissao.horario_inicio).slice(0, 5) : "",
-      horario_fim: permissao.horario_fim ? String(permissao.horario_fim).slice(0, 5) : "",
+      id_ambientes: [...new Set(ambientesSelecionados)],
+      horario_inicio: permissao.horario_inicio
+        ? String(permissao.horario_inicio).slice(0, 5)
+        : "",
+      horario_fim: permissao.horario_fim
+        ? String(permissao.horario_fim).slice(0, 5)
+        : "",
       status_permissao: permissao.status_permissao,
       data_inicio: String(permissao.data_inicio || "").slice(0, 10),
-      data_fim: permissao.data_fim ? String(permissao.data_fim).slice(0, 10) : "",
+      data_fim: permissao.data_fim
+        ? String(permissao.data_fim).slice(0, 10)
+        : "",
       dias_semana: permissao.dias_semana || "",
     });
   }
@@ -431,10 +515,21 @@ export default function Acessos() {
     setSavingRecord(true);
     setRecordError("");
     try {
-      const endpoint = editRecord.tipo === "credencial"
-        ? `/credenciais/${editRecord.id}/editar`
-        : `/permissoes-acesso/${editRecord.id}`;
-      const resposta = await requisicaoAPI(endpoint, { method: "PATCH", body: JSON.stringify(editForm) });
+      const endpoint =
+        editRecord.tipo === "credencial"
+          ? `/credenciais/${editRecord.id}/editar`
+          : `/permissoes-acesso/${editRecord.id}`;
+      const resposta = await requisicaoAPI(endpoint, {
+        method: "PATCH",
+        body: JSON.stringify(
+          editRecord.tipo === "permissao"
+            ? {
+                ...editForm,
+                id_ambientes: editForm.id_ambientes,
+              }
+            : editForm,
+        ),
+      });
       setEditRecord(null);
       setToast(resposta.mensagem || "Registro atualizado.");
       await carregarDados();
@@ -476,9 +571,7 @@ export default function Acessos() {
         <div>
           <span className="ac-eyebrow">SEGURANÇA PREDIAL</span>
           <h1>Eventos de acesso</h1>
-          <p>
-            Acompanhe entradas, saídas e tentativas de acesso ao edifício.
-          </p>
+          <p>Acompanhe entradas, saídas e tentativas de acesso ao edifício.</p>
         </div>
 
         <div className="ac-heading-actions">
@@ -486,15 +579,24 @@ export default function Acessos() {
             <i />
             <span>Monitoramento ativo</span>
           </div>
-          {canRegisterEvent && <button className="ac-register-event-button" onClick={() => {
-            setEventError("");
-            setEventModalOpen(true);
-          }}>Registrar evento</button>}
+          {canRegisterEvent && (
+            <button
+              className="ac-register-event-button"
+              onClick={() => {
+                setEventError("");
+                setEventModalOpen(true);
+              }}
+            >
+              Registrar evento
+            </button>
+          )}
         </div>
       </div>
 
       {toast && (
-        <div className="ac-toast" role="status">{toast}</div>
+        <div className="ac-toast" role="status">
+          {toast}
+        </div>
       )}
 
       <section className="ac-overview">
@@ -570,10 +672,7 @@ export default function Acessos() {
               />
 
               {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  aria-label="Limpar busca"
-                >
+                <button onClick={() => setSearch("")} aria-label="Limpar busca">
                   <AccessIcon name="close" size={14} />
                 </button>
               )}
@@ -591,7 +690,7 @@ export default function Acessos() {
                   {item}
                   {item === "Negados" && <span>{denied}</span>}
                 </button>
-              )
+              ),
             )}
           </div>
 
@@ -689,9 +788,7 @@ export default function Acessos() {
               <>
                 <div
                   className={`ac-detail-status ${
-                    selectedEvent.result === "Permitido"
-                      ? "success"
-                      : "blocked"
+                    selectedEvent.result === "Permitido" ? "success" : "blocked"
                   }`}
                 >
                   <AccessIcon
@@ -732,7 +829,11 @@ export default function Acessos() {
                   </div>
                   <div>
                     <span>Credencial</span>
-                    <b>{selectedEvent.credentialId ? `#${selectedEvent.credentialId} · ${selectedEvent.method}` : "Não identificada"}</b>
+                    <b>
+                      {selectedEvent.credentialId
+                        ? `#${selectedEvent.credentialId} · ${selectedEvent.method}`
+                        : "Não identificada"}
+                    </b>
                   </div>
                   <div>
                     <span>Status do evento</span>
@@ -744,7 +845,11 @@ export default function Acessos() {
                   </div>
                   <div>
                     <span>Código tentado</span>
-                    <b>{selectedEvent.tokenSuffix ? `•••• ${selectedEvent.tokenSuffix}` : "—"}</b>
+                    <b>
+                      {selectedEvent.tokenSuffix
+                        ? `•••• ${selectedEvent.tokenSuffix}`
+                        : "—"}
+                    </b>
                   </div>
                   <div>
                     <span>Localização</span>
@@ -755,7 +860,13 @@ export default function Acessos() {
                 <div className="ac-event-permission">
                   <span>PERMISSÃO DE ACESSO NA DATA DO EVENTO</span>
                   <b>{selectedEvent.permissionStatus}</b>
-                  <small>{selectedEvent.permissionId ? `Permissão #${selectedEvent.permissionId} · ` : ""}{selectedEvent.permissionHours} · {selectedEvent.permissionDays}</small>
+                  <small>
+                    {selectedEvent.permissionId
+                      ? `Permissão #${selectedEvent.permissionId} · `
+                      : ""}
+                    {selectedEvent.permissionHours} ·{" "}
+                    {selectedEvent.permissionDays}
+                  </small>
                 </div>
 
                 <div className="ac-detail-message">
@@ -766,9 +877,7 @@ export default function Acessos() {
             ) : (
               <div className="ac-detail-empty">
                 <AccessIcon name="pin" size={22} />
-                <p>
-                  Selecione um evento para visualizar os detalhes.
-                </p>
+                <p>Selecione um evento para visualizar os detalhes.</p>
               </div>
             )}
           </section>
@@ -848,12 +957,23 @@ export default function Acessos() {
                   </span>
 
                   <div className="ac-token-actions">
-                    {canRegisterEvent && <button type="button" className="ac-record-edit-button" onClick={() => abrirEdicaoCredencial(token.id)}>Editar</button>}
+                    {canRegisterEvent && (
+                      <button
+                        type="button"
+                        className="ac-record-edit-button"
+                        onClick={() => abrirEdicaoCredencial(token.id)}
+                      >
+                        Editar
+                      </button>
+                    )}
                     <button
                       className={`ac-token-button ${token.active ? "block" : "unblock"}`}
                       onClick={() => toggleToken(token.id)}
                     >
-                      <AccessIcon name={token.active ? "lock" : "unlock"} size={14} />
+                      <AccessIcon
+                        name={token.active ? "lock" : "unlock"}
+                        size={14}
+                      />
                       {token.active ? "Bloquear" : "Liberar"}
                     </button>
                   </div>
@@ -875,110 +995,362 @@ export default function Acessos() {
             <h2>Permissões de acesso</h2>
             <p>Ambientes, horários e validade liberados para cada usuário.</p>
           </div>
-          <span className="ac-event-counter">{permissions.length} permissões</span>
+          <span className="ac-event-counter">
+            {permissions.length} permissões
+          </span>
         </div>
         <div className="ac-permission-list">
-          {permissions.length ? permissions.map((permission) => (
-            <article className="ac-permission-row" key={permission.id}>
-              <div className="ac-permission-person">
-                <b>{permission.person}</b>
-                <small>{permission.role}</small>
-              </div>
-              <div className="ac-permission-place">
-                <b>{permission.environment}</b>
-                <small>{permission.floor}º andar · {permission.location}</small>
-              </div>
-              <div className="ac-permission-schedule">
-                <b>{permission.hours}</b>
-                <small>{permission.days} · {permission.period}</small>
-              </div>
-              <span className={`ac-permission-status ${permission.status === "Ativa" ? "active" : "inactive"}`}>{permission.status}</span>
-              {canRegisterEvent && <button type="button" className="ac-record-edit-button" onClick={() => abrirEdicaoPermissao(permission.id)}>Editar</button>}
-            </article>
-          )) : <p className="ac-permission-empty">Nenhuma permissão de acesso cadastrada.</p>}
+          {permissions.length ? (
+            permissions.map((permission) => (
+              <article className="ac-permission-row" key={permission.id}>
+                <div className="ac-permission-person">
+                  <b>{permission.person}</b>
+                  <small>{permission.role}</small>
+                </div>
+                <div className="ac-permission-place">
+                  <b>{permission.environment}</b>
+                  <small>
+                    {permission.floor}º andar · {permission.location}
+                  </small>
+                </div>
+                <div className="ac-permission-schedule">
+                  <b>{permission.hours}</b>
+                  <small>
+                    {permission.days} · {permission.period}
+                  </small>
+                </div>
+                <span
+                  className={`ac-permission-status ${permission.status === "Ativa" ? "active" : "inactive"}`}
+                >
+                  {permission.status}
+                </span>
+                {canRegisterEvent && (
+                  <button
+                    type="button"
+                    className="ac-record-edit-button"
+                    onClick={() => abrirEdicaoPermissao(permission.id)}
+                  >
+                    Editar
+                  </button>
+                )}
+              </article>
+            ))
+          ) : (
+            <p className="ac-permission-empty">
+              Nenhuma permissão de acesso cadastrada.
+            </p>
+          )}
         </div>
       </section>
 
       {editRecord && (
-        <div className="ac-event-modal-overlay" onMouseDown={(evento) => {
-          if (evento.target === evento.currentTarget) setEditRecord(null);
-        }}>
-          <section className="ac-event-modal ac-record-edit-modal" role="dialog" aria-modal="true" aria-labelledby="ac-record-edit-title">
+        <div
+          className="ac-event-modal-overlay"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget) setEditRecord(null);
+          }}
+        >
+          <section
+            className="ac-event-modal ac-record-edit-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ac-record-edit-title"
+          >
             <header className="ac-event-modal-header">
               <div>
                 <span>GERENCIAMENTO DE ACESSO</span>
-                <h2 id="ac-record-edit-title">Editar {editRecord.tipo === "credencial" ? "credencial" : "permissão"}</h2>
-                <p>As alterações seguem os campos cadastrados no banco de dados.</p>
+                <h2 id="ac-record-edit-title">
+                  Editar{" "}
+                  {editRecord.tipo === "credencial"
+                    ? "credencial"
+                    : "permissão"}
+                </h2>
+                <p>
+                  As alterações seguem os campos cadastrados no banco de dados.
+                </p>
               </div>
-              <button type="button" onClick={() => setEditRecord(null)} aria-label="Fechar formulário">×</button>
+              <button
+                type="button"
+                onClick={() => setEditRecord(null)}
+                aria-label="Fechar formulário"
+              >
+                ×
+              </button>
             </header>
             <form onSubmit={salvarEdicao}>
-              {recordError && <p className="ac-event-form-error" role="alert">{recordError}</p>}
+              {recordError && (
+                <p className="ac-event-form-error" role="alert">
+                  {recordError}
+                </p>
+              )}
               {editRecord.tipo === "credencial" ? (
                 <div className="ac-event-form-grid">
-                  <label className="ac-event-form-wide">Usuário vinculado
-                    <select required value={editForm.id_usuario || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_usuario: evento.target.value }))}>
+                  <label className="ac-event-form-wide">
+                    Usuário vinculado
+                    <select
+                      required
+                      value={editForm.id_usuario || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          id_usuario: evento.target.value,
+                        }))
+                      }
+                    >
                       <option value="">Selecione o usuário</option>
-                      {rawUsers.map((usuario) => <option key={usuario.id_usuario} value={usuario.id_usuario}>{usuario.nome} · {PERFIL_LABEL[usuario.perfil] || usuario.perfil}</option>)}
+                      {rawUsers.map((usuario) => (
+                        <option
+                          key={usuario.id_usuario}
+                          value={usuario.id_usuario}
+                        >
+                          {usuario.nome} ·{" "}
+                          {PERFIL_LABEL[usuario.perfil] || usuario.perfil}
+                        </option>
+                      ))}
                     </select>
                   </label>
-                  <label>Tipo de credencial
-                    <select required value={editForm.tipo_credencial || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, tipo_credencial: evento.target.value }))}>
-                      <option value="cartao_rfid">Cartão RFID</option><option value="tag_nfc">Tag NFC</option><option value="qr_code">QR Code</option>
+                  <label>
+                    Tipo de credencial
+                    <select
+                      required
+                      value={editForm.tipo_credencial || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          tipo_credencial: evento.target.value,
+                        }))
+                      }
+                    >
+                      <option value="cartao_rfid">Cartão RFID</option>
+                      <option value="tag_nfc">Tag NFC</option>
+                      <option value="qr_code">QR Code</option>
                     </select>
                   </label>
-                  <label>Status
-                    <select required value={editForm.status || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, status: evento.target.value }))}>
-                      <option value="ativa">Ativa</option><option value="bloqueada">Bloqueada</option><option value="expirada">Expirada</option>
+                  <label>
+                    Status
+                    <select
+                      required
+                      value={editForm.status || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          status: evento.target.value,
+                        }))
+                      }
+                    >
+                      <option value="ativa">Ativa</option>
+                      <option value="bloqueada">Bloqueada</option>
+                      <option value="expirada">Expirada</option>
                     </select>
                   </label>
-                  <label>Bloqueada até (opcional)
-                    <input type="datetime-local" value={editForm.bloqueado_ate || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, bloqueado_ate: evento.target.value }))} />
+                  <label>
+                    Bloqueada até (opcional)
+                    <input
+                      type="datetime-local"
+                      value={editForm.bloqueado_ate || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          bloqueado_ate: evento.target.value,
+                        }))
+                      }
+                    />
                   </label>
-                  <label>Novo código (opcional)
-                    <input autoComplete="off" value={editForm.novo_token || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, novo_token: evento.target.value }))} placeholder="Deixe vazio para manter o atual" />
+                  <label>
+                    Novo código (opcional)
+                    <input
+                      autoComplete="off"
+                      value={editForm.novo_token || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          novo_token: evento.target.value,
+                        }))
+                      }
+                      placeholder="Deixe vazio para manter o atual"
+                    />
                     <small>O novo código será salvo somente como hash.</small>
                   </label>
                 </div>
               ) : (
                 <div className="ac-event-form-grid">
-                  <label>Usuário
-                    <select required value={editForm.id_usuario || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_usuario: evento.target.value }))}>
+                  <label>
+                    Usuário
+                    <select
+                      required
+                      value={editForm.id_usuario || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          id_usuario: evento.target.value,
+                        }))
+                      }
+                    >
                       <option value="">Selecione o usuário</option>
-                      {rawUsers.map((usuario) => <option key={usuario.id_usuario} value={usuario.id_usuario}>{usuario.nome} · {PERFIL_LABEL[usuario.perfil] || usuario.perfil}</option>)}
+                      {rawUsers.map((usuario) => (
+                        <option
+                          key={usuario.id_usuario}
+                          value={usuario.id_usuario}
+                        >
+                          {usuario.nome} ·{" "}
+                          {PERFIL_LABEL[usuario.perfil] || usuario.perfil}
+                        </option>
+                      ))}
                     </select>
                   </label>
-                  <label>Ambiente
-                    <select required value={editForm.id_ambiente || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, id_ambiente: evento.target.value }))}>
-                      <option value="">Selecione o ambiente</option>
-                      {rawEnvironments.map((ambiente) => <option key={ambiente.id_ambiente} value={ambiente.id_ambiente}>{ambiente.nome} · {ambiente.localizacao}</option>)}
+                  <div className="ac-event-form-wide">
+                    <label>Ambientes autorizados</label>
+
+                    <div className="ac-environment-selection">
+                      {rawEnvironments.map((ambiente) => {
+                        const idAmbiente = String(ambiente.id_ambiente);
+                        const marcado = (editForm.id_ambientes || []).includes(
+                          idAmbiente,
+                        );
+
+                        return (
+                          <label
+                            key={ambiente.id_ambiente}
+                            className="ac-environment-option"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={marcado}
+                              onChange={(evento) => {
+                                setEditForm((atual) => {
+                                  const selecionados = atual.id_ambientes || [];
+
+                                  return {
+                                    ...atual,
+                                    id_ambientes: evento.target.checked
+                                      ? [...selecionados, idAmbiente]
+                                      : selecionados.filter(
+                                          (item) => item !== idAmbiente,
+                                        ),
+                                  };
+                                });
+                              }}
+                            />
+
+                            <span>
+                              <strong>{ambiente.nome}</strong>
+                              <small>
+                                {ambiente.localizacao ||
+                                  "Localização não informada"}
+                              </small>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+
+                    <small>
+                      Marque todos os ambientes aos quais este usuário poderá
+                      acessar.
+                    </small>
+                  </div>
+                  <label>
+                    Status da permissão
+                    <select
+                      required
+                      value={editForm.status_permissao || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          status_permissao: evento.target.value,
+                        }))
+                      }
+                    >
+                      <option value="ativa">Ativa</option>
+                      <option value="inativa">Inativa</option>
+                      <option value="suspensa">Suspensa</option>
+                      <option value="expirada">Expirada</option>
                     </select>
                   </label>
-                  <label>Status da permissão
-                    <select required value={editForm.status_permissao || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, status_permissao: evento.target.value }))}>
-                      <option value="ativa">Ativa</option><option value="inativa">Inativa</option><option value="suspensa">Suspensa</option><option value="expirada">Expirada</option>
-                    </select>
+                  <label>
+                    Dias da semana
+                    <input
+                      maxLength={100}
+                      value={editForm.dias_semana || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          dias_semana: evento.target.value,
+                        }))
+                      }
+                      placeholder="Ex.: Segunda a sexta"
+                    />
                   </label>
-                  <label>Dias da semana
-                    <input maxLength={100} value={editForm.dias_semana || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, dias_semana: evento.target.value }))} placeholder="Ex.: Segunda a sexta" />
+                  <label>
+                    Horário inicial (opcional)
+                    <input
+                      type="time"
+                      value={editForm.horario_inicio || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          horario_inicio: evento.target.value,
+                        }))
+                      }
+                    />
                   </label>
-                  <label>Horário inicial (opcional)
-                    <input type="time" value={editForm.horario_inicio || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, horario_inicio: evento.target.value }))} />
+                  <label>
+                    Horário final (opcional)
+                    <input
+                      type="time"
+                      value={editForm.horario_fim || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          horario_fim: evento.target.value,
+                        }))
+                      }
+                    />
                   </label>
-                  <label>Horário final (opcional)
-                    <input type="time" value={editForm.horario_fim || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, horario_fim: evento.target.value }))} />
+                  <label>
+                    Início da validade
+                    <input
+                      required
+                      type="date"
+                      value={editForm.data_inicio || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          data_inicio: evento.target.value,
+                        }))
+                      }
+                    />
                   </label>
-                  <label>Início da validade
-                    <input required type="date" value={editForm.data_inicio || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, data_inicio: evento.target.value }))} />
-                  </label>
-                  <label>Fim da validade (opcional)
-                    <input type="date" value={editForm.data_fim || ""} onChange={(evento) => setEditForm((atual) => ({ ...atual, data_fim: evento.target.value }))} />
+                  <label>
+                    Fim da validade (opcional)
+                    <input
+                      type="date"
+                      value={editForm.data_fim || ""}
+                      onChange={(evento) =>
+                        setEditForm((atual) => ({
+                          ...atual,
+                          data_fim: evento.target.value,
+                        }))
+                      }
+                    />
                   </label>
                 </div>
               )}
               <footer className="ac-event-modal-footer">
-                <button type="button" className="ac-event-cancel" onClick={() => setEditRecord(null)}>Cancelar</button>
-                <button type="submit" className="ac-event-submit" disabled={savingRecord}>{savingRecord ? "Salvando…" : "Salvar alterações"}</button>
+                <button
+                  type="button"
+                  className="ac-event-cancel"
+                  onClick={() => setEditRecord(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="ac-event-submit"
+                  disabled={savingRecord}
+                >
+                  {savingRecord ? "Salvando…" : "Salvar alterações"}
+                </button>
               </footer>
             </form>
           </section>
@@ -986,69 +1358,235 @@ export default function Acessos() {
       )}
 
       {eventModalOpen && (
-        <div className="ac-event-modal-overlay" onMouseDown={(evento) => {
-          if (evento.target === evento.currentTarget) setEventModalOpen(false);
-        }}>
-          <section className="ac-event-modal" role="dialog" aria-modal="true" aria-labelledby="ac-event-modal-title">
+        <div
+          className="ac-event-modal-overlay"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget)
+              setEventModalOpen(false);
+          }}
+        >
+          <section
+            className="ac-event-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ac-event-modal-title"
+          >
             <header className="ac-event-modal-header">
               <div>
                 <span>REGISTRO DE MOVIMENTAÇÃO</span>
                 <h2 id="ac-event-modal-title">Registrar evento de acesso</h2>
                 <p>Selecione o ambiente e, se houver, a credencial usada.</p>
               </div>
-              <button type="button" onClick={() => setEventModalOpen(false)} aria-label="Fechar formulário">×</button>
+              <button
+                type="button"
+                onClick={() => setEventModalOpen(false)}
+                aria-label="Fechar formulário"
+              >
+                ×
+              </button>
             </header>
 
             <form onSubmit={registrarEvento}>
-              {eventError && <p className="ac-event-form-error" role="alert">{eventError}</p>}
+              {eventError && (
+                <p className="ac-event-form-error" role="alert">
+                  {eventError}
+                </p>
+              )}
               <div className="ac-event-form-grid">
-                <label className="ac-event-form-wide">Ambiente
-                  <select required value={eventForm.id_ambiente} onChange={(evento) => setEventForm((atual) => ({ ...atual, id_ambiente: evento.target.value }))}>
+                <label className="ac-event-form-wide">
+                  Ambiente
+                  <select
+                    required
+                    value={eventForm.id_ambiente}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        id_ambiente: evento.target.value,
+                      }))
+                    }
+                  >
                     <option value="">Selecione um ambiente</option>
-                    {rawEnvironments.map((ambiente) => <option key={ambiente.id_ambiente} value={ambiente.id_ambiente}>{ambiente.nome}{ambiente.localizacao ? ` · ${ambiente.localizacao}` : ""}</option>)}
+                    {rawEnvironments.map((ambiente) => (
+                      <option
+                        key={ambiente.id_ambiente}
+                        value={ambiente.id_ambiente}
+                      >
+                        {ambiente.nome}
+                        {ambiente.localizacao
+                          ? ` · ${ambiente.localizacao}`
+                          : ""}
+                      </option>
+                    ))}
                   </select>
                 </label>
-                <label className="ac-event-form-wide">Credencial
-                  <select value={eventForm.id_credencial} onChange={(evento) => setEventForm((atual) => ({ ...atual, id_credencial: evento.target.value }))}>
-                    <option value="">Tentativa sem credencial reconhecida</option>
-                    {rawTokens.map((credencial) => <option key={credencial.id_credencial} value={credencial.id_credencial}>#{credencial.id_credencial} · {credencial.nome_usuario} · {METODO_LABEL[credencial.tipo_credencial] || credencial.tipo_credencial} · {credencial.status}</option>)}
+                <label className="ac-event-form-wide">
+                  Credencial
+                  <select
+                    value={eventForm.id_credencial}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        id_credencial: evento.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">
+                      Tentativa sem credencial reconhecida
+                    </option>
+                    {rawTokens.map((credencial) => (
+                      <option
+                        key={credencial.id_credencial}
+                        value={credencial.id_credencial}
+                      >
+                        #{credencial.id_credencial} · {credencial.nome_usuario}{" "}
+                        ·{" "}
+                        {METODO_LABEL[credencial.tipo_credencial] ||
+                          credencial.tipo_credencial}{" "}
+                        · {credencial.status}
+                      </option>
+                    ))}
                   </select>
-                  <small>O código da credencial será consultado e armazenado somente como hash.</small>
+                  <small>
+                    O código da credencial será consultado e armazenado somente
+                    como hash.
+                  </small>
                 </label>
-                {!eventForm.id_credencial && <label className="ac-event-form-wide">Código tentado (opcional)
-                  <input autoComplete="off" value={eventForm.token_tentado} onChange={(evento) => setEventForm((atual) => ({ ...atual, token_tentado: evento.target.value }))} placeholder="Código apresentado no leitor" />
-                  <small>Se informado, o código será convertido em SHA-256 antes de salvar.</small>
-                </label>}
-                <label>Movimentação
-                  <select required value={eventForm.tipo_acesso} onChange={(evento) => setEventForm((atual) => ({ ...atual, tipo_acesso: evento.target.value }))}>
-                    <option value="entrada">Entrada</option><option value="saida">Saída</option>
+                {!eventForm.id_credencial && (
+                  <label className="ac-event-form-wide">
+                    Código tentado (opcional)
+                    <input
+                      autoComplete="off"
+                      value={eventForm.token_tentado}
+                      onChange={(evento) =>
+                        setEventForm((atual) => ({
+                          ...atual,
+                          token_tentado: evento.target.value,
+                        }))
+                      }
+                      placeholder="Código apresentado no leitor"
+                    />
+                    <small>
+                      Se informado, o código será convertido em SHA-256 antes de
+                      salvar.
+                    </small>
+                  </label>
+                )}
+                <label>
+                  Movimentação
+                  <select
+                    required
+                    value={eventForm.tipo_acesso}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        tipo_acesso: evento.target.value,
+                      }))
+                    }
+                  >
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
                   </select>
                 </label>
-                <label>Decisão
-                  <select required value={eventForm.decisao_acesso} onChange={(evento) => setEventForm((atual) => ({ ...atual, decisao_acesso: evento.target.value }))}>
-                    <option value="permitido">Permitido</option><option value="negado">Negado</option>
+                <label>
+                  Decisão
+                  <select
+                    required
+                    value={eventForm.decisao_acesso}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        decisao_acesso: evento.target.value,
+                      }))
+                    }
+                  >
+                    <option value="permitido">Permitido</option>
+                    <option value="negado">Negado</option>
                   </select>
                 </label>
-                <label>Status do evento
-                  <select required value={eventForm.status_evento} onChange={(evento) => setEventForm((atual) => ({ ...atual, status_evento: evento.target.value }))}>
-                    <option value="processando">Processando</option><option value="concluido">Concluído</option><option value="pendente">Pendente</option><option value="falha_comunicacao">Falha de comunicação</option><option value="bloqueado">Bloqueado</option><option value="falha">Falha</option>
+                <label>
+                  Status do evento
+                  <select
+                    required
+                    value={eventForm.status_evento}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        status_evento: evento.target.value,
+                      }))
+                    }
+                  >
+                    <option value="processando">Processando</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="falha_comunicacao">
+                      Falha de comunicação
+                    </option>
+                    <option value="bloqueado">Bloqueado</option>
+                    <option value="falha">Falha</option>
                   </select>
                 </label>
-                <label>Motivo
-                  <select required value={eventForm.motivo} onChange={(evento) => setEventForm((atual) => ({ ...atual, motivo: evento.target.value }))}>
-                    {MOTIVOS_EVENTO.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}
+                <label>
+                  Motivo
+                  <select
+                    required
+                    value={eventForm.motivo}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        motivo: evento.target.value,
+                      }))
+                    }
+                  >
+                    {MOTIVOS_EVENTO.map(([valor, rotulo]) => (
+                      <option key={valor} value={valor}>
+                        {rotulo}
+                      </option>
+                    ))}
                   </select>
                 </label>
-                <label>Data e hora do evento
-                  <input required type="datetime-local" value={eventForm.data_utilizacao} onChange={(evento) => setEventForm((atual) => ({ ...atual, data_utilizacao: evento.target.value }))} />
+                <label>
+                  Data e hora do evento
+                  <input
+                    required
+                    type="datetime-local"
+                    value={eventForm.data_utilizacao}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        data_utilizacao: evento.target.value,
+                      }))
+                    }
+                  />
                 </label>
-                <label>Expiração (opcional)
-                  <input type="datetime-local" value={eventForm.data_expiracao} onChange={(evento) => setEventForm((atual) => ({ ...atual, data_expiracao: evento.target.value }))} />
+                <label>
+                  Expiração (opcional)
+                  <input
+                    type="datetime-local"
+                    value={eventForm.data_expiracao}
+                    onChange={(evento) =>
+                      setEventForm((atual) => ({
+                        ...atual,
+                        data_expiracao: evento.target.value,
+                      }))
+                    }
+                  />
                 </label>
               </div>
               <footer className="ac-event-modal-footer">
-                <button type="button" className="ac-event-cancel" onClick={() => setEventModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="ac-event-submit" disabled={savingEvent || !rawEnvironments.length}>{savingEvent ? "Salvando…" : "Salvar evento"}</button>
+                <button
+                  type="button"
+                  className="ac-event-cancel"
+                  onClick={() => setEventModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="ac-event-submit"
+                  disabled={savingEvent || !rawEnvironments.length}
+                >
+                  {savingEvent ? "Salvando…" : "Salvar evento"}
+                </button>
               </footer>
             </form>
           </section>

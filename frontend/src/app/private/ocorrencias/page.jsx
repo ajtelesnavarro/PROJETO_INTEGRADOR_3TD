@@ -7,16 +7,43 @@ import "./ocorrencias.css";
 
 function Icon({ name, size = 18 }) {
   const paths = {
-    search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></>,
+    search: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </>
+    ),
     filter: <path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z" />,
     plus: <path d="M12 5v14M5 12h14" />,
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
     check: <path d="m5 12 4 4L19 6" />,
-    clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-    alert: <><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0Z" /><path d="M12 9v4m0 4h.01" /></>,
-    grid: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
-    list: <><path d="M9 6h12M9 12h12M9 18h12" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>,
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
+    alert: (
+      <>
+        <path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0Z" />
+        <path d="M12 9v4m0 4h.01" />
+      </>
+    ),
+    grid: (
+      <>
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </>
+    ),
+    list: (
+      <>
+        <path d="M9 6h12M9 12h12M9 18h12" />
+        <path d="M4 6h.01M4 12h.01M4 18h.01" />
+      </>
+    ),
   };
 
   return (
@@ -69,9 +96,9 @@ const STATUS_DB_TO_UI = {
 };
 
 const STATUS_UI_TO_DB = {
-  "Aberta": "aberta",
+  Aberta: "aberta",
   "Em andamento": "em_andamento",
-  "Resolvida": "resolvida",
+  Resolvida: "resolvida",
 };
 
 const PRIO_DB_TO_UI = {
@@ -118,46 +145,78 @@ export default function Ocorrencias() {
 
   const carregarDados = useCallback(async () => {
     try {
-      const [resPerfil, resOc, resDisp, resAmb, resAndares, resEq] = await Promise.all([
-        requisicaoAPI("/auth/me"),
-        requisicaoAPI("/ocorrencias?limite=200"),
-        requisicaoAPI("/dispositivos?limite=200"),
-        requisicaoAPI("/ambientes?limite=200"),
-        requisicaoAPI("/andares?limite=200"),
-        requisicaoAPI("/equipes"),
-      ]);
+      const [resPerfil, resOc, resDisp, resAmb, resAndares, resEq] =
+        await Promise.all([
+          requisicaoAPI("/auth/me"),
+          requisicaoAPI("/ocorrencias?limite=200"),
+          requisicaoAPI("/dispositivos?limite=200"),
+          requisicaoAPI("/ambientes?limite=200"),
+          requisicaoAPI("/andares?limite=200"),
+          requisicaoAPI("/equipes"),
+        ]);
 
       const usuarioAtual = resPerfil.dados || resPerfil;
       setUsuarioLogado(usuarioAtual);
-      const ehManutencao = String(usuarioAtual?.perfil || '').toLowerCase() === 'manutencao';
+      const ehManutencao =
+        String(usuarioAtual?.perfil || "").toLowerCase() === "manutencao";
       const listaOc = resOc.dados || [];
       const idPredioAtual = Number(obterPredioAtual()?.id_predio);
-      const idsAndares = new Set((resAndares.dados || [])
-        .filter((andar) => Number(andar.id_predio) === idPredioAtual)
-        .map((andar) => Number(andar.id_andar)));
-      const listaAmb = (resAmb.dados || []).filter((amb) => idsAndares.has(Number(amb.id_andar)));
-      const idsAmbientes = new Set(listaAmb.map((amb) => Number(amb.id_ambiente)));
-      const listaDisp = (resDisp.dados || []).filter((disp) =>
-        idsAmbientes.has(Number(disp.id_ambiente)) &&
-        (!ehManutencao || Number(disp.id_usuario) === Number(usuarioAtual.id))
+      const idsAndares = new Set(
+        (resAndares.dados || [])
+          .filter((andar) => Number(andar.id_predio) === idPredioAtual)
+          .map((andar) => Number(andar.id_andar)),
       );
-      const idsDispositivos = new Set(listaDisp.map((disp) => Number(disp.id_dispositivo)));
-      const listaEq = (resEq.dados || []).filter((eq) => Number(eq.id_predio) === idPredioAtual);
+      const listaAmb = (resAmb.dados || []).filter((amb) =>
+        idsAndares.has(Number(amb.id_andar)),
+      );
+      const idsAmbientes = new Set(
+        listaAmb.map((amb) => Number(amb.id_ambiente)),
+      );
+      const listaDisp = (resDisp.dados || []).filter(
+        (disp) =>
+          idsAmbientes.has(Number(disp.id_ambiente)) &&
+          (!ehManutencao ||
+            Number(disp.id_usuario) === Number(usuarioAtual.id)),
+      );
+      const idsDispositivos = new Set(
+        listaDisp.map((disp) => Number(disp.id_dispositivo)),
+      );
+      const listaEq = (resEq.dados || []).filter(
+        (eq) => Number(eq.id_predio) === idPredioAtual,
+      );
 
-      const perfilUsuario = String(usuarioAtual?.perfil || '').toLowerCase();
-      setRawOccurrences(ehManutencao
-        ? listaOc.filter((oc) => Number(oc.id_tecnico_responsavel) === Number(usuarioAtual.id_usuario ?? usuarioAtual.id))
-        : listaOc.filter((oc) => idsDispositivos.has(Number(oc.id_dispositivo)) ||
-            (perfilUsuario === 'funcionario' &&
-             Number(oc.id_tecnico_responsavel) === Number(usuarioAtual.id_usuario ?? usuarioAtual.id))));
+      const perfilUsuario = String(usuarioAtual?.perfil || "").toLowerCase();
+      setRawOccurrences(
+        ehManutencao
+          ? listaOc.filter(
+              (oc) =>
+                Number(oc.id_tecnico_responsavel) ===
+                Number(usuarioAtual.id_usuario ?? usuarioAtual.id),
+            )
+          : listaOc.filter(
+              (oc) =>
+                idsDispositivos.has(Number(oc.id_dispositivo)) ||
+                (perfilUsuario === "funcionario" &&
+                  Number(oc.id_tecnico_responsavel) ===
+                    Number(usuarioAtual.id_usuario ?? usuarioAtual.id)),
+            ),
+      );
       setDispositivos(listaDisp);
       setAmbientes(listaAmb);
       setEquipes(listaEq);
-      setUsuarios((resEq.usuarios || []).filter((usuario) => Number(usuario.id_predio) === idPredioAtual));
+      setUsuarios(
+        (resEq.usuarios || []).filter(
+          (usuario) => Number(usuario.id_predio) === idPredioAtual,
+        ),
+      );
 
       setForm((prev) => ({
         ...prev,
-        id_dispositivo: prev.id_dispositivo || (listaDisp[0]?.id_dispositivo ? String(listaDisp[0].id_dispositivo) : ""),
+        id_dispositivo:
+          prev.id_dispositivo ||
+          (listaDisp[0]?.id_dispositivo
+            ? String(listaDisp[0].id_dispositivo)
+            : ""),
         responsibleKey: prev.responsibleKey || "",
       }));
     } catch (erro) {
@@ -170,22 +229,35 @@ export default function Ocorrencias() {
   }, [carregarDados]);
 
   const responsibleOptions = useMemo(() => {
-    const opts = [{ key: "", label: "Não atribuído" }];
-    equipes.forEach((eq) => {
-      opts.push({ key: `eq:${eq.id_equipe}`, label: eq.nome_equipe });
+    const equipesOperacionais = equipes.filter((eq) => {
+      const nome = String(eq.nome_equipe || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+
+      return nome === "manutencao predial" || nome === "suporte tecnico";
     });
-    usuarios.filter((u) => String(u.perfil || '').toLowerCase() === 'manutencao').forEach((u) => {
-      opts.push({ key: `tec:${u.id_usuario}`, label: `${u.nome} (Funcionário)` });
-    });
-    return opts;
-  }, [equipes, usuarios]);
+
+    return [
+      { key: "", label: "Não atribuído" },
+      ...equipesOperacionais.map((eq) => ({
+        key: `eq:${eq.id_equipe}`,
+        label: eq.nome_equipe,
+      })),
+    ];
+  }, [equipes]);
 
   const occurrences = useMemo(() => {
     return rawOccurrences.map((oc) => {
-      const disp = dispositivos.find((d) => d.id_dispositivo === oc.id_dispositivo);
+      const disp = dispositivos.find(
+        (d) => d.id_dispositivo === oc.id_dispositivo,
+      );
       const amb = ambientes.find((a) => a.id_ambiente === disp?.id_ambiente);
       const eq = equipes.find((e) => e.id_equipe === oc.id_equipe_responsavel);
-      const tec = usuarios.find((u) => u.id_usuario === oc.id_tecnico_responsavel);
+      const tec = usuarios.find(
+        (u) => u.id_usuario === oc.id_tecnico_responsavel,
+      );
 
       let responsibleKey = "";
       let responsibleLabel = "Não atribuído";
@@ -225,7 +297,7 @@ export default function Ocorrencias() {
 
   const selected = useMemo(
     () => occurrences.find((o) => o.rawId === selectedId) || null,
-    [occurrences, selectedId]
+    [occurrences, selectedId],
   );
 
   const filteredOccurrences = useMemo(() => {
@@ -249,11 +321,17 @@ export default function Ocorrencias() {
     });
   }, [occurrences, search, statusFilter, priorityFilter]);
 
-  const openCount = occurrences.filter((item) => item.status === "Aberta").length;
-  const progressCount = occurrences.filter((item) => item.status === "Em andamento").length;
-  const resolvedCount = occurrences.filter((item) => item.status === "Resolvida").length;
+  const openCount = occurrences.filter(
+    (item) => item.status === "Aberta",
+  ).length;
+  const progressCount = occurrences.filter(
+    (item) => item.status === "Em andamento",
+  ).length;
+  const resolvedCount = occurrences.filter(
+    (item) => item.status === "Resolvida",
+  ).length;
   const highPriorityCount = occurrences.filter(
-    (item) => item.priority === "Alta" && item.status !== "Resolvida"
+    (item) => item.priority === "Alta" && item.status !== "Resolvida",
   ).length;
 
   async function updateStatus(item, newStatus) {
@@ -282,8 +360,12 @@ export default function Ocorrencias() {
   async function updateResponsible(item, key) {
     try {
       const payload = {
-        id_equipe_responsavel: key.startsWith("eq:") ? Number(key.slice(3)) : null,
-        id_tecnico_responsavel: key.startsWith("tec:") ? Number(key.slice(4)) : null,
+        id_equipe_responsavel: key.startsWith("eq:")
+          ? Number(key.slice(3))
+          : null,
+        id_tecnico_responsavel: key.startsWith("tec:")
+          ? Number(key.slice(4))
+          : null,
       };
 
       await requisicaoAPI(`/ocorrencias/${item.rawId}`, {
@@ -310,7 +392,9 @@ export default function Ocorrencias() {
       const payload = {
         id_dispositivo: Number(form.id_dispositivo),
         titulo: form.title.trim(),
-        descricao: form.description.trim() || "Ocorrência registrada via painel operacional.",
+        descricao:
+          form.description.trim() ||
+          "Ocorrência registrada via painel operacional.",
         prioridade: form.priority,
         status_ocorrencia: "aberta",
         id_equipe_responsavel: form.responsibleKey.startsWith("eq:")
@@ -352,7 +436,10 @@ export default function Ocorrencias() {
         </div>
 
         {usuarioLogado?.perfil === "administrador" && (
-          <button className="oc-primary-button" onClick={() => setModalOpen(true)}>
+          <button
+            className="oc-primary-button"
+            onClick={() => setModalOpen(true)}
+          >
             <Icon name="plus" size={17} />
             Nova ocorrência
           </button>
@@ -509,11 +596,15 @@ export default function Ocorrencias() {
                         onClick={() => setSelectedId(item.rawId)}
                       >
                         <strong>{item.title}</strong>
-                        <small>{item.id} · {item.location}</small>
+                        <small>
+                          {item.id} · {item.location}
+                        </small>
                       </button>
                     </td>
 
-                    <td><Priority value={item.priority} /></td>
+                    <td>
+                      <Priority value={item.priority} />
+                    </td>
 
                     <td>{item.requester}</td>
 
@@ -521,16 +612,22 @@ export default function Ocorrencias() {
                       <select
                         className="oc-responsible-select"
                         value={item.responsibleKey}
-                        disabled={usuarioLogado?.perfil !== 'administrador'}
-                        onChange={(e) => updateResponsible(item, e.target.value)}
+                        disabled={usuarioLogado?.perfil !== "administrador"}
+                        onChange={(e) =>
+                          updateResponsible(item, e.target.value)
+                        }
                       >
                         {responsibleOptions.map((opt) => (
-                          <option key={opt.key} value={opt.key}>{opt.label}</option>
+                          <option key={opt.key} value={opt.key}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                     </td>
 
-                    <td><Status value={item.status} /></td>
+                    <td>
+                      <Status value={item.status} />
+                    </td>
 
                     <td className="oc-date">{item.opened}</td>
 
@@ -560,14 +657,16 @@ export default function Ocorrencias() {
           <div className="oc-kanban">
             {["Aberta", "Em andamento", "Resolvida"].map((status) => {
               const items = filteredOccurrences.filter(
-                (item) => item.status === status
+                (item) => item.status === status,
               );
 
               return (
                 <div className="oc-kanban-column" key={status}>
                   <div className="oc-kanban-heading">
                     <div>
-                      <i className={`oc-kanban-dot ${status.toLowerCase().replaceAll(" ", "-")}`} />
+                      <i
+                        className={`oc-kanban-dot ${status.toLowerCase().replaceAll(" ", "-")}`}
+                      />
                       <strong>{status}</strong>
                     </div>
                     <span>{items.length}</span>
@@ -581,7 +680,9 @@ export default function Ocorrencias() {
                       </div>
 
                       <h3>{item.title}</h3>
-                      <p>{item.category} · {item.location}</p>
+                      <p>
+                        {item.category} · {item.location}
+                      </p>
 
                       <div className="oc-kanban-card-footer">
                         <span>{item.requester}</span>
@@ -596,7 +697,9 @@ export default function Ocorrencias() {
                           onClick={() =>
                             updateStatus(
                               item,
-                              status === "Aberta" ? "Em andamento" : "Resolvida"
+                              status === "Aberta"
+                                ? "Em andamento"
+                                : "Resolvida",
                             )
                           }
                         >
@@ -619,7 +722,10 @@ export default function Ocorrencias() {
       </section>
 
       {modalOpen && usuarioLogado?.perfil === "administrador" && (
-        <div className="oc-modal-overlay" onMouseDown={() => setModalOpen(false)}>
+        <div
+          className="oc-modal-overlay"
+          onMouseDown={() => setModalOpen(false)}
+        >
           <section
             className="oc-modal"
             onMouseDown={(e) => e.stopPropagation()}
@@ -657,11 +763,15 @@ export default function Ocorrencias() {
                   <select
                     required
                     value={form.id_dispositivo}
-                    onChange={(e) => setForm({ ...form, id_dispositivo: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, id_dispositivo: e.target.value })
+                    }
                   >
                     <option value="">Selecione um dispositivo...</option>
                     {dispositivos.map((d) => {
-                      const amb = ambientes.find((a) => a.id_ambiente === d.id_ambiente);
+                      const amb = ambientes.find(
+                        (a) => a.id_ambiente === d.id_ambiente,
+                      );
                       return (
                         <option key={d.id_dispositivo} value={d.id_dispositivo}>
                           {d.nome} {amb ? `(${amb.nome})` : ""}
@@ -675,7 +785,9 @@ export default function Ocorrencias() {
                   Prioridade
                   <select
                     value={form.priority}
-                    onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, priority: e.target.value })
+                    }
                   >
                     <option value="baixa">Baixa</option>
                     <option value="media">Média</option>
@@ -688,10 +800,14 @@ export default function Ocorrencias() {
                 Responsável pelo atendimento
                 <select
                   value={form.responsibleKey}
-                  onChange={(e) => setForm({ ...form, responsibleKey: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, responsibleKey: e.target.value })
+                  }
                 >
                   {responsibleOptions.map((opt) => (
-                    <option key={opt.key} value={opt.key}>{opt.label}</option>
+                    <option key={opt.key} value={opt.key}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -702,7 +818,9 @@ export default function Ocorrencias() {
                   required
                   rows="4"
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
                   placeholder="Descreva o problema encontrado..."
                 />
               </label>
@@ -727,7 +845,10 @@ export default function Ocorrencias() {
       )}
 
       {selected && (
-        <div className="oc-modal-overlay" onMouseDown={() => setSelectedId(null)}>
+        <div
+          className="oc-modal-overlay"
+          onMouseDown={() => setSelectedId(null)}
+        >
           <section
             className="oc-modal oc-details-modal"
             onMouseDown={(e) => e.stopPropagation()}
@@ -736,7 +857,9 @@ export default function Ocorrencias() {
               <div>
                 <span className="oc-section-label">{selected.id}</span>
                 <h2>{selected.title}</h2>
-                <p>{selected.category} · {selected.location}</p>
+                <p>
+                  {selected.category} · {selected.location}
+                </p>
               </div>
 
               <button
@@ -771,7 +894,9 @@ export default function Ocorrencias() {
                 onChange={(e) => updateResponsible(selected, e.target.value)}
               >
                 {responsibleOptions.map((opt) => (
-                  <option key={opt.key} value={opt.key}>{opt.label}</option>
+                  <option key={opt.key} value={opt.key}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </label>
@@ -816,7 +941,9 @@ export default function Ocorrencias() {
 
       {toast && (
         <div className="oc-toast">
-          <span><Icon name="check" size={16} /></span>
+          <span>
+            <Icon name="check" size={16} />
+          </span>
           {toast}
         </div>
       )}

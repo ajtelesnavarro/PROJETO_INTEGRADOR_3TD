@@ -81,7 +81,7 @@
 
 .about-image-copy span,
 .mission-card > span {
-    font: 10px "DM Mono";
+    font: 12px "DM Mono";
     letter-spacing: 1.5px;
     color: #A78BFA;
 }
@@ -102,7 +102,7 @@
     gap: 16px;
     align-items: center;
     color: #D7DDF0;
-    font: 9px "DM Mono";
+    font: 12px "DM Mono";
 }
 
 .about-image-note b {
@@ -211,7 +211,7 @@
 }
 
 .mission-card p {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.85;
     color: #64708D;
     margin: 0;
@@ -246,7 +246,7 @@
 }
 
 .value span {
-    font: 10px "DM Mono";
+    font: 14px "DM Mono";
     color: #A78BFA;
 }
 
@@ -259,7 +259,7 @@
 
 .value p {
     color: #AAB6D3;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.8;
 }
 
@@ -290,7 +290,7 @@
 .platform-heading p {
     max-width: 360px;
     color: #64708D;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.8;
     margin: 0;
 }
@@ -318,7 +318,7 @@
 }
 
 .platform-number {
-    font: 10px "DM Mono";
+    font: 14px "DM Mono";
     color: #8995B0;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .platform-card p {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.8;
     color: #64708D;
     margin: 0;
@@ -369,7 +369,7 @@
 .audience-copy {
     max-width: 440px;
     color: #64708D;
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1.9;
     margin-top: 25px;
 }
@@ -384,7 +384,7 @@
     min-height: 125px;
     padding: 24px;
     border: 1px solid #DCE3F2;
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 800;
     color: #172B5E;
     border-radius: 7px;
@@ -424,7 +424,7 @@
 
 .centered-cta p {
     color: #AAB6D3;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.8;
     margin: 18px auto 28px;
     max-width: 480px;

@@ -222,7 +222,7 @@ export default function PrediosAndares() {
     if (!predioAtual) return null;
 
     const logradouroDetalhado = [
-      predioAtual.rua,
+      predioAtual.logradouro,
       predioAtual.numero,
       predioAtual.complemento,
       predioAtual.bairro,
@@ -258,7 +258,7 @@ export default function PrediosAndares() {
       id_predio: null,
       nome_predio: "",
       cep: "",
-      rua: "",
+      logradouro: "",
       numero: "",
       complemento: "",
       bairro: "",
@@ -274,7 +274,7 @@ export default function PrediosAndares() {
       id_predio: predio.id_predio,
       nome_predio: predio.nome_predio || "",
       cep: predio.cep || "",
-      rua: predio.rua || "",
+      logradouro: predio.logradouro || "",
       numero: predio.numero || "",
       complemento: predio.complemento || "",
       bairro: predio.bairro || "",
@@ -456,7 +456,7 @@ export default function PrediosAndares() {
     const payload = {
       nome_predio: modalPredio.nome_predio.trim(),
       cep: modalPredio.cep.trim(),
-      rua: modalPredio.rua.trim(),
+      logradouro: modalPredio.logradouro.trim(),
       numero: modalPredio.numero.trim(),
       complemento: modalPredio.complemento.trim() || null,
       bairro: modalPredio.bairro.trim(),
@@ -593,7 +593,7 @@ export default function PrediosAndares() {
               <div className="pa-building-meta">
                 <span>
                   <Icon>⌂</Icon>
-                  {edificioFormatado.rua}, {edificioFormatado.numero}
+                  {edificioFormatado.logradouro}, {edificioFormatado.numero}
                 </span>
 
                 <span>
@@ -818,7 +818,8 @@ export default function PrediosAndares() {
     className="pa-add-sector-button"
     onClick={() => abrirModalNovoSetor(andar)}
   >
-    + Cadastrar setor
+    Cadastrar setor
+    <span>＋</span>
   </button>
 </div>
 
@@ -1492,9 +1493,9 @@ export default function PrediosAndares() {
               <label>
                 Rua / Avenida
                 <input
-                  value={modalPredio.rua}
+                  value={modalPredio.logradouro}
                   onChange={(e) =>
-                    setModalPredio((a) => ({ ...a, rua: e.target.value }))
+                    setModalPredio((a) => ({ ...a, logradouro: e.target.value }))
                   }
                   required
                 />

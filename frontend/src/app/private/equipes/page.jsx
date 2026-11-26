@@ -61,9 +61,7 @@ const icons = {
   ),
   close: <path d="m18 6-12 12M6 6l12 12" />,
   check: <path d="m5 12 4 4L19 6" />,
-  shield: (
-    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
-  ),
+  shield: <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />,
   filter: (
     <>
       <path d="M4 6h16M7 12h10m-7 6h4" />
@@ -115,7 +113,17 @@ const emptyForm = {
   since: new Date().toLocaleDateString("pt-BR"),
 };
 
-const usuarioVazio = { nome: "", email: "", cpf: "", telefone: "", senha: "", perfil: "porteiro", ambientes: [], tipo_credencial: "cartao_rfid", token_credencial: "" };
+const usuarioVazio = {
+  nome: "",
+  email: "",
+  cpf: "",
+  telefone: "",
+  senha: "",
+  perfil: "funcionario",
+  ambientes: [],
+  tipo_credencial: "cartao_rfid",
+  token_credencial: "",
+};
 
 export default function Page() {
   const [teams, setTeams] = useState([]);
@@ -149,7 +157,8 @@ export default function Page() {
           .slice(0, 3)
           .toUpperCase(),
         color: CORES_EQUIPE[idx % CORES_EQUIPE.length],
-        description: eq.descricao || "Equipe operacional vinculada ao edifício.",
+        description:
+          eq.descricao || "Equipe operacional vinculada ao edifício.",
         members: (eq.membros || []).map((m) => ({
           id: m.id_usuario,
           name: m.nome,
@@ -168,12 +177,13 @@ export default function Page() {
 
       if (lista.length > 0) {
         setActiveTeam((prev) => {
-          const teamId = prev && lista.some((t) => t.id === prev) ? prev : lista[0].id;
+          const teamId =
+            prev && lista.some((t) => t.id === prev) ? prev : lista[0].id;
           const currentTeam = lista.find((t) => t.id === teamId);
           setSelectedMember((prevMem) =>
             prevMem && currentTeam?.members.some((m) => m.id === prevMem)
               ? prevMem
-              : currentTeam?.members[0]?.id ?? null
+              : (currentTeam?.members[0]?.id ?? null),
           );
           return teamId;
         });
@@ -189,7 +199,9 @@ export default function Page() {
 
   useEffect(() => {
     try {
-      setPerfilAtual(JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || "");
+      setPerfilAtual(
+        JSON.parse(localStorage.getItem("lumora_usuario") || "{}").perfil || "",
+      );
     } catch {
       setPerfilAtual("");
     }
@@ -199,15 +211,15 @@ export default function Page() {
 
   const allMembers = useMemo(
     () => teams.flatMap((item) => item.members),
-    [teams]
+    [teams],
   );
 
   const activeMembers = allMembers.filter(
-    (member) => member.status === "Ativo"
+    (member) => member.status === "Ativo",
   ).length;
 
   const absentMembers = allMembers.filter(
-    (member) => member.status === "Ausente"
+    (member) => member.status === "Ausente",
   ).length;
 
   const visibleMembers = useMemo(() => {
@@ -221,16 +233,13 @@ export default function Page() {
         member.role.toLowerCase().includes(term) ||
         member.email.toLowerCase().includes(term);
 
-      const matchesFilter =
-        filter === "Todos" || member.status === filter;
+      const matchesFilter = filter === "Todos" || member.status === filter;
 
       return matchesSearch && matchesFilter;
     });
   }, [team, search, filter]);
 
-  const selected = team?.members.find(
-    (member) => member.id === selectedMember
-  );
+  const selected = team?.members.find((member) => member.id === selectedMember);
 
   function changeTeam(id) {
     const nextTeam = teams.find((item) => item.id === id);
@@ -273,17 +282,20 @@ export default function Page() {
 
     try {
       if (editingMember) {
-        await requisicaoAPI(`/equipes/${activeTeam}/integrantes/${editingMember}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            nome: form.name,
-            perfil: form.role,
-            email: form.email,
-            telefone: form.phone,
-            status: form.status,
-            since: form.since,
-          }),
-        });
+        await requisicaoAPI(
+          `/equipes/${activeTeam}/integrantes/${editingMember}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              nome: form.name,
+              perfil: form.role,
+              email: form.email,
+              telefone: form.phone,
+              status: form.status,
+              since: form.since,
+            }),
+          },
+        );
         setFeedback("Integrante atualizado com sucesso.");
       } else {
         if (!form.id_usuario) {
@@ -340,10 +352,15 @@ export default function Page() {
       return;
     }
     try {
-      await requisicaoAPI("/usuarios", { method: "POST", body: JSON.stringify(userForm) });
+      await requisicaoAPI("/usuarios", {
+        method: "POST",
+        body: JSON.stringify(userForm),
+      });
       setUserModalOpen(false);
       setUserForm(usuarioVazio);
-      setFeedback("Usuário cadastrado. Ele já pode ser vinculado a uma equipe.");
+      setFeedback(
+        "Usuário cadastrado. Ele já pode ser vinculado a uma equipe.",
+      );
       await carregarEquipes();
     } catch (erro) {
       setErroUsuario(erro.message || "Erro ao cadastrar usuário.");
@@ -371,7 +388,9 @@ export default function Page() {
     const member = team?.members.find((item) => item.id === memberId);
     if (!member) return;
 
-    if (!window.confirm(`Deseja realmente desvincular ${member.name} da equipe?`)) {
+    if (
+      !window.confirm(`Deseja realmente desvincular ${member.name} da equipe?`)
+    ) {
       return;
     }
 
@@ -414,17 +433,21 @@ export default function Page() {
         </div>
 
         <div className="tm-page-actions">
-          {perfilAtual === "administrador" && <button className="tm-primary-button tm-user-action" onClick={abrirCadastroUsuario}>
-            <Icon name="plus" size={17} />
-            Cadastrar usuário
-          </button>}
-          <button className="tm-primary-button tm-secondary-action" onClick={() => setTeamModalOpen(true)}>
+          {perfilAtual === "administrador" && (
+            <button
+              className="tm-primary-button tm-user-action"
+              onClick={abrirCadastroUsuario}
+            >
+              <Icon name="plus" size={17} />
+              Cadastrar usuário
+            </button>
+          )}
+          <button
+            className="tm-primary-button tm-secondary-action"
+            onClick={() => setTeamModalOpen(true)}
+          >
             <Icon name="plus" size={17} />
             Criar equipe
-          </button>
-          <button className="tm-primary-button" onClick={openNewMember} disabled={!team}>
-            <Icon name="plus" size={17} />
-            Adicionar integrante
           </button>
         </div>
       </header>
@@ -517,7 +540,6 @@ export default function Page() {
               </button>
             ))}
           </div>
-
         </aside>
 
         <main className="tm-members-area">
@@ -678,7 +700,9 @@ export default function Page() {
           ) : (
             <div className="tm-empty">
               <strong>Nenhuma equipe cadastrada no banco</strong>
-              <p>Cadastre equipes na tabela equipe para gerenciar os integrantes.</p>
+              <p>
+                Cadastre equipes na tabela equipe para gerenciar os integrantes.
+              </p>
             </div>
           )}
         </main>
@@ -779,7 +803,10 @@ export default function Page() {
       </section>
 
       {modalOpen && (
-        <div className="tm-modal-overlay" onMouseDown={() => setModalOpen(false)}>
+        <div
+          className="tm-modal-overlay"
+          onMouseDown={() => setModalOpen(false)}
+        >
           <section
             className="tm-modal"
             role="dialog"
@@ -793,7 +820,9 @@ export default function Page() {
                 <h2 id="tm-modal-title">
                   {editingMember ? "Editar integrante" : "Novo integrante"}
                 </h2>
-                <p>Preencha os dados do funcionário e seu vínculo com a equipe.</p>
+                <p>
+                  Preencha os dados do funcionário e seu vínculo com a equipe.
+                </p>
               </div>
               <button
                 className="tm-modal-close"
@@ -814,7 +843,10 @@ export default function Page() {
                     disabled={Boolean(editingMember)}
                     required={!editingMember}
                     onChange={(event) => {
-                      const usuario = usuariosDisponiveis.find((item) => String(item.id_usuario) === event.target.value);
+                      const usuario = usuariosDisponiveis.find(
+                        (item) =>
+                          String(item.id_usuario) === event.target.value,
+                      );
                       setForm((atual) => ({
                         ...atual,
                         id_usuario: event.target.value,
@@ -827,7 +859,10 @@ export default function Page() {
                   >
                     <option value="">Selecione um usuário existente</option>
                     {usuariosDisponiveis.map((usuario) => (
-                      <option key={usuario.id_usuario} value={String(usuario.id_usuario)}>
+                      <option
+                        key={usuario.id_usuario}
+                        value={String(usuario.id_usuario)}
+                      >
                         {usuario.nome} · {usuario.email}
                       </option>
                     ))}
@@ -851,7 +886,7 @@ export default function Page() {
                     name="role"
                     value={form.role}
                     onChange={handleFormChange}
-                    disabled
+                    disabled={Boolean(editingMember)}
                   >
                     <option value="administrador">Administrador</option>
                     <option value="manutencao">Manutenção</option>
@@ -927,15 +962,32 @@ export default function Page() {
       )}
 
       {teamModalOpen && (
-        <div className="tm-modal-overlay" onMouseDown={() => setTeamModalOpen(false)}>
-          <section className="tm-modal" role="dialog" aria-modal="true" aria-labelledby="tm-team-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div
+          className="tm-modal-overlay"
+          onMouseDown={() => setTeamModalOpen(false)}
+        >
+          <section
+            className="tm-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tm-team-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
             <div className="tm-modal-header">
               <div>
                 <span className="tm-section-label">CADASTRO DO PRÉDIO</span>
                 <h2 id="tm-team-modal-title">Criar equipe</h2>
-                <p>A equipe será criada vazia. Você poderá vincular usuários cadastrados depois.</p>
+                <p>
+                  A equipe será criada vazia. Você poderá vincular usuários
+                  cadastrados depois.
+                </p>
               </div>
-              <button type="button" className="tm-modal-close" onClick={() => setTeamModalOpen(false)} aria-label="Fechar">
+              <button
+                type="button"
+                className="tm-modal-close"
+                onClick={() => setTeamModalOpen(false)}
+                aria-label="Fechar"
+              >
                 <Icon name="close" size={19} />
               </button>
             </div>
@@ -943,16 +995,44 @@ export default function Page() {
               <div className="tm-form-grid">
                 <label className="tm-form-full">
                   Nome da equipe
-                  <input required maxLength={100} value={teamForm.nome_equipe} onChange={(event) => setTeamForm((atual) => ({ ...atual, nome_equipe: event.target.value }))} />
+                  <input
+                    required
+                    maxLength={100}
+                    value={teamForm.nome_equipe}
+                    onChange={(event) =>
+                      setTeamForm((atual) => ({
+                        ...atual,
+                        nome_equipe: event.target.value,
+                      }))
+                    }
+                  />
                 </label>
                 <label className="tm-form-full">
                   Descrição
-                  <textarea maxLength={255} value={teamForm.descricao} onChange={(event) => setTeamForm((atual) => ({ ...atual, descricao: event.target.value }))} />
+                  <textarea
+                    maxLength={255}
+                    value={teamForm.descricao}
+                    onChange={(event) =>
+                      setTeamForm((atual) => ({
+                        ...atual,
+                        descricao: event.target.value,
+                      }))
+                    }
+                  />
                 </label>
               </div>
               <div className="tm-modal-footer">
-                <button type="button" className="tm-cancel-button" onClick={() => setTeamModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="tm-primary-button"><Icon name="check" size={16} />Criar equipe</button>
+                <button
+                  type="button"
+                  className="tm-cancel-button"
+                  onClick={() => setTeamModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button type="submit" className="tm-primary-button">
+                  <Icon name="check" size={16} />
+                  Criar equipe
+                </button>
               </div>
             </form>
           </section>
@@ -960,46 +1040,234 @@ export default function Page() {
       )}
 
       {userModalOpen && perfilAtual === "administrador" && (
-        <div className="tm-modal-overlay" onMouseDown={() => setUserModalOpen(false)}>
-          <section className="tm-modal" role="dialog" aria-modal="true" aria-labelledby="tm-user-modal-title" onMouseDown={(event) => event.stopPropagation()}>
+        <div
+          className="tm-modal-overlay"
+          onMouseDown={() => setUserModalOpen(false)}
+        >
+          <section
+            className="tm-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tm-user-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
             <div className="tm-modal-header">
               <div>
                 <span className="tm-section-label">USUÁRIOS DO PRÉDIO</span>
                 <h2 id="tm-user-modal-title">Cadastrar usuário</h2>
-                <p>O cadastro cria uma conta. O vínculo com uma equipe pode ser feito depois.</p>
+                <p>
+                  O cadastro cria uma conta. O vínculo com uma equipe pode ser
+                  feito depois.
+                </p>
               </div>
-              <button type="button" className="tm-modal-close" onClick={() => setUserModalOpen(false)} aria-label="Fechar"><Icon name="close" size={19} /></button>
+              <button
+                type="button"
+                className="tm-modal-close"
+                onClick={() => setUserModalOpen(false)}
+                aria-label="Fechar"
+              >
+                <Icon name="close" size={19} />
+              </button>
             </div>
             <form onSubmit={criarUsuario}>
-              {erroUsuario && <p className="tm-user-error" role="alert">{erroUsuario}</p>}
+              {erroUsuario && (
+                <p className="tm-user-error" role="alert">
+                  {erroUsuario}
+                </p>
+              )}
               <div className="tm-form-grid">
-                <label className="tm-form-full">Nome completo<input required minLength={3} maxLength={100} value={userForm.nome} onChange={(event) => setUserForm((atual) => ({ ...atual, nome: event.target.value }))} /></label>
-                <label>E-mail<input required type="email" value={userForm.email} onChange={(event) => setUserForm((atual) => ({ ...atual, email: event.target.value }))} /></label>
-                <label>CPF<input required inputMode="numeric" maxLength={14} placeholder="11 números" value={userForm.cpf} onChange={(event) => setUserForm((atual) => ({ ...atual, cpf: event.target.value.replace(/\D/g, "").slice(0, 11) }))} /></label>
-                <label>Telefone (opcional)<input maxLength={20} value={userForm.telefone} onChange={(event) => setUserForm((atual) => ({ ...atual, telefone: event.target.value }))} /></label>
-                <label>Perfil<select required value={userForm.perfil} onChange={(event) => setUserForm((atual) => ({ ...atual, perfil: event.target.value }))}><option value="porteiro">Porteiro</option><option value="manutencao">Manutenção</option></select></label>
-                <label>Tipo de credencial<select required value={userForm.tipo_credencial} onChange={(event) => setUserForm((atual) => ({ ...atual, tipo_credencial: event.target.value }))}><option value="cartao_rfid">Cartão RFID</option><option value="tag_nfc">Tag NFC</option><option value="qr_code">QR Code</option></select></label>
-                <label className="tm-form-full">Código da credencial<input required minLength={4} maxLength={255} autoComplete="off" value={userForm.token_credencial} onChange={(event) => setUserForm((atual) => ({ ...atual, token_credencial: event.target.value }))} /><small>O código será convertido em hash. O valor original não será exibido na lista.</small></label>
+                <label className="tm-form-full">
+                  Nome completo
+                  <input
+                    required
+                    minLength={3}
+                    maxLength={100}
+                    value={userForm.nome}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        nome: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  E-mail
+                  <input
+                    required
+                    type="email"
+                    value={userForm.email}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        email: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  CPF
+                  <input
+                    required
+                    inputMode="numeric"
+                    maxLength={14}
+                    placeholder="11 números"
+                    value={userForm.cpf}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        cpf: event.target.value.replace(/\D/g, "").slice(0, 11),
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Telefone (opcional)
+                  <input
+                    maxLength={20}
+                    value={userForm.telefone}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        telefone: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Perfil
+                  <select
+                    required
+                    value={userForm.perfil}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        perfil: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="funcionario">Funcionário</option>
+                    <option value="porteiro">Porteiro</option>
+                    <option value="manutencao">Manutenção</option>
+                  </select>
+                </label>
+                <label>
+                  Tipo de credencial
+                  <select
+                    required
+                    value={userForm.tipo_credencial}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        tipo_credencial: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="cartao_rfid">Cartão RFID</option>
+                    <option value="tag_nfc">Tag NFC</option>
+                    <option value="qr_code">QR Code</option>
+                  </select>
+                </label>
+                <label className="tm-form-full">
+                  Código da credencial
+                  <input
+                    required
+                    minLength={4}
+                    maxLength={255}
+                    autoComplete="off"
+                    value={userForm.token_credencial}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        token_credencial: event.target.value,
+                      }))
+                    }
+                  />
+                  <small>
+                    O código será convertido em hash. O valor original não será
+                    exibido na lista.
+                  </small>
+                </label>
                 <fieldset className="tm-form-full tm-environment-access">
                   <legend>Ambientes com acesso permitido</legend>
-                  {carregandoAmbientes ? <p>Carregando ambientes…</p> : ambientesDisponiveis.length ? (
+                  {carregandoAmbientes ? (
+                    <p>Carregando ambientes…</p>
+                  ) : ambientesDisponiveis.length ? (
                     <div className="tm-environment-list">
                       {ambientesDisponiveis.map((ambiente) => {
                         const ambienteId = Number(ambiente.id_ambiente);
                         const marcado = userForm.ambientes.includes(ambienteId);
-                        return <label className="tm-environment-option" key={ambienteId}>
-                          <input type="checkbox" checked={marcado} onChange={() => setUserForm((atual) => ({ ...atual, ambientes: marcado ? atual.ambientes.filter((id) => id !== ambienteId) : [...atual.ambientes, ambienteId] }))} />
-                          <span><strong>{ambiente.nome}</strong><small>{ambiente.numero_andar}º andar · {ambiente.localizacao}</small></span>
-                        </label>;
+                        return (
+                          <label
+                            className="tm-environment-option"
+                            key={ambienteId}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={marcado}
+                              onChange={() =>
+                                setUserForm((atual) => ({
+                                  ...atual,
+                                  ambientes: marcado
+                                    ? atual.ambientes.filter(
+                                        (id) => id !== ambienteId,
+                                      )
+                                    : [...atual.ambientes, ambienteId],
+                                }))
+                              }
+                            />
+                            <span>
+                              <strong>{ambiente.nome}</strong>
+                              <small>
+                                {ambiente.numero_andar}º andar ·{" "}
+                                {ambiente.localizacao}
+                              </small>
+                            </span>
+                          </label>
+                        );
                       })}
                     </div>
-                  ) : <p>Nenhum ambiente disponível neste prédio.</p>}
+                  ) : (
+                    <p>Nenhum ambiente disponível neste prédio.</p>
+                  )}
                 </fieldset>
-                <label className="tm-form-full">Senha inicial<input required type="password" minLength={8} autoComplete="new-password" value={userForm.senha} onChange={(event) => setUserForm((atual) => ({ ...atual, senha: event.target.value }))} /><small>A senha será armazenada como hash. Use pelo menos 8 caracteres.</small></label>
+                <label className="tm-form-full">
+                  Senha inicial
+                  <input
+                    required
+                    type="password"
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={userForm.senha}
+                    onChange={(event) =>
+                      setUserForm((atual) => ({
+                        ...atual,
+                        senha: event.target.value,
+                      }))
+                    }
+                  />
+                  <small>
+                    A senha será armazenada como hash. Use pelo menos 8
+                    caracteres.
+                  </small>
+                </label>
               </div>
               <div className="tm-modal-footer">
-                <button type="button" className="tm-cancel-button" onClick={() => setUserModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="tm-primary-button" disabled={carregandoAmbientes || !ambientesDisponiveis.length}><Icon name="check" size={16} />Cadastrar usuário</button>
+                <button
+                  type="button"
+                  className="tm-cancel-button"
+                  onClick={() => setUserModalOpen(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="tm-primary-button"
+                  disabled={carregandoAmbientes || !ambientesDisponiveis.length}
+                >
+                  <Icon name="check" size={16} />
+                  Cadastrar usuário
+                </button>
               </div>
             </form>
           </section>

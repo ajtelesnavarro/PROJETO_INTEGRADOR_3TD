@@ -5,10 +5,28 @@ import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, unwrap } from "@/components/lib/api";
 
 export const PERMISSOES_POR_PERFIL = {
-  administrador: ["dashboard", "predios", "ambientes", "dispositivos", "acessos", "ocorrencias", "equipes", "reclamacoes", "orcamentos", "historico", "perfil"],
-  manutencao: ["dashboard", "ambientes", "dispositivos", "ocorrencias", "historico", "perfil"],
-  porteiro: ["dashboard", "acessos", "perfil"],
-  locador: ["dashboard", "historico", "perfil", "reclamacoes"],
+  administrador: [
+    "dashboard", "predios", "ambientes", "dispositivos", "acessos",
+    "ocorrencias", "equipes", "reclamacoes", "orcamentos",
+    "historico", "perfil"
+  ],
+
+  manutencao: [
+    "dashboard", "ambientes", "dispositivos",
+    "ocorrencias", "historico", "perfil"
+  ],
+
+  porteiro: [
+    "dashboard", "acessos", "perfil"
+  ],
+
+  funcionario: [
+    "dashboard", "historico", "perfil", "reclamacoes"
+  ],
+
+  locador: [
+    "dashboard", "historico", "perfil", "reclamacoes"
+  ],
 };
 
 export const ITEM_PERMISSAO = {

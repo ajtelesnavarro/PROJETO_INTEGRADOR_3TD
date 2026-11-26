@@ -176,7 +176,7 @@ button,input,textarea,select {
     border:0;
     border-radius:7px;
     padding:14px 20px;
-    font-size:13px;
+    font-size:15px;
     font-weight:800;
     cursor:pointer
 }
@@ -454,7 +454,7 @@ button,input,textarea,select {
 .under-link {
     display:inline-block;
     margin-top:30px;
-    font-size:13px;
+    font-size:18px;
     font-weight:800;
     color:var(--blue);
     border-bottom:1px solid #cad7dd;
@@ -481,7 +481,7 @@ button,input,textarea,select {
     max-width:380px;
     color:var(--muted);
     line-height:1.8;
-    font-size:13px
+    font-size:16px
 }
 .bento {
     display:grid;
@@ -983,7 +983,7 @@ button,input,textarea,select {
 }
 .centered-cta p {
     color:var(--muted);
-    font-size:13px;
+    font-size:16px;
     margin-bottom:25px
 }
 .auth {

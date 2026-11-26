@@ -13,8 +13,8 @@ const adminOuPorteiro = autorizarPerfis("administrador", "porteiro");
 
 gestaoRouter.get("/equipes", consulta, GestaoController.listarEquipes);
 gestaoRouter.get("/usuarios", consulta, GestaoController.listarUsuarios);
-gestaoRouter.get("/usuarios/contexto-cadastro", somenteAdmin, GestaoController.contextoCadastroUsuario);
-gestaoRouter.post("/usuarios", somenteAdmin, GestaoController.criarUsuario);
+gestaoRouter.get("/usuarios/contexto-cadastro", adminOuPorteiro, GestaoController.contextoCadastroUsuario);
+gestaoRouter.post("/usuarios", adminOuPorteiro, GestaoController.criarUsuario);
 gestaoRouter.post("/equipes", adminOuManutencao, GestaoController.criarEquipe);
 gestaoRouter.get("/alertas-limites", consultaAlertas, GestaoController.listarAlertasLimites);
 gestaoRouter.post("/equipes/:id/integrantes", adminOuManutencao, GestaoController.adicionarIntegrante);
@@ -26,6 +26,11 @@ gestaoRouter.get("/permissoes-acesso", consulta, GestaoController.listarPermisso
 gestaoRouter.patch("/credenciais/:id", adminOuPorteiro, GestaoController.atualizarCredencial);
 gestaoRouter.patch("/credenciais/:id/editar", adminOuPorteiro, GestaoController.editarCredencial);
 gestaoRouter.patch("/permissoes-acesso/:id", adminOuPorteiro, GestaoController.atualizarPermissaoAcesso);
+gestaoRouter.patch(
+  "/permissoes-acesso/usuario/:idUsuario/ambientes",
+  adminOuPorteiro,
+  GestaoController.atualizarAmbientesUsuario,
+);
 
 gestaoRouter.get("/acessos-detalhados", consulta, GestaoController.listarAcessosDetalhado);
 gestaoRouter.post("/eventos-acesso", adminOuPorteiro, GestaoController.registrarEventoAcesso);

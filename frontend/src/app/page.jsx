@@ -85,8 +85,11 @@ export default async function Home() {
             </article>
 
             <article className="bento-card incidents">
-              <div className="card-number">03</div>
+              <div className="card-title">
+                <div className="card-number">03</div>
               <span className="small-label">OCORRÊNCIAS</span>
+              </div>
+              
               <div className="incident-row"><span className="incident-icon">!</span><div><b>Sensor de temperatura</b><small>Em atendimento</small></div></div>
               <div className="incident-row"><span className="incident-icon green-bg">✓</span><div><b>Iluminação · Sala 04</b><small>Resolvida</small></div></div>
             </article>
