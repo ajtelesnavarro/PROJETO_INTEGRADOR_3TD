@@ -17,6 +17,15 @@ export function criarOrcamentoController({ orcamentoService }) {
         }
     }
 
+    async function listarServicos(_req, res) {
+        try {
+            const dados = await orcamentoService.listarServicos();
+            res.json({ sucesso: true, dados });
+        } catch (erro) {
+            res.status(500).json({ sucesso: false, mensagem: erro.message });
+        }
+    }
+
     async function buscarPorId(req, res) {
         try {
             const resultado = await orcamentoService.buscarPorId(req.params.id);
@@ -57,6 +66,7 @@ export function criarOrcamentoController({ orcamentoService }) {
     return {
         criar,
         listar,
+        listarServicos,
         buscarPorId,
         atualizarStatus,
         aprovar,

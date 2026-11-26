@@ -71,7 +71,8 @@ export async function listarUsuarios(req, res, next) {
                 nome,
                 email,
                 telefone,
-                perfil
+                perfil,
+                ativo
              FROM usuario
              WHERE id_predio = ?
              ORDER BY nome ASC`,
@@ -393,17 +394,40 @@ export async function criarEquipe(req, res, next) {
 ========================================================= */
 
 export async function listarAlertasLimites(req, res, next) {
-  try {
-    /*
-     * Busca somente a última leitura de cada dispositivo.
-     *
-     * São consultados:
-     * - temperatura
-     * - iluminação
-     * - energia
-     *
-     * Os resultados são unidos com UNION ALL.
-     */
+    try {
+        const idPredio = await obterPredioUsuario(req.usuario.id);
+        if (!idPredio) return res.json({ sucesso: true, dados: [] });
+
+        const [ultimosStatus] = await pool.query(
+            `SELECT h.id_dispositivo, h.status_dispositivo, h.data_historico_dispositivo
+             FROM historico_dispositivo h
+             INNER JOIN dispositivo d ON d.id_dispositivo = h.id_dispositivo
+             INNER JOIN ambiente a ON a.id_ambiente = d.id_ambiente
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             WHERE an.id_predio = ?
+               AND NOT EXISTS (
+                    SELECT 1 FROM historico_dispositivo h2
+                    WHERE h2.id_dispositivo = h.id_dispositivo
+                      AND (h2.data_historico_dispositivo > h.data_historico_dispositivo
+                           OR (h2.data_historico_dispositivo = h.data_historico_dispositivo
+                               AND h2.id_historico_dispositivo > h.id_historico_dispositivo))
+               )`,
+            [idPredio]
+        );
+        const statusMaisRecentePorDispositivo = new Map(
+            ultimosStatus.map((item) => [Number(item.id_dispositivo), item])
+        );
+
+        /*
+         * Busca somente a última leitura de cada dispositivo.
+         *
+         * São consultados:
+         * - temperatura
+         * - iluminação
+         * - energia
+         *
+         * Os resultados são unidos com UNION ALL.
+         */
 
     const [leituras] = await pool.query(
       `
@@ -568,10 +592,16 @@ export async function listarAlertasLimites(req, res, next) {
 
     const alertas = [];
 
-    for (const leitura of leituras) {
-      const valor = Number(leitura.valor);
-      const minimo = Number(leitura.limite_minimo);
-      const maximo = Number(leitura.limite_maximo);
+        for (const leitura of leituras) {
+            const ultimoStatus = statusMaisRecentePorDispositivo.get(Number(leitura.id_dispositivo));
+            if (
+                ultimoStatus?.status_dispositivo === "ativo" &&
+                new Date(ultimoStatus.data_historico_dispositivo).getTime() >= new Date(leitura.data_hora).getTime()
+            ) continue;
+
+            const valor = Number(leitura.valor);
+            const minimo = Number(leitura.limite_minimo);
+            const maximo = Number(leitura.limite_maximo);
 
       const potencia = Number(leitura.potencia);
       const potenciaMaxima = Number(leitura.potencia_maxima);
@@ -689,31 +719,81 @@ export async function listarAlertasLimites(req, res, next) {
                  FROM historico_dispositivo
                  WHERE id_dispositivo = ? AND data_inicio_status = ? AND motivo = ?
                  ORDER BY id_historico_dispositivo DESC LIMIT 1`,
-        [alerta.id_dispositivo, dataEvento, motivo],
-      );
-      alerta.id_historico_dispositivo =
-        registro?.id_historico_dispositivo ?? null;
-    }
+                [alerta.id_dispositivo, dataEvento, motivo]
+            );
+            alerta.id_historico_dispositivo = registro?.id_historico_dispositivo ?? null;
+        }
+
+        const [dispositivosForaDeOperacao] = await pool.query(
+            `SELECT d.id_dispositivo, d.nome AS nome_dispositivo,
+                    d.tipo_dispositivo,
+                    COALESCE(h.status_dispositivo, d.status_dispositivo) AS status_dispositivo,
+                    a.nome AS nome_ambiente,
+                    h.id_historico_dispositivo, h.data_historico_dispositivo AS data_hora
+             FROM dispositivo d
+             INNER JOIN ambiente a ON a.id_ambiente = d.id_ambiente
+             INNER JOIN andar an ON an.id_andar = a.id_andar
+             LEFT JOIN historico_dispositivo h
+               ON h.id_historico_dispositivo = (
+                    SELECT h2.id_historico_dispositivo
+                    FROM historico_dispositivo h2
+                    WHERE h2.id_dispositivo = d.id_dispositivo
+                    ORDER BY h2.data_historico_dispositivo DESC, h2.id_historico_dispositivo DESC
+                    LIMIT 1
+               )
+             WHERE an.id_predio = ? AND COALESCE(h.status_dispositivo, d.status_dispositivo) <> 'ativo'
+             ORDER BY h.data_historico_dispositivo DESC, d.nome ASC`,
+            [idPredio]
+        );
+
+        for (const dispositivo of dispositivosForaDeOperacao) {
+            alertas.push({
+                id_dispositivo: dispositivo.id_dispositivo,
+                id_historico_dispositivo: dispositivo.id_historico_dispositivo,
+                dispositivo: dispositivo.nome_dispositivo,
+                ambiente: dispositivo.nome_ambiente,
+                tipo: "status",
+                status_dispositivo: dispositivo.status_dispositivo,
+                motivo: "status_dispositivo",
+                data_hora: dispositivo.data_hora,
+            });
+        }
+
+        const dispositivosConAlertaStatus = new Set(
+            alertas.filter((alerta) => alerta.tipo === "status").map((alerta) => Number(alerta.id_dispositivo))
+        );
+        const alertasVisiveis = alertas.filter((alerta) =>
+            alerta.tipo === "status" || !dispositivosConAlertaStatus.has(Number(alerta.id_dispositivo))
+        );
 
     /* =========================================================
            ORDENA OS ALERTAS
            Mais recente primeiro
         ========================================================= */
 
-    alertas.sort((a, b) => {
-      return new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime();
-    });
+        alertasVisiveis.sort((a, b) => {
+            return (
+                new Date(b.data_hora).getTime() -
+                new Date(a.data_hora).getTime()
+            );
+        });
+
 
     /* =========================================================
            RESPOSTA PARA O FRONTEND
         ========================================================= */
 
-    return res.json({
-      sucesso: true,
-      dados: alertas,
-    });
-  } catch (erro) {
-    console.error("Erro ao listar alertas de limites:", erro);
+        return res.json({
+            sucesso: true,
+            dados: alertasVisiveis
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao listar alertas de limites:",
+            erro
+        );
 
     return next(erro);
   }
@@ -1964,28 +2044,23 @@ export async function atualizarHistoricoDispositivo(req, res, next) {
           `UPDATE historico_energia SET consumo_kwh = COALESCE(?, consumo_kwh),
                      potencia_kw = COALESCE(?, potencia_kw), custo_estimado = ?, qualidade_medicao = ?
                      WHERE id_historico_energia = ?`,
-          [
-            numeroOpcional(consumo_kwh),
-            numeroOpcional(potencia_kw),
-            numeroOpcional(custo_estimado),
-            qualidade_medicao || null,
-            leituras[0].id_historico_energia,
-          ],
-        );
-      }
-    } else if (tipo === "temperatura") {
-      if (
-        temperatura_medida !== "" &&
-        temperatura_medida != null &&
-        !Number.isFinite(Number(temperatura_medida))
-      ) {
-        await conexao.rollback();
-        return res
-          .status(400)
-          .json({ sucesso: false, erro: "Temperatura medida inválida." });
-      }
-      const [leituras] = await conexao.query(
-        `SELECT id_historico_temperatura FROM historico_temperatura
+                    [numeroOpcional(consumo_kwh), numeroOpcional(potencia_kw), numeroOpcional(custo_estimado), qualidade_medicao || null, leituras[0].id_historico_energia]
+                );
+            } else if (numeroValido(consumo_kwh) && numeroValido(potencia_kw)) {
+                await conexao.query(
+                    `INSERT INTO historico_energia
+                        (id_dispositivo, id_tarifa, consumo_kwh, potencia_kw, custo_estimado, qualidade_medicao, data_historico_energia)
+                     VALUES (?, NULL, ?, ?, ?, ?, ?)`,
+                    [idDispositivo, Number(consumo_kwh), Number(potencia_kw), numeroOpcional(custo_estimado), qualidade_medicao || null, dataRegistro]
+                );
+            }
+        } else if (tipo === "temperatura") {
+            if (temperatura_medida !== "" && temperatura_medida != null && !Number.isFinite(Number(temperatura_medida))) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Temperatura medida inválida." });
+            }
+            const [leituras] = await conexao.query(
+                `SELECT id_historico_temperatura FROM historico_temperatura
                  WHERE id_dispositivo = ? AND data_temperatura = ?
                  ORDER BY id_historico_temperatura DESC LIMIT 1 FOR UPDATE`,
         [idDispositivo, dataRegistro],
@@ -1994,41 +2069,39 @@ export async function atualizarHistoricoDispositivo(req, res, next) {
         await conexao.query(
           `UPDATE historico_temperatura SET temperatura_medida = COALESCE(?, temperatura_medida), umidade = ?
                      WHERE id_historico_temperatura = ?`,
-          [
-            numeroOpcional(temperatura_medida),
-            numeroOpcional(umidade),
-            leituras[0].id_historico_temperatura,
-          ],
-        );
-      }
-    } else if (tipo === "iluminacao") {
-      if (
-        iluminacao_medida !== "" &&
-        iluminacao_medida != null &&
-        !numeroValido(iluminacao_medida)
-      ) {
-        await conexao.rollback();
-        return res
-          .status(400)
-          .json({ sucesso: false, erro: "Iluminação medida inválida." });
-      }
-      const [leituras] = await conexao.query(
-        `SELECT id_historico_iluminacao FROM historico_iluminacao
+                    [numeroOpcional(temperatura_medida), numeroOpcional(umidade), leituras[0].id_historico_temperatura]
+                );
+            } else if (temperatura_medida !== "" && temperatura_medida != null) {
+                await conexao.query(
+                    `INSERT INTO historico_temperatura (id_dispositivo, temperatura_medida, umidade, data_temperatura)
+                     VALUES (?, ?, ?, ?)`,
+                    [idDispositivo, Number(temperatura_medida), numeroOpcional(umidade), dataRegistro]
+                );
+            }
+        } else if (tipo === "iluminacao") {
+            if (iluminacao_medida !== "" && iluminacao_medida != null && !numeroValido(iluminacao_medida)) {
+                await conexao.rollback();
+                return res.status(400).json({ sucesso: false, erro: "Iluminação medida inválida." });
+            }
+            const [leituras] = await conexao.query(
+                `SELECT id_historico_iluminacao FROM historico_iluminacao
                  WHERE id_dispositivo = ? AND data_iluminacao = ?
                  ORDER BY id_historico_iluminacao DESC LIMIT 1 FOR UPDATE`,
-        [idDispositivo, dataRegistro],
-      );
-      if (
-        leituras.length &&
-        iluminacao_medida !== "" &&
-        iluminacao_medida != null
-      ) {
-        await conexao.query(
-          `UPDATE historico_iluminacao SET iluminacao_medida = ? WHERE id_historico_iluminacao = ?`,
-          [Number(iluminacao_medida), leituras[0].id_historico_iluminacao],
-        );
-      }
-    }
+                [idDispositivo, dataRegistro]
+            );
+            if (leituras.length && iluminacao_medida !== "" && iluminacao_medida != null) {
+                await conexao.query(
+                    `UPDATE historico_iluminacao SET iluminacao_medida = ? WHERE id_historico_iluminacao = ?`,
+                    [Number(iluminacao_medida), leituras[0].id_historico_iluminacao]
+                );
+            } else if (iluminacao_medida !== "" && iluminacao_medida != null) {
+                await conexao.query(
+                    `INSERT INTO historico_iluminacao (id_dispositivo, iluminacao_medida, data_iluminacao)
+                     VALUES (?, ?, ?)`,
+                    [idDispositivo, Number(iluminacao_medida), dataRegistro]
+                );
+            }
+        }
 
     await conexao.query(
       `UPDATE dispositivo AS d SET status_dispositivo = ?

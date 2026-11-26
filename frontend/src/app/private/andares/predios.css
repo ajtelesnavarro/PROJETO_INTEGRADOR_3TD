@@ -1497,18 +1497,22 @@
 .pa-page .pa-filters button,
 .pa-page .pa-status,
 .pa-page .pa-building-meta span { font-size: 13px; }
+.pa-page .pa-metric small { color: #526482; font-size: 13px; }
+.pa-page .pa-metric div > span { color: #68758d; font-size: 12px; }
 .pa-page .pa-search { height: 48px; width: min(100%, 430px); }
 .pa-page .pa-floor-card { padding: 26px; }
 .pa-page .pa-floor-title h3 { font-size: 23px; }
-.pa-page .pa-floor-title p { min-height: 40px; color: #68758d; font-size: 14px; }
+.pa-page .pa-floor-title p { min-height: 40px; color: #596984; font-size: 15px; }
 .pa-page .pa-floor-data { gap: 12px; margin-top: 20px; padding: 17px 0; }
 .pa-page .pa-floor-data strong { font-size: 24px; }
-.pa-page .pa-floor-data span { color: #68758d; font-size: 12px; }
+.pa-page .pa-floor-data span { color: #596984; font-size: 14px; }
 .pa-page .pa-sector-preview > span,
-.pa-page .pa-detail-list-heading > span { color: #68758d; font-size: 12px; }
+.pa-page .pa-detail-list-heading > span { color: #596984; font-size: 13px; }
 .pa-page .pa-sector-preview button,
 .pa-page .pa-floor-details,
-.pa-page .pa-sector-preview p { font-size: 13px; }
+.pa-page .pa-sector-preview p { color: #596984; font-size: 14px; }
+.pa-page .pa-sector-chip { padding: 9px 11px; color: #405786; font-size: 13px; }
+.pa-page .pa-add-sector-button { min-height: 40px; font-size: 13px; }
 
 /* Painel lateral de detalhes do andar. */
 .pa-page .pa-detail-header h2 { font-size: 25px; }
@@ -1533,4 +1537,8 @@
   .pa-page .pa-section-heading p { font-size: 14px; }
   .pa-page .pa-detail-description p,
   .pa-page .pa-detail-note p { font-size: 13px; }
+}
+
+@media (max-width: 420px) {
+  .pa-page .pa-metric div > span { font-size: 11px; }
 }

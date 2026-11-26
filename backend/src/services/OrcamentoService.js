@@ -1,6 +1,3 @@
-import { randomBytes } from "node:crypto";
-import bcrypt from "bcryptjs";
-
 const STATUS_VALIDOS = [
   "solicitado",
   "em_analise",
@@ -15,7 +12,8 @@ export function criarOrcamentoService({ orcamentoModel }) {
   async function criar(dados) {
     const nomeRecebido = dados.nomeResponsavel || dados.nome_responsavel;
     const nomeResponsavel = typeof nomeRecebido === "string" ? nomeRecebido.trim() : "";
-    const nomeEmpresa = dados.nomeEmpresa || dados.nome_empresa;
+    const empresaRecebida = dados.nomeEmpresa || dados.nome_empresa;
+    const nomeEmpresa = typeof empresaRecebida === "string" ? empresaRecebida.trim() : "";
     const email = typeof dados.email === "string" ? dados.email.trim().toLowerCase() : "";
     const telefone = dados.telefone || "";
     const quantidadeAndares = Number(
@@ -27,6 +25,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
     const quantidadeDispositivos = Number(
       dados.quantidadeDispositivos ?? dados.quantidade_dispositivos ?? 0
     );
+    const percentualDesconto = Number(dados.descontoPercentual ?? 0);
     const servicosRecebidos = dados.servicosDesejados ?? dados.servicos ?? [];
     const servicosLista = [...new Set(
       (Array.isArray(servicosRecebidos) ? servicosRecebidos : [servicosRecebidos])
@@ -38,16 +37,22 @@ export function criarOrcamentoService({ orcamentoModel }) {
       !nomeResponsavel ||
       !nomeEmpresa ||
       !REGEX_EMAIL.test(email) ||
-      quantidadeAndares <= 0 ||
-      quantidadeAmbientes <= 0
+      nomeResponsavel.length > 150 ||
+      nomeEmpresa.length > 150 ||
+      email.length > 150 ||
+      telefone.length > 20 ||
+      !Number.isFinite(quantidadeAndares) || quantidadeAndares <= 0 ||
+      !Number.isFinite(quantidadeAmbientes) || quantidadeAmbientes <= 0 ||
+      !Number.isFinite(quantidadeDispositivos) || quantidadeDispositivos < 0 ||
+      !Number.isFinite(percentualDesconto) || percentualDesconto < 0 || percentualDesconto > 100
     ) {
       throw new Error(
         "Preencha todos os campos obrigatórios (empresa, responsável, e-mail, andares e ambientes)."
       );
     }
 
-    if (nomeResponsavel.length > 100) {
-      throw new Error("O nome do responsável deve ter no máximo 100 caracteres.");
+    if (servicosLista.length === 0) {
+      throw new Error("Selecione pelo menos um serviço para o orçamento.");
     }
 
     const servicosDetalhes = await orcamentoModel.buscarServicosPorNome(servicosLista);
@@ -61,21 +66,9 @@ export function criarOrcamentoService({ orcamentoModel }) {
       quantidadeAmbientes * 32 +
       quantidadeDispositivos * 18;
 
-    const valorSubtotal =
-      dados.valorSubtotal !== undefined
-        ? Number(dados.valorSubtotal)
-        : totalServicos + totalEstrutura;
-
-    const percentualDesconto = Number(dados.descontoPercentual ?? 0);
-    const valorDesconto =
-      dados.valorDesconto !== undefined
-        ? Number(dados.valorDesconto)
-        : Number((valorSubtotal * (percentualDesconto / 100)).toFixed(2));
-
-    const valorTotal =
-      dados.valorTotal !== undefined
-        ? Number(dados.valorTotal)
-        : Number((valorSubtotal - valorDesconto).toFixed(2));
+    const valorSubtotal = Number((totalServicos + totalEstrutura).toFixed(2));
+    const valorDesconto = Number((valorSubtotal * (percentualDesconto / 100)).toFixed(2));
+    const valorTotal = Number((valorSubtotal - valorDesconto).toFixed(2));
 
     const prazoCalculado = Math.max(
       5,
@@ -89,6 +82,9 @@ export function criarOrcamentoService({ orcamentoModel }) {
       prazoInformado === undefined || prazoInformado === null || prazoInformado === ""
         ? prazoCalculado
         : Number(prazoInformado);
+    if (!Number.isInteger(prazoEstimadoDias) || prazoEstimadoDias < 0) {
+      throw new Error("A validade do orçamento deve ser um número de dias válido.");
+    }
     const validadeCalculada = new Date();
     validadeCalculada.setUTCDate(validadeCalculada.getUTCDate() + 30);
     const dataValidade =
@@ -98,16 +94,11 @@ export function criarOrcamentoService({ orcamentoModel }) {
 
     const descricaoBase = (dados.descricao || "").trim();
     const descricaoFinal = descricaoBase || null;
-    const senhaTemporaria = `Lumora@${randomBytes(12).toString("hex")}`;
-    const senhaHashBcrypt = await bcrypt.hash(senhaTemporaria, 12);
-    const senhaHash = senhaHashBcrypt.replace(/^\$2b\$/, () => "$2y$");
-
     const idOrcamento = await orcamentoModel.criar({
       nomeResponsavel,
       nomeEmpresa,
       email,
       telefone,
-      senhaHash,
       quantidadeAndares,
       quantidadeAmbientes,
       quantidadeDispositivos: quantidadeDispositivos || null,
@@ -121,11 +112,15 @@ export function criarOrcamentoService({ orcamentoModel }) {
     });
 
     const criado = await orcamentoModel.buscarPorId(idOrcamento);
-    return { idOrcamento, dados: criado, senhaTemporaria };
+    return { idOrcamento, dados: criado };
   }
 
   async function listar() {
     return orcamentoModel.listar();
+  }
+
+  async function listarServicos() {
+    return orcamentoModel.listarServicos();
   }
 
   async function buscarPorId(id) {
@@ -151,6 +146,7 @@ export function criarOrcamentoService({ orcamentoModel }) {
   return {
     criar,
     listar,
+    listarServicos,
     buscarPorId,
     atualizarStatus,
   };

@@ -54,6 +54,7 @@ export function carregarAmbiente(arquivoDeConfiguracao = '.env') {
 export function exibirDiagnostico(configuracao) {
     console.table({
         projeto: 'Lumora SmartBuilding',
+        bancoDeDados: 'app_db',
         node: process.version,
         sistema: `${process.platform} ${process.arch}`,
         diretorio: process.cwd(),

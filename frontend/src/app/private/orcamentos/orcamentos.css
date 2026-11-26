@@ -1417,11 +1417,11 @@
 .orc-quantity > small { font-size: 11px; }
 .orc-quantity > div { margin-top: 4px; }
 .orc-quantity > div button { width: 30px; height: 30px; }
-.orc-services-grid { gap: 6px; }
-.orc-service-option { min-height: 42px; gap: 8px; padding: 2px 8px; }
-.orc-service-symbol { width: 30px; height: 30px; }
-.orc-service-option > div strong { font-size: 13px; }
-.orc-service-option > div small { font-size: 11px; }
+.orc-services-grid { gap: 4px; }
+.orc-service-option { min-height: 36px; gap: 7px; padding: 1px 7px; }
+.orc-service-symbol { width: 26px; height: 26px; }
+.orc-service-option > div strong { font-size: 12px; }
+.orc-service-option > div small { font-size: 10px; }
 .orc-price-summary { gap: 5px; margin: 7px 0 0; padding: 8px 10px; }
 .orc-price-summary > div { font-size: 12px; }
 .orc-price-summary .orc-total-line { padding-top: 5px; }

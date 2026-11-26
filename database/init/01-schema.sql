@@ -730,9 +730,8 @@ CREATE TABLE historico_dispositivo (
 
 -- 23. SERVICO
 
-CREATE TABLE servico (
+CREATE TABLE IF NOT EXISTS servico (
     id_servico INT AUTO_INCREMENT PRIMARY KEY,
-
     nome_servico ENUM(
         'monitoramento_temperatura',
         'controle_iluminacao',
@@ -740,17 +739,11 @@ CREATE TABLE servico (
         'controle_acesso',
         'monitoramento_dispositivos'
     ) NOT NULL,
-
     valor_base DECIMAL(12,2) NOT NULL,
     descricao VARCHAR(255) NULL,
-
-    CONSTRAINT uk_nome_servico
-        UNIQUE (nome_servico),
-
-    CONSTRAINT chk_valor_base_servico
-        CHECK (valor_base >= 0)
+    CONSTRAINT uk_nome_servico UNIQUE (nome_servico),
+    CONSTRAINT chk_valor_base_servico CHECK (valor_base >= 0)
 ) ENGINE=InnoDB;
-
 
 -- 24. ORCAMENTO
 
@@ -973,7 +966,7 @@ VALUES
 (2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
 (3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
 (4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'porteiro', '12345678904', NULL, '1992-11-17', 'ativo'),
-(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'funcionario', '12345678905', NULL, '2000-06-25', 'ativo');
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'funcionario', '12345678905', 'locador' '2000-06-25', 'ativo');
 
 -- SETOR
 
@@ -1201,15 +1194,12 @@ VALUES
 
 -- SERVICO
 
-INSERT INTO servico
-(nome_servico, descricao, valor_base)
-VALUES
+INSERT IGNORE INTO servico (nome_servico, descricao, valor_base) VALUES
 ('monitoramento_temperatura', 'Monitoramento da temperatura dos ambientes e identificacao de alteracoes fora dos limites configurados.', 1500.00),
 ('controle_iluminacao', 'Monitoramento dos niveis de iluminacao dos ambientes conforme os limites definidos.', 2000.00),
 ('monitoramento_energia', 'Acompanhamento do consumo e da potencia eletrica, com estimativa de custos de energia.', 1800.00),
 ('controle_acesso', 'Gerenciamento de credenciais, permissoes e registros de entrada e saida dos ambientes.', 2500.00),
 ('monitoramento_dispositivos', 'Acompanhamento do funcionamento e do status dos dispositivos instalados no predio.', 1200.00);
-
 
 -- ORCAMENTO
 

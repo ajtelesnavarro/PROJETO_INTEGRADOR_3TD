@@ -98,6 +98,9 @@ export default function Header({
     };
 
     carregarAlertas();
+    const atualizarAlertas = () => carregarAlertas();
+    window.addEventListener("lumora:device-status-updated", atualizarAlertas);
+    window.addEventListener("focus", atualizarAlertas);
 
     // Atualiza a cada 60 segundos
     const intervalo = window.setInterval(carregarAlertas, 60_000);
@@ -105,6 +108,8 @@ export default function Header({
     return () => {
       ativo = false;
       window.clearInterval(intervalo);
+      window.removeEventListener("lumora:device-status-updated", atualizarAlertas);
+      window.removeEventListener("focus", atualizarAlertas);
     };
   }, []);
 
@@ -209,8 +214,18 @@ export default function Header({
                   alertas.map((alerta, indice) => {
 
                     let titulo;
+                    let descricaoStatus = "";
 
-                    if (alerta.tipo === "temperatura") {
+                    if (alerta.tipo === "status") {
+                      const status = {
+                        instavel: "Instável",
+                        manutencao: "Em manutenção",
+                        offline: "Offline",
+                        inativo: "Inativo",
+                      }[alerta.status_dispositivo] || alerta.status_dispositivo;
+                      titulo = `Dispositivo ${String(status).toLowerCase()}`;
+                      descricaoStatus = `${alerta.ambiente} · ${alerta.dispositivo} está com status ${status}.`;
+                    } else if (alerta.tipo === "temperatura") {
                       titulo = "Temperatura";
                     } else if (alerta.tipo === "iluminacao") {
                       titulo = "Iluminação";
@@ -228,7 +243,9 @@ export default function Header({
 
                     let limite;
 
-                    if (alerta.motivo === "potencia") {
+                    if (alerta.tipo === "status") {
+                      limite = "";
+                    } else if (alerta.motivo === "potencia") {
                       limite =
                         "máximo " +
                         Number(
@@ -273,16 +290,13 @@ export default function Header({
 
                         <span className="lumora-alert-copy">
                           <b>
-                            {titulo} {direcao} do limite
+                            {alerta.tipo === "status" ? titulo : `${titulo} ${direcao} do limite`}
                           </b>
 
                           <p>
-                            {alerta.ambiente} ·{" "}
-                            {alerta.dispositivo}:{" "}
-                            {Number(alerta.valor).toLocaleString(
-                              "pt-BR"
-                            )}{" "}
-                            {alerta.unidade} ({limite})
+                            {alerta.tipo === "status"
+                              ? descricaoStatus
+                              : <>{alerta.ambiente} · {alerta.dispositivo}: {Number(alerta.valor).toLocaleString("pt-BR")} {alerta.unidade} ({limite})</>}
                           </p>
 
                           <small>
