@@ -1,12 +1,7 @@
+
 import mysql from "mysql2/promise";
 
-export const DATABASE_NAME = "app_db";
-
-if (process.env.DB_NAME && process.env.DB_NAME.trim() !== DATABASE_NAME) {
-  console.warn(
-    `[database] DB_NAME=${process.env.DB_NAME.trim()} foi configurado, mas o sistema usa ${DATABASE_NAME}.`
-  );
-}
+export const DATABASE_NAME = process.env.DB_NAME?.trim() || "db_lumora";
 
 export const pool = mysql.createPool({
   host: process.env.DB_HOST,
