@@ -1,7 +1,7 @@
 
 import mysql from "mysql2/promise";
 
-export const DATABASE_NAME = process.env.DB_NAME?.trim() || "db_lumora";
+export const DATABASE_NAME = process.env.DB_NAME?.trim() || "app_db";
 
 export const pool = mysql.createPool({
   host: process.env.DB_HOST,
