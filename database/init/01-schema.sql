@@ -963,10 +963,10 @@ INSERT INTO usuario
 VALUES
 (1, 1, 'Ana Souza', 'ana.souza@lumora.com.br', '$2y$12$DW0AXgcZ6RS.JqrZIfNVqOghjsPQw6ZOWaHeOM94nvMJ8X8L3ZTqi', '(11) 90000-1001', 'administrador', '12345678901', NULL, '1988-04-12', 'ativo'),
 -- SENHA_TESTE: LumoraTeste2026!
-(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$xcI4s7mvF2/TNUpYzwADEuhuX1uZsa0tF0ldtGZMa0KGRlIt.msGG', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
-(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$noxrWTfcAjHsgbFInXXehO9fSBHjYC8ZYuAhIl2uwLGwBBYV4q4am', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
-(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$OyKLcox.DPu.1UX0AFaKBeEdaI0au0nDzPlM/7ZAHJCQsp1nh2lFe', '(11) 90000-1004', 'porteiro', '12345678904', NULL, '1992-11-17', 'ativo'),
-(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$YriEFH6egVd.q4viv9Txrey1vHBj4EN/b.WXpFyNchsuI8g0HX2U2', NULL, 'funcionario', '12345678905', 'locador' '2000-06-25', 'ativo');
+(2, 1, 'Bruno Lima', 'bruno.lima@lumora.com.br', '$2y$12$DW0AXgcZ6RS.JqrZIfNVqOghjsPQw6ZOWaHeOM94nvMJ8X8L3ZTqi', '(11) 90000-1002', 'manutencao', '12345678902', NULL, '1990-08-21', 'ativo'),
+(3, 1, 'Carla Mendes', 'carla.mendes@lumora.com.br', '$2y$12$DW0AXgcZ6RS.JqrZIfNVqOghjsPQw6ZOWaHeOM94nvMJ8X8L3ZTqi', '(11) 90000-1003', 'porteiro', '12345678903', NULL, '1995-02-03', 'ativo'),
+(4, 1, 'Diego Alves', 'diego.alves@lumora.com.br', '$2y$12$DW0AXgcZ6RS.JqrZIfNVqOghjsPQw6ZOWaHeOM94nvMJ8X8L3ZTqi', '(11) 90000-1004', 'porteiro', '12345678904', NULL, '1992-11-17', 'ativo'),
+(5, 1, 'Elisa Costa', 'elisa.costa@lumora.com.br', '$2y$12$DW0AXgcZ6RS.JqrZIfNVqOghjsPQw6ZOWaHeOM94nvMJ8X8L3ZTqi', NULL, 'funcionario', '12345678905', 'locador' '2000-06-25', 'ativo');
 
 -- SETOR
 
