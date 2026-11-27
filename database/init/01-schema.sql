@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS app_db
+CREATE DATABASE IF NOT EXISTS db_lumora
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE app_db;
+USE db_lumora;
 
 -- 1. PREDIO
 
@@ -1194,7 +1194,7 @@ VALUES
 
 -- SERVICO
 
-INSERT IGNORE INTO servico (nome_servico, descricao, valor_base) VALUES
+INSERT INTO servico (nome_servico, descricao, valor_base) VALUES
 ('monitoramento_temperatura', 'Monitoramento da temperatura dos ambientes e identificacao de alteracoes fora dos limites configurados.', 1500.00),
 ('controle_iluminacao', 'Monitoramento dos niveis de iluminacao dos ambientes conforme os limites definidos.', 2000.00),
 ('monitoramento_energia', 'Acompanhamento do consumo e da potencia eletrica, com estimativa de custos de energia.', 1800.00),
